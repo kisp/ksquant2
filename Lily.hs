@@ -6,7 +6,10 @@ import System.Directory
 import System.FilePath
 import Data.Ratio
 
-data Dur = D1 | D2 | D4 | D8 | D16 | D32 | D64
+data SimpleDur = D1 | D2 | D4 | D8 | D16 | D32 | D64
+	   deriving Show
+
+data Dur = Dur SimpleDur Int
 	   deriving Show
 
 data Elt = Note Dur Bool
@@ -17,7 +20,7 @@ data Elt = Note Dur Bool
 data Measure = Measure Int Int [Elt]
 	       deriving Show
 
-durToRatio x =
+simpleDurToRatio x =
     case x of
       D1 -> 1 % 1
       D2 -> 1 % 2
@@ -27,13 +30,17 @@ durToRatio x =
       D32 -> 1 % 32
       D64 -> 1 % 64
 
+durToRatio (Dur s d) = rec ((simpleDurToRatio s) * (1 % 2)) d (simpleDurToRatio s)
+    where rec l 0 acc = acc
+	  rec l d acc = rec (l * (1 % 2)) (d - 1) (acc + l)
+
 eltToRatio (Note d _) = durToRatio d
 eltToRatio (Rest d) = durToRatio d
 eltToRatio (Times n d xs) = (n % d) * foldr (+) 0 (map eltToRatio xs)
 
 isCorrectmeasurelength (Measure n d xs) = (n % d) == foldr (+) 0 (map eltToRatio xs)
 
-durToLily x = (show . denominator . durToRatio) x
+durToLily (Dur x d) = (show . denominator . simpleDurToRatio) x ++ take d (repeat '.')
 
 eltToLily (Note d tie) = "c'" ++ (durToLily d) ++
 			 if tie then "~" else ""
@@ -92,7 +99,9 @@ exportLily name xs =
   else
       error "measures are not valid"
 
-m1 = [Measure 4 4 [Note D4 False, Rest D4, Note D4 False, Note D4 False],
-      Measure 4 4 [Rest D1],
-      Measure 3 4 [Note D4 False, Note D4 True, Times 2 3 [Note D8 False, Note D8 False, Note D8 True]],
-      Measure 3 4 [Note D2 False, Note D4 False]]
+m1 = [Measure 4 4 [Note (Dur D4 1) False, Note (Dur D8 0) False, Note (Dur D2 0) False],
+      Measure 4 4 [Note (Dur D4 2) False, Note (Dur D16 0) False, Note (Dur D2 0) False],
+      Measure 4 4 [Rest (Dur D1 0)],
+      Measure 3 4 [Note (Dur D4 0) False, Note (Dur D4 0) True,
+			Times 2 3 [Note (Dur D8 0) False, Note (Dur D8 0) False, Note (Dur D8 0) True]],
+      Measure 3 4 [Note (Dur D2 0) False, Note (Dur D4 0) False]]
