@@ -80,7 +80,7 @@ runLily path =
   in do
     pwd <- getCurrentDirectory
     setCurrentDirectory dir
-    rawSystem "lilypond" [takeFileName path]
+    rawSystem "lilypond" ["--pdf", takeFileName path]
     setCurrentDirectory pwd
 
 openPdf path = rawSystem "gnome-open" [replaceExtension path "pdf"]
@@ -99,7 +99,7 @@ exportLily name xs =
   else
       error "measures are not valid"
 
-m1 = [Measure 4 4 [Note (Dur D4 1) False, Note (Dur D8 0) False, Note (Dur D2 0) False],
+m1 = [Measure 4 4 [Note (Dur D4 1) False, Note (Dur D8 0) True, Note (Dur D2 0) False],
       Measure 4 4 [Note (Dur D4 2) False, Note (Dur D16 0) False, Note (Dur D2 0) False],
       Measure 4 4 [Rest (Dur D1 0)],
       Measure 3 4 [Note (Dur D4 0) False, Note (Dur D4 0) True,
