@@ -13,6 +13,7 @@ class (Num b) => Interval a b | a -> b where
     start :: a -> b
     end :: a -> b
     dur :: a -> b
+    -- defaults
     dur x = end x - start x
     end x = start x + dur x
 
