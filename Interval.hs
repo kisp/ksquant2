@@ -1,10 +1,19 @@
-module Interval (Interval
+module Interval (Point
+                ,point
+                ,Interval
                 ,start
-                ,end
+                ,end                
                 ,intersect
                 ,isPointInInterval
                 ,isStrictlyAfter
-                ,ascending_intervals) where
+                ,ascending_intervals
+                ,get_ascending_intervals
+                ,AscendingIntervals --only type not constructor
+                ,ascending_points
+                ,get_ascending_points
+                ,AscendingPoints --only type not constructor
+                ,groupPointsByIntervalls
+                ) where
 import Utils
 
 -- http://www.haskell.org/haskellwiki/Functional_dependencies
@@ -16,6 +25,9 @@ class (Num b) => Interval a b | a -> b where
     -- defaults
     dur x = end x - start x
     end x = start x + dur x
+
+class Point a b | a -> b where
+    point :: a -> b
 
 instance (Num t) => Interval (t,t) t where
     start (x,_) = x
@@ -34,15 +46,37 @@ intersect a b =
           s2 < e1
 
 -- Is x in iv?
-isPointInInterval iv x = start iv <= x && x < end iv
+isPointInInterval iv x = start iv <= point x && point x < end iv
 
 isStrictlyAfter a b = start b >= end a
 
 data AscendingIntervals a = AscendingIntervals [a]
                             deriving Show
 
+isAscending_intervals ivs = isForAllNeighbours isStrictlyAfter ivs
+
 ascending_intervals ivs =
-    if not (isForAllNeighbours isStrictlyAfter ivs) then
+    if not (isAscending_intervals ivs) then
         error "not (isForAllNeighbours isStrictlyAfter ivs)"
     else
         AscendingIntervals ivs
+
+get_ascending_intervals (AscendingIntervals xs) = xs
+
+data AscendingPoints a = AscendingPoints [a]
+                       deriving (Show, Eq)
+ascending_points xs =
+    if not (isForAllNeighbours (<) xs) then
+        error "not (isForAllNeighbours (<) xs)"
+    else
+        AscendingPoints xs
+
+get_ascending_points (AscendingPoints xs) = xs
+
+groupPointsByIntervalls ivs xs = f (get_ascending_intervals ivs) (get_ascending_points xs)
+    where f [] _ = []
+          f (iv:ivs) [] = (ascending_points []) : (f ivs [])
+          f (iv:ivs) (x:xs)
+              | (point x) < (start iv) = f (iv:ivs) xs
+              | otherwise = (ascending_points (takeWhile (<(end iv)) (x:xs))) :
+                            (f ivs (dropWhile (<(end iv)) (x:xs)))
