@@ -1,4 +1,10 @@
-module Interval where
+module Interval (Interval
+                ,start
+                ,end
+                ,intersect
+                ,isPointInInterval
+                ,isStrictlyAfter
+                ,ascending_intervals) where
 import Utils
 
 -- http://www.haskell.org/haskellwiki/Functional_dependencies
@@ -39,6 +45,3 @@ ascending_intervals ivs =
         error "not (isForAllNeighbours isStrictlyAfter ivs)"
     else
         AscendingIntervals ivs
-ascending_intervals_list (AscendingIntervals ivs) = ivs
-
-myfirst xs = start (head (ascending_intervals_list (ascending_intervals xs)))
