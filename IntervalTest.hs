@@ -2,14 +2,21 @@ module IntervalTest where
 import Interval
 import Test.QuickCheck
 
-instance Arbitrary (Int,Int) where
-    arbitrary     = do
-      a <- choose (0, 20)
-      b <- choose (0, 20)
-      return (a,b)
-    coarbitrary c = error ""
+data TestInterval = TestInterval (Int,Int)
+                    deriving Show
 
-mytest :: (Int,Int) -> Bool
+instance Interval TestInterval Int where
+    start (TestInterval x) = start x
+    end (TestInterval x) = end x
+
+instance Arbitrary TestInterval where
+    arbitrary     = do
+      a <- choose (0, 30)
+      b <- choose (a+1, 31)
+      return (TestInterval (a,b))
+
+mytest :: TestInterval -> Bool
 mytest iv = start iv < end iv
 
-run = quickCheck mytest
+main = do
+  quickCheck mytest
