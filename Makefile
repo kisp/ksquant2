@@ -1,5 +1,5 @@
 all:
-	ghc --make Main.hs
+	ghc -fglasgow-exts --make Main.hs
 	./Main
 
 test:

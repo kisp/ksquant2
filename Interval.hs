@@ -1,4 +1,5 @@
 module Interval where
+import Utils
 
 -- http://www.haskell.org/haskellwiki/Functional_dependencies
 -- This tells Haskell that b is uniquely determined from a. 
@@ -28,10 +29,16 @@ intersect a b =
 -- Is x in iv?
 isPointInInterval iv x = start iv <= x && x < end iv
 
-myfloat = 1.3::Float
+isStrictlyAfter a b = start b >= end a
 
-foo = (start (1::Float,2::Float)) :: Float
-foo2 = start (myfloat,myfloat)
+data AscendingIntervals a = AscendingIntervals [a]
+                            deriving Show
 
-huhu = let i = (1::Int,2::Int) in
-       [start i,end i, dur i]
+ascending_intervals ivs =
+    if not (isForAllNeighbours isStrictlyAfter ivs) then
+        error "not (isForAllNeighbours isStrictlyAfter ivs)"
+    else
+        AscendingIntervals ivs
+ascending_intervals_list (AscendingIntervals ivs) = ivs
+
+myfirst xs = start (head (ascending_intervals_list (ascending_intervals xs)))

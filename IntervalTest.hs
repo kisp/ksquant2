@@ -30,6 +30,10 @@ prop_intersect a b = intersect a b == safe_intersect a b
     where safe_intersect a b = any inBoth [0..ivmax]
           inBoth x = isPointInInterval a x && isPointInInterval b x
 
+prop_isStrictlyAfter :: TestInterval -> TestInterval -> Bool
+prop_isStrictlyAfter a b = isStrictlyAfter a b == safeisStrictlyAfter a b
+    where safeisStrictlyAfter a b = not (intersect a b) && start b >= end a
+
 good :: Result -> Bool
 good Success {} = True
 good NoExpectedFailure {} = True
@@ -44,3 +48,4 @@ main = do
   runtest "prop_good_iv" prop_good_iv
   runtest "prop_isPointInInterval" prop_isPointInInterval
   runtest "prop_intersect" prop_intersect
+  runtest "prop_isStrictlyAfter" prop_isStrictlyAfter
