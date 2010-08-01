@@ -3,7 +3,7 @@ import Interval
 import Test.QuickCheck
 import System
 import Text.Printf
-import Data.List (delete)
+import Data.List (delete,sort,nub)
 
 ivmax = 30::Int
 domain = [0..ivmax]
@@ -74,6 +74,10 @@ mt ivs xs = (safe_groupPointsByIntervalls ivs xs)
     where safe_groupPointsByIntervalls ivs xs = map grap (get_ascending_intervals ivs)
           grap iv = ascending_points (filter (isPointInInterval iv) (get_ascending_points xs))
 
+prop_ascending_intervals2points :: AscendingIntervals TestInterval -> Bool
+prop_ascending_intervals2points ivs = (ascending_intervals2points ivs) == (safe_ascending_intervals2points ivs)
+    where safe_ascending_intervals2points ivs = let ivs' = get_ascending_intervals ivs
+                                                in (ascending_points . sort . nub) ((map start ivs') ++ (map end ivs'))
 
 --------------------------------------------------------------------------
 
@@ -93,3 +97,4 @@ main = do
   runtest "prop_intersect" prop_intersect
   runtest "prop_isStrictlyAfter" prop_isStrictlyAfter
   runtest "prop_groupPointsByIntervalls" prop_groupPointsByIntervalls
+  runtest "prop_ascending_intervals2points" prop_ascending_intervals2points

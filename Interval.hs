@@ -13,6 +13,7 @@ module Interval (Point
                 ,get_ascending_points
                 ,AscendingPoints --only type not constructor
                 ,groupPointsByIntervalls
+                ,ascending_intervals2points
                 ) where
 import Utils
 
@@ -73,6 +74,8 @@ ascending_points xs =
 
 get_ascending_points (AscendingPoints xs) = xs
 
+-- for each interval return ascending_points that are all the points
+-- from xs contained in the interval
 groupPointsByIntervalls ivs xs = f (get_ascending_intervals ivs) (get_ascending_points xs)
     where f [] _ = []
           f (iv:ivs) [] = (ascending_points []) : (f ivs [])
@@ -80,3 +83,12 @@ groupPointsByIntervalls ivs xs = f (get_ascending_intervals ivs) (get_ascending_
               | (point x) < (start iv) = f (iv:ivs) xs
               | otherwise = (ascending_points (takeWhile (<(end iv)) (x:xs))) :
                             (f ivs (dropWhile (<(end iv)) (x:xs)))
+
+-- TODO call internal Constructor instead of safe ascending_points
+ascending_intervals2points ivs = ascending_points (f (get_ascending_intervals ivs))
+    where f (iv:ivs) = [start iv,end iv] ++ (g ivs (end iv))
+          g [] _ = []
+          g (iv:ivs) last = if (start iv == last) then
+                                [end iv] ++ (g ivs (end iv))
+                            else
+                                [start iv,end iv] ++ (g ivs (end iv))
