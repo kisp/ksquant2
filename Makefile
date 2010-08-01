@@ -3,7 +3,7 @@ all:
 	./Main
 
 test:
-	runhaskell -XMultiParamTypeClasses IntervalTest.hs 
+	runhaskell -XMultiParamTypeClasses -XFunctionalDependencies -XFlexibleInstances IntervalTest.hs 
 
 clean:
 	rm -f *flymake* *.hi *.o Main
