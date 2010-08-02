@@ -8,7 +8,7 @@ module Measure (m
                ,transform_leafs
                ,transform_leafs'
                ,smap
-               ,div_to_ratio)
+               ,measures_divide_leafs)
 where
 import Data.Ratio
 
@@ -102,3 +102,13 @@ instance Transformable E E where
         let (res,z') = (smap (transform_leafs' fn) es z)
         in ((d dur r res),z')
     transform_leafs' fn z x = fn x z
+
+measures_divide_leafs ms divs =
+    (fst (smap (transform_leafs' trans) ms divs))
+        where trans :: E -> [Int] -> (E, [Int])
+              trans (L dur tie) (d':ds) =
+                  let n = d'
+                      r = div_to_ratio n
+                  in (d dur r (take n (repeat (l ((dur/(n%1)/r)) False))),
+                        ds)
+              trans r@(R dur) ds = (r,ds)

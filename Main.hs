@@ -27,17 +27,10 @@ ms2 = [M.m (2,4) 60 (M.l (2%4) False)
                                 ,M.l (2%4) False])]
 
 ms = take 2 (repeat (M.m (4,4) 60 (M.l (4%4) False))) ++
-     take 2 (repeat (M.m (2,2) 60 (M.l (2%2) False)))
+     take 2 (repeat (M.m (3,4) 60 (M.l (3%4) False)))
 
-mytransform (M.L dur tie) (d:ds) =
-    let n = d
-        r = M.div_to_ratio n
-    in (M.d dur r (take n (repeat (M.l ((dur/(n%1)/r)) False))),
-        ds)
-mytransform r@(M.R dur) ds = (r,ds)
-
-ms3 = (fst (M.smap (M.transform_leafs' mytransform) ms (repeat 4)))
-ms4 = ms3 ++ (fst (M.smap (M.transform_leafs' mytransform) ms3 [2..20]))
+-- ms3 = (fst (M.smap (M.transform_leafs' mytransform) ms (repeat 4)))
+ms4 = ms ++ (M.measures_divide_leafs ms [2..20])
 
 main = do
   putStrLn "Here we have some sample input:"
