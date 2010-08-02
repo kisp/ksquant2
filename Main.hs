@@ -21,12 +21,12 @@ test = L.exportLily "foo" L.m1
 -- ms = I.measures_from_timesigs_tempos (take 5 (repeat (4,4))) (repeat 72)
 
 ms2 = [M.m (2,4) 60 (M.l (2%4) False)
-     ,M.m (4,4) 60 (M.d (4%4) 1 [M.d (1%4) 1 [M.l (1%8) False
-                                             ,M.r (1%8)]
-                                ,M.d (1%4) (2%3) [M.l (1%8) False
-                                                 ,M.l (1%8) False
-                                                 ,M.l (1%8) True]
-                                ,M.l (2%4) False])]
+      ,M.m (4,4) 60 (M.d (4%4) 1 [M.d (1%4) 1 [M.l (1%8) False
+                                              ,M.r (1%8)]
+                                 ,M.d (1%4) (2%3) [M.l (1%8) False
+                                                  ,M.l (1%8) False
+                                                  ,M.l (1%8) True]
+                                 ,M.l (2%4) False])]
 
 main = do
   putStrLn "Here we have some sample input:"

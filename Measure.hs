@@ -9,7 +9,9 @@ module Measure (m
                ,transform_leafs'
                ,smap
                ,measures_divide_leafs
-               ,measures_with_beats)
+               ,measures_with_beats
+               ,leaf_durs
+               ,leaf_effective_durs)
 where
 import Data.Ratio
 
@@ -46,13 +48,15 @@ type Tempo = Rat
 data M = M Timesig Tempo E
        deriving Show
 
+mdiv (M _ _ e) = e
+
 data E = D Rat Rat [E]
        | L Rat Bool
        | R Rat
        deriving Show
 
 dur (D d _ _) = d
-dur (L d _)     = d
+dur (L d _)   = d
 dur (R d)     = d
 
 timesig_dur (n,d) = (n%d)
@@ -119,3 +123,25 @@ measures_with_beats timesigs tempos =
     in measures_divide_leafs (map mes (zip timesigs tempos)) divs
     where mes (timesig,tempo) =
               (m timesig tempo (l (timesig_dur timesig) False))
+
+leaf_durs :: E -> [Rat]
+leaf_durs (L d _) = [d]
+leaf_durs (R d) = [d]
+leaf_durs (D _ _ es) = concatMap leaf_durs es
+
+leaf_effective_durs :: E -> [Rat]
+leaf_effective_durs x = leaf_effective_durs' 1 x
+
+leaf_effective_durs' r (L d _) = [d * r]
+leaf_effective_durs' r (R d) = [d * r]
+leaf_effective_durs' r (D _ r' es) =
+    concatMap (leaf_effective_durs' (r * r')) es
+
+---------------------------------------------------------
+
+m1 = M (4,4) (60 % 1)
+     (D (1 % 1) (1 % 1)
+      [L (1 % 4) False,L (1 % 4) False,L (1 % 4) False,L (1 % 4) False])
+
+m2 = (measures_divide_leafs [m1] (repeat 3)) !! 0
+m3 = (measures_divide_leafs [m2] (repeat 3)) !! 0
