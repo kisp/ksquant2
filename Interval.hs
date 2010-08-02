@@ -14,8 +14,10 @@ module Interval (Point
                 ,AscendingPoints --only type not constructor
                 ,groupPointsByIntervalls
                 ,ascending_intervals2points
+                ,best_div
                 ) where
 import Utils
+import Data.List (sortBy)
 
 -- http://www.haskell.org/haskellwiki/Functional_dependencies
 -- This tells Haskell that b is uniquely determined from a. 
@@ -105,3 +107,20 @@ divide_interval iv n =
 boundary_move_cost iv x = let x' = point x
                               dist = min (abs ((start iv) - x')) ((abs (end iv) - x'))
                           in dist * dist
+
+-- what is the cost of dividing iv by div (e.g. 3) and moving points
+-- in xs accordingly
+div_cost iv xs div = let small_ivs = divide_interval iv div
+                         point_groups = groupPointsByIntervalls small_ivs xs
+                         group_cost (small_iv,points) =
+                             sum (map (boundary_move_cost small_iv) (get_ascending_points points))
+                     in sum (map group_cost (zip (get_ascending_intervals small_ivs) point_groups))
+
+-- return a list of pairs (div,cost). Best pair comes first. In case of
+-- two identical costs the div that comes first in divs will be
+-- prefered (sortBy is a stable sorting algorithm).
+ranked_divs iv xs divs = sortBy test (zip divs (map (div_cost iv xs) divs))
+    where test (_,a) (_,b) = compare a b 
+
+-- choose the best div from divs
+best_div iv xs divs = fst (head (ranked_divs iv xs divs))
