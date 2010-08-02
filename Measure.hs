@@ -8,7 +8,8 @@ module Measure (m
                ,transform_leafs
                ,transform_leafs'
                ,smap
-               ,measures_divide_leafs)
+               ,measures_divide_leafs
+               ,measures_with_beats)
 where
 import Data.Ratio
 
@@ -112,3 +113,9 @@ measures_divide_leafs ms divs =
                   in (d dur r (take n (repeat (l ((dur/(n%1)/r)) False))),
                         ds)
               trans r@(R dur) ds = (r,ds)
+
+measures_with_beats timesigs tempos =
+    let divs = map fst timesigs
+    in measures_divide_leafs (map mes (zip timesigs tempos)) divs
+    where mes (timesig,tempo) =
+              (m timesig tempo (l (timesig_dur timesig) False))
