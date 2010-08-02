@@ -14,6 +14,7 @@ module Interval (Point
                 ,AscendingPoints --only type not constructor
                 ,groupPointsByIntervalls
                 ,ascending_intervals2points
+                ,divide_interval
                 ,best_div
                 ) where
 import Utils

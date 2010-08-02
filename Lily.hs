@@ -7,7 +7,11 @@ import System.FilePath
 import Data.Ratio
 
 data SimpleDur = D1 | D2 | D4 | D8 | D16 | D32 | D64
-           deriving Show
+           deriving (Show,Enum)
+
+-- 1 / 2^n
+power_to_simple_dur :: Int -> SimpleDur
+power_to_simple_dur n = toEnum n
 
 data Dur = Dur SimpleDur Int
            deriving Show
