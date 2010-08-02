@@ -5,7 +5,10 @@ module Measure (m
                ,E(L,D,R)
                ,M(M)
                ,Rat
-               ,transform_leafs)
+               ,transform_leafs
+               ,transform_leafs'
+               ,smap
+               ,div_to_ratio)
 where
 import Data.Ratio
 
@@ -16,6 +19,16 @@ isPowerOfTwo x | x > 1 = if (even x) then
                              isPowerOfTwo (x `div` 2)
                          else
                              False
+
+lowerPowerOfTwo 1 = 1
+lowerPowerOfTwo x | x > 1 = if isPowerOfTwo x then
+                                x
+                            else
+                                (lowerPowerOfTwo (x-1))
+
+
+-- e.g. when we divide by 9 the tuplet ratio will be 8 % 9
+div_to_ratio d = ((lowerPowerOfTwo d) % d)
 
 notableDur :: Rat -> Bool
 notableDur x = h (numerator x) (denominator x)
@@ -65,12 +78,27 @@ d d r es = if not(check d r es) then
 
 class Transformable a b where
     transform_leafs :: (b -> b) -> a -> a
+    -- passing around user supplied data
+    transform_leafs' :: (b -> t -> (b,t)) -> t -> a -> (a,t)
+
+smap :: (t -> a -> (b,t)) -> [a] -> t -> ([b],t)
+smap _ [] d   = ([],d)
+smap f (x:xs) d = let (r,newd) = f d x
+                  in let (rest,lastd) = (smap f xs newd)                      
+                     in ((r : rest),lastd)
 
 instance Transformable M E where
     transform_leafs fn (M timesig tempo e) =
         m timesig tempo (transform_leafs fn e)
+    transform_leafs' fn z (M timesig tempo e) =
+        let (r,z') = (transform_leafs' fn z e)
+        in ((m timesig tempo r),z')
 
 instance Transformable E E where
     transform_leafs fn (D dur r es) =
         d dur r (map (transform_leafs fn) es)
     transform_leafs fn x = fn x
+    transform_leafs' fn z (D dur r es) =
+        let (res,z') = (smap (transform_leafs' fn) es z)
+        in ((d dur r res),z')
+    transform_leafs' fn z x = fn x z

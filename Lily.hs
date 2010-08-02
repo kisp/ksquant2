@@ -6,7 +6,7 @@ import System.Directory
 import System.FilePath
 import Data.Ratio
 
-data SimpleDur = D1 | D2 | D4 | D8 | D16 | D32 | D64
+data SimpleDur = D1 | D2 | D4 | D8 | D16 | D32 | D64 | D128
            deriving (Show,Enum)
 
 -- 1 / 2^n
@@ -33,6 +33,7 @@ simpleDurToRatio x =
       D16 -> 1 % 16
       D32 -> 1 % 32
       D64 -> 1 % 64
+      D128 -> 1 % 128
 
 durToRatio (Dur s d) = rec ((simpleDurToRatio s) * (1 % 2)) d (simpleDurToRatio s)
     where rec l 0 acc = acc
