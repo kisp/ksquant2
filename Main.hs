@@ -12,7 +12,7 @@ groups = Iv.groupPointsByIntervalls ivs points
 test = L.exportLily "foo" L.m1
 
 
-ms = I.measures_from_timesigs_tempos (take 5 (repeat (4,4))) (repeat 60)
+ms = I.measures_from_timesigs_tempos (take 5 (repeat (4,4))) (repeat 72)
 
 main = do
   putStrLn "Here we have some sample input:"

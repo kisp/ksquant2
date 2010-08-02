@@ -1,7 +1,7 @@
 module Internal (measures_from_timesigs_tempos)
 where
 import Input
-import Interval
+import qualified Interval as I
 
 type TimeSig = (Int, Int)
 
@@ -9,7 +9,7 @@ type TimeSig = (Int, Int)
 data Measure = Measure TimeSig Time Time Time
                deriving Show
 
-instance Interval Measure Time where
+instance I.Interval Measure Time where
     start (Measure _ _ x _) = x
     end (Measure _ _ _ x) = x
 
@@ -28,9 +28,9 @@ measure_from_start_tempo timesig tempo start =
         dur = intToFloat numer * beat_length tempo
     in Measure timesig tempo start (start + dur)
 
-measures_from_timesigs_tempos :: [TimeSig] -> [Time] -> [Measure]
-measures_from_timesigs_tempos timesigs tempos = foldl r [] (zip timesigs tempos)
+measures_from_timesigs_tempos :: [TimeSig] -> [Time] -> I.AscendingIntervals Measure
+measures_from_timesigs_tempos timesigs tempos = I.ascending_intervals (foldl r [] (zip timesigs tempos))
     where r :: [Measure] -> (TimeSig,Time) -> [Measure]
           r preds (timesig,tempo) = preds ++ [measure_from_start_tempo timesig tempo (l preds)]
           l [] = 0
-          l preds = end (last preds)
+          l preds = I.end (last preds)
