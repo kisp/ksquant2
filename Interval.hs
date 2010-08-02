@@ -34,6 +34,9 @@ instance (Num t) => Interval (t,t) t where
     start (x,_) = x
     end (_,x) = x
 
+instance (Num t) => Point t t where
+    point x = x
+
 -- Do the intervals a and b have common points?
 intersect a b =
     let s1 = start a
