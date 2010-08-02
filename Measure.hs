@@ -31,11 +31,11 @@ data M = M Timesig Tempo E
        deriving Show
 
 data E = D Rat Rat [E]
-       | L Rat
+       | L Rat Bool
        deriving Show
 
 dur (D d _ _) = d
-dur (L d)     = d
+dur (L d _)     = d
 
 timesig_dur (n,d) = (n%d)
 
@@ -44,10 +44,10 @@ m timesig tempo d = if not(check timesig tempo d) then
                     else M timesig tempo d
     where check timesig tempo d = (dur d) == (timesig_dur timesig)
 
-l d = if not(check d) then
-          error "l d not valid"
-      else L d
-    where check d = notableDur d
+l d tie = if not(check) then
+          error "l d tie not valid"
+      else L d tie
+    where check = notableDur d
 
 d d r es = if not(check d r es) then
           error "d d r es not valid"
