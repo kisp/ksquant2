@@ -35,9 +35,9 @@ simpleDurToRatio x =
       D64 -> 1 % 64
       D128 -> 1 % 128
 
-durToRatio (Dur s d) = rec ((simpleDurToRatio s) * (1 % 2)) d (simpleDurToRatio s)
-    where rec l 0 acc = acc
-          rec l d acc = rec (l * (1 % 2)) (d - 1) (acc + l)
+durToRatio (Dur s d) = r ((simpleDurToRatio s) * (1 % 2)) d (simpleDurToRatio s)
+    where r l 0 acc = acc
+          r l d acc = r (l * (1 % 2)) (d - 1) (acc + l)
 
 eltToRatio (Note d _) = durToRatio d
 eltToRatio (Rest d) = durToRatio d
