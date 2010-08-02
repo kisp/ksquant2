@@ -18,9 +18,9 @@ dur_to_lily d = (L.Dur (base d) (dots d))
 e_to_lily :: M.E -> [L.Elt]
 e_to_lily (M.L d) = [L.Note (dur_to_lily d) False]
 e_to_lily (M.D d r es) | r == 1 = concatMap e_to_lily es
-                       | otherwise = let n = numerator d
-                                         d' = denominator d
-                                     in [L.Times n d' (concatMap e_to_lily es)]
+                       | otherwise = let n' = numerator r
+                                         d' = denominator r
+                                     in [L.Times n' d' (concatMap e_to_lily es)]
 
 m_to_lily :: M.M -> L.Measure
 m_to_lily (M.M (n,d) tempo e) = (L.Measure n d (e_to_lily e))

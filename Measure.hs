@@ -1,5 +1,6 @@
 module Measure (m
                ,l
+               ,d
                ,E(L,D)
                ,M(M)
                ,Rat)
@@ -47,3 +48,8 @@ l d = if not(check d) then
           error "l d not valid"
       else L d
     where check d = notableDur d
+
+d d r es = if not(check d r es) then
+          error "d d r es not valid"
+      else D d r es
+    where check d r es = d == r * sum (map dur es)
