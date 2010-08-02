@@ -92,3 +92,13 @@ ascending_intervals2points ivs = ascending_points (f (get_ascending_intervals iv
                                 [end iv] ++ (g ivs (end iv))
                             else
                                 [start iv,end iv] ++ (g ivs (end iv))
+
+divide_interval iv n =
+    let new_dur = (dur iv) / n
+        points = map ((+(start iv)) . (*new_dur)) [0..n]
+    in ascending_intervals (neighbours points)
+
+-- min cost to move x to start or end of iv
+boundary_move_cost iv x = let x' = point x
+                              dist = min (abs ((start iv) - x')) ((abs (end iv) - x'))
+                          in dist * dist
