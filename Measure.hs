@@ -1,9 +1,11 @@
 module Measure (m
                ,l
                ,d
-               ,E(L,D)
+               ,r
+               ,E(L,D,R)
                ,M(M)
-               ,Rat)
+               ,Rat
+               ,transform_leafs)
 where
 import Data.Ratio
 
@@ -32,10 +34,12 @@ data M = M Timesig Tempo E
 
 data E = D Rat Rat [E]
        | L Rat Bool
+       | R Rat
        deriving Show
 
 dur (D d _ _) = d
 dur (L d _)     = d
+dur (R d)     = d
 
 timesig_dur (n,d) = (n%d)
 
@@ -49,7 +53,24 @@ l d tie = if not(check) then
       else L d tie
     where check = notableDur d
 
+r d = if not(check) then
+          error "r d not valid"
+      else R d
+    where check = notableDur d
+
 d d r es = if not(check d r es) then
           error "d d r es not valid"
       else D d r es
     where check d r es = d == r * sum (map dur es)
+
+class Transformable a b where
+    transform_leafs :: (b -> b) -> a -> a
+
+instance Transformable M E where
+    transform_leafs fn (M timesig tempo e) =
+        m timesig tempo (transform_leafs fn e)
+
+instance Transformable E E where
+    transform_leafs fn (D dur r es) =
+        d dur r (map (transform_leafs fn) es)
+    transform_leafs fn x = fn x

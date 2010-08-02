@@ -17,6 +17,7 @@ dur_to_lily d = (L.Dur (base d) (dots d))
 
 e_to_lily :: M.E -> [L.Elt]
 e_to_lily (M.L d tie) = [L.Note (dur_to_lily d) tie]
+e_to_lily (M.R d) = [L.Rest (dur_to_lily d)]
 e_to_lily (M.D d r es) | r == 1 = concatMap e_to_lily es
                        | otherwise = let n' = numerator r
                                          d' = denominator r
