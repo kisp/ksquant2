@@ -4,7 +4,6 @@ module Measure (m
                ,r
                ,E(L,D,R)
                ,M(M)
-               ,Rat
                ,transform_leafs
                ,transform_leafs'
                ,smap
@@ -16,8 +15,6 @@ module Measure (m
 where
 import Data.Ratio
 import Utils
-
-type Rat = Ratio Int
 
 isPowerOfTwo 1 = True
 isPowerOfTwo x | x > 1 = if (even x) then
@@ -33,9 +30,10 @@ lowerPowerOfTwo x | x > 1 = if isPowerOfTwo x then
 
 
 -- e.g. when we divide by 9 the tuplet ratio will be 8 % 9
+div_to_ratio :: Integer -> Rational
 div_to_ratio d = ((lowerPowerOfTwo d) % d)
 
-notableDur :: Rat -> Bool
+notableDur :: Rational -> Bool
 notableDur x = h (numerator x) (denominator x)
     where h 1 d = isPowerOfTwo d
           h 3 d = isPowerOfTwo d && d >= 2
@@ -44,17 +42,17 @@ notableDur x = h (numerator x) (denominator x)
           h 15 d = isPowerOfTwo d && d >= 8
           h _ _ = False
 
-type Timesig = (Int,Int)
-type Tempo = Rat
+type Timesig = (Integer,Integer)
+type Tempo = Rational
 
 data M = M Timesig Tempo E
        deriving Show
 
 mdiv (M _ _ e) = e
 
-data E = D Rat Rat [E]
-       | L Rat Bool
-       | R Rat
+data E = D Rational Rational [E]
+       | L Rational Bool
+       | R Rational
        deriving Show
 
 dur (D d _ _) = d
@@ -112,11 +110,11 @@ instance Transformable E E where
 
 measures_divide_leafs ms divs =
     (fst (smap (transform_leafs' trans) ms divs))
-        where trans :: E -> [Int] -> (E, [Int])
+        where 
               trans (L dur tie) (d':ds) =
                   let n = d'
                       r = div_to_ratio n
-                  in (d dur r (take n (repeat (l ((dur/(n%1)/r)) False))),
+                  in (d dur r (take (fromInteger n) (repeat (l ((dur/(n%1)/r)) False))),
                         ds)
               trans r@(R dur) ds = (r,ds)
 
@@ -126,12 +124,12 @@ measures_with_beats timesigs tempos =
     where mes (timesig,tempo) =
               (m timesig tempo (l (timesig_dur timesig) False))
 
-leaf_durs :: E -> [Rat]
+leaf_durs :: E -> [Rational]
 leaf_durs (L d _) = [d]
 leaf_durs (R d) = [d]
 leaf_durs (D _ _ es) = concatMap leaf_durs es
 
-leaf_effective_durs :: E -> [Rat]
+leaf_effective_durs :: E -> [Rational]
 leaf_effective_durs x = leaf_effective_durs' 1 x
     where
       leaf_effective_durs' r (L d _) = [d * r]
@@ -139,7 +137,7 @@ leaf_effective_durs x = leaf_effective_durs' 1 x
       leaf_effective_durs' r (D _ r' es) =
           concatMap (leaf_effective_durs' (r * r')) es
 
-tempo_to_beat_dur :: Rat -> Rat
+tempo_to_beat_dur :: Rational -> Rational
 tempo_to_beat_dur tempo = 60 / tempo
 
 measure_dur (M (n,_) tempo _) = (n%1) * (tempo_to_beat_dur tempo)
