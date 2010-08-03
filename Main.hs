@@ -28,11 +28,13 @@ ms2 = [M.m (2,4) 60 (M.l (2%4) False)
                                                   ,M.l (1%8) True]
                                  ,M.l (2%4) False])]
 
+
+
 main = do
   putStrLn "Here we have some sample input:"
   putStrLn $ show ivs
   putStrLn $ show points
   putStrLn $ show groups
-  putStrLn $ show ms
+  putStrLn $ show (M.measures_leaf_intervals ms)
   L.exportLily "atest" (map m_to_lily ms)
   -- putStrLn $ show (Iv.divide_interval ((Iv.get_ascending_intervals ms) !! 0) 4)

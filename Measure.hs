@@ -11,9 +11,11 @@ module Measure (m
                ,measures_divide_leafs
                ,measures_with_beats
                ,leaf_durs
-               ,leaf_effective_durs)
+               ,leaf_effective_durs
+               ,measures_leaf_intervals)
 where
 import Data.Ratio
+import Utils
 
 type Rat = Ratio Int
 
@@ -131,11 +133,41 @@ leaf_durs (D _ _ es) = concatMap leaf_durs es
 
 leaf_effective_durs :: E -> [Rat]
 leaf_effective_durs x = leaf_effective_durs' 1 x
+    where
+      leaf_effective_durs' r (L d _) = [d * r]
+      leaf_effective_durs' r (R d) = [d * r]
+      leaf_effective_durs' r (D _ r' es) =
+          concatMap (leaf_effective_durs' (r * r')) es
 
-leaf_effective_durs' r (L d _) = [d * r]
-leaf_effective_durs' r (R d) = [d * r]
-leaf_effective_durs' r (D _ r' es) =
-    concatMap (leaf_effective_durs' (r * r')) es
+tempo_to_beat_dur :: Rat -> Rat
+tempo_to_beat_dur tempo = 60 / tempo
+
+measure_dur (M (n,_) tempo _) = (n%1) * (tempo_to_beat_dur tempo)
+
+-- foldl            :: (a -> b -> a) -> a -> [b] -> a
+-- foldl f acc []     =  acc
+-- foldl f acc (x:xs) =  foldl f (f acc x) xs
+
+dxs_to_xs dxs = scanl (+) 0 dxs
+butlast xs = reverse (tail (reverse xs))
+dxs_to_xs_butlast dxs = butlast (dxs_to_xs dxs)
+
+measures_start_times ms = dxs_to_xs (map measure_dur ms)
+
+measure_leaf_start_times m@(M (n,d) tempo div) start = (map (+start) (dxs_to_xs_butlast (map trans (leaf_effective_durs div))))
+    where trans dur = (tempo_to_beat_dur tempo) * (dur_to_beat dur)
+          dur_to_beat dur = dur * (d%1)
+
+measures_leaf_start_times ms = (concatMap (uncurry measure_leaf_start_times)
+                                              (zip ms (measures_start_times ms)))
+
+measure_leaf_intervals m@(M (n,d) tempo div) start = (neighbours (map (+start) (dxs_to_xs (map trans (leaf_effective_durs div)))))
+    where trans dur = (tempo_to_beat_dur tempo) * (dur_to_beat dur)
+          dur_to_beat dur = dur * (d%1)
+
+measures_leaf_intervals ms = (concatMap (uncurry measure_leaf_intervals)
+                                                  (zip ms (measures_start_times ms)))
+
 
 ---------------------------------------------------------
 
@@ -145,3 +177,4 @@ m1 = M (4,4) (60 % 1)
 
 m2 = (measures_divide_leafs [m1] (repeat 3)) !! 0
 m3 = (measures_divide_leafs [m2] (repeat 3)) !! 0
+
