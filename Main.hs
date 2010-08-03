@@ -9,32 +9,35 @@ import MeasureToLily
 
 import Data.Ratio
 
-i1 = [Event 0 0.25, Event 1.25 2.25, Event 2.25 4, Event 5 7.25]
-ms = M.measures_with_beats (take 4 (repeat (4,4))) (repeat 60)
+----------------
 
-ivs = (Iv.ascending_intervals i1)
-points = (Iv.ascending_intervals2points ivs)
-groups = Iv.groupPointsByIntervalls ivs points
+rational_to_time :: Rational -> Time
+rational_to_time x = fromRational x
 
-test = L.exportLily "foo" L.m1
+rational_pair_to_time_pair (x,y) = (rational_to_time x, rational_to_time y)
 
--- ms = I.measures_from_timesigs_tempos (take 5 (repeat (4,4))) (repeat 72)
+----------------
 
-ms2 = [M.m (2,4) 60 (M.l (2%4) False)
-      ,M.m (4,4) 60 (M.d (4%4) 1 [M.d (1%4) 1 [M.l (1%8) False
-                                              ,M.r (1%8)]
-                                 ,M.d (1%4) (2%3) [M.l (1%8) False
-                                                  ,M.l (1%8) False
-                                                  ,M.l (1%8) True]
-                                 ,M.l (2%4) False])]
+input = [Event 0 0.3333333, Event 1.25 2.25, Event 2.25 4, Event 5 7.33333333]
+measures = M.measures_with_beats (take 4 (repeat (4,4))) (repeat 60)
+divs = [1..8] :: [Int]
+----------------
 
+input' = Iv.ascending_intervals input
 
+beats_intervals = Iv.ascending_intervals (map rational_pair_to_time_pair (M.measures_leaf_intervals measures))
+
+points = (Iv.ascending_intervals2points input')
+groups = Iv.groupPointsByIntervalls beats_intervals points
+
+best_divs = (map (uncurry (Iv.best_div divs)) (zip (Iv.get_ascending_intervals beats_intervals) groups))
+
+measures' = M.measures_divide_leafs measures (map toInteger best_divs)
+
+----------------
 
 main = do
   putStrLn "Here we have some sample input:"
-  putStrLn $ show ivs
-  putStrLn $ show points
   putStrLn $ show groups
-  putStrLn $ show (M.measures_leaf_intervals ms)
-  L.exportLily "atest" (map m_to_lily ms)
-  -- putStrLn $ show (Iv.divide_interval ((Iv.get_ascending_intervals ms) !! 0) 4)
+  putStrLn $ show best_divs
+  L.exportLily "atest" (map m_to_lily measures')

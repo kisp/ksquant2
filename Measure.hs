@@ -6,7 +6,6 @@ module Measure (m
                ,M(M)
                ,transform_leafs
                ,transform_leafs'
-               ,smap
                ,measures_divide_leafs
                ,measures_with_beats
                ,leaf_durs

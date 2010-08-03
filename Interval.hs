@@ -124,4 +124,4 @@ ranked_divs iv xs divs = sortBy test (zip divs (map (div_cost iv xs) divs))
     where test (_,a) (_,b) = compare a b 
 
 -- choose the best div from divs
-best_div iv xs divs = fst (head (ranked_divs iv xs divs))
+best_div divs iv xs = (round (fst (head (ranked_divs iv xs (map intToFloat divs))))) :: Int
