@@ -16,6 +16,8 @@ module Interval (Point
                 ,ascending_intervals2points
                 ,divide_interval
                 ,best_div
+                ,locate_point
+                ,quantize_iv
                 ) where
 import Utils
 import Data.List (sortBy)
@@ -125,3 +127,22 @@ ranked_divs iv xs divs = sortBy test (zip divs (map (div_cost iv xs) divs))
 
 -- choose the best div from divs
 best_div divs iv xs = (round (fst (head (ranked_divs iv xs (map intToFloat divs))))) :: Int
+
+locate_point ivs x = rec (get_ascending_intervals ivs) (point x) 0
+    where rec (iv:ivs) x index
+              | isPointInInterval iv x = (iv,(index,index+1))
+              | otherwise = rec ivs x (index+1)
+
+quantize_iv ivs iv = let s = start iv
+                         e = end iv
+                         ((s0,s1),(si0,si1)) = locate_point ivs s
+                         ((e0,e1),(ei0,ei1)) = locate_point ivs e
+                     in snd (head (sortBy
+                                   test [(cost ds de,(snd a,snd b)) |
+                                         a <- [(s0,si0),(s1,si1)],
+                                         b <- [(e0,ei0),(e1,ei1)],
+                                         not (snd a == snd b),
+                                         let ds = abs (s - (fst a)),
+                                         let de = abs (e - (fst b))]))
+    where cost ds de = abs (de - ds) + abs ds + abs de
+          test a b = (fst a) `compare` (fst b)

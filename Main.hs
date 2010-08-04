@@ -26,17 +26,27 @@ input' = Iv.ascending_intervals input
 
 beats_intervals = Iv.ascending_intervals (map rational_pair_to_time_pair (M.measures_leaf_intervals measures))
 
-points = (Iv.ascending_intervals2points input')
+points = Iv.ascending_intervals2points input'
 groups = Iv.groupPointsByIntervalls beats_intervals points
 
 best_divs = (map (uncurry (Iv.best_div divs)) (zip (Iv.get_ascending_intervals beats_intervals) groups))
 
 measures' = M.measures_divide_leafs measures (map toInteger best_divs)
 
+quant_grid = Iv.ascending_intervals (map rational_pair_to_time_pair (M.measures_leaf_intervals measures'))
+groups' = Iv.groupPointsByIntervalls quant_grid points
+
 ----------------
 
+nice_show label obj = do
+  putStrLn "------------"
+  putStrLn $ (label ++ ":\n" ++ (show obj))
+
 main = do
-  putStrLn "Here we have some sample input:"
-  putStrLn $ show groups
-  putStrLn $ show best_divs
+  nice_show "input'" input'
+  nice_show "groups" groups
+  nice_show "best_divs" best_divs
+  nice_show "quant_grid" quant_grid
+  nice_show "groups'" groups'
+  nice_show "quantize_iv" (map (Iv.quantize_iv quant_grid) input)
   L.exportLily "atest" (map m_to_lily measures')
