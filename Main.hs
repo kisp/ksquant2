@@ -53,7 +53,7 @@ main = do
   -- nice_show "input'" input'
   -- nice_show "groups" groups
   -- nice_show "best_divs" best_divs
-  -- nice_show "quant_grid" quant_grid
+  nice_show "quant_grid" quant_grid
   -- nice_show "groups'" groups'
-  nice_show "qevents" qevents 
+  nice_show "qevents" qevents
   L.exportLily "atest" (map m_to_lily measures')
