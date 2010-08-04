@@ -20,6 +20,7 @@ rational_pair_to_time_pair (x,y) = (rational_to_time x, rational_to_time y)
 input = [Event 0 0.3333333, Event 1.25 2.25, Event 2.25 4, Event 5 7.33333333]
 measures = M.measures_with_beats (take 4 (repeat (4,4))) (repeat 60)
 divs = [1..8] :: [Int]
+
 ----------------
 
 input' = Iv.ascending_intervals input
@@ -33,8 +34,13 @@ best_divs = (map (uncurry (Iv.best_div divs)) (zip (Iv.get_ascending_intervals b
 
 measures' = M.measures_divide_leafs measures (map toInteger best_divs)
 
-quant_grid = Iv.ascending_intervals (map rational_pair_to_time_pair (M.measures_leaf_intervals measures'))
-groups' = Iv.groupPointsByIntervalls quant_grid points
+quant_grid = (M.measures_leaf_intervals measures')
+quant_grid' = Iv.ascending_intervals (map rational_pair_to_time_pair quant_grid)
+groups' = Iv.groupPointsByIntervalls quant_grid' points
+
+make_qevent ivs ((start_i,end_i),e) = QEvent (Iv.start (ivs!!start_i)) (Iv.start (ivs!!end_i)) [e]
+
+qevents = Iv.ascending_intervals (map ((make_qevent quant_grid) . (Iv.quantize_iv quant_grid')) input)
 
 ----------------
 
@@ -43,10 +49,11 @@ nice_show label obj = do
   putStrLn $ (label ++ ":\n" ++ (show obj))
 
 main = do
-  nice_show "input'" input'
-  nice_show "groups" groups
-  nice_show "best_divs" best_divs
-  nice_show "quant_grid" quant_grid
-  nice_show "groups'" groups'
-  nice_show "quantize_iv" (map (Iv.quantize_iv quant_grid) input)
+  nice_show "input" input
+  -- nice_show "input'" input'
+  -- nice_show "groups" groups
+  -- nice_show "best_divs" best_divs
+  -- nice_show "quant_grid" quant_grid
+  -- nice_show "groups'" groups'
+  nice_show "qevents" qevents 
   L.exportLily "atest" (map m_to_lily measures')

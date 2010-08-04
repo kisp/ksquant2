@@ -13,4 +13,11 @@ instance Iv.Interval Event Time where
 instance Iv.Point Time Time where
     point x = x
 
-type Events = [Event]
+-----------------------------
+
+data QEvent = QEvent Rational Rational [Event]
+              deriving Show
+
+instance Iv.Interval QEvent Rational where
+    start (QEvent start end _) = start
+    end (QEvent start end _) = end
