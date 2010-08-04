@@ -49,10 +49,14 @@ data M = M Timesig Tempo E
 
 mdiv (M _ _ e) = e
 
-data E = D Rational Rational [E]
+data E =
+--    dur      factor   children
+    D Rational Rational [E]
+--         dur      tie
        | L Rational Bool
+--         dur
        | R Rational
-       deriving Show
+         deriving Show
 
 dur (D d _ _) = d
 dur (L d _)   = d
