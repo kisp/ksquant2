@@ -151,14 +151,16 @@ dxs_to_xs_butlast dxs = butlast (dxs_to_xs dxs)
 
 measures_start_times ms = dxs_to_xs (map measure_dur ms)
 
-measure_leaf_start_times m@(M (n,d) tempo div) start = (map (+start) (dxs_to_xs_butlast (map trans (leaf_effective_durs div))))
+measure_leaf_start_times m@(M (n,d) tempo div) start =
+    (map (+start) (dxs_to_xs_butlast (map trans (leaf_effective_durs div))))
     where trans dur = (tempo_to_beat_dur tempo) * (dur_to_beat dur)
           dur_to_beat dur = dur * (d%1)
 
 measures_leaf_start_times ms = (concatMap (uncurry measure_leaf_start_times)
                                               (zip ms (measures_start_times ms)))
 
-measure_leaf_intervals m@(M (n,d) tempo div) start = (neighbours (map (+start) (dxs_to_xs (map trans (leaf_effective_durs div)))))
+measure_leaf_intervals m@(M (n,d) tempo div) start =
+    (neighbours (map (+start) (dxs_to_xs (map trans (leaf_effective_durs div)))))
     where trans dur = (tempo_to_beat_dur tempo) * (dur_to_beat dur)
           dur_to_beat dur = dur * (d%1)
 
