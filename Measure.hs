@@ -163,8 +163,17 @@ measure_leaf_intervals m@(M (n,d) tempo div) start = (neighbours (map (+start) (
           dur_to_beat dur = dur * (d%1)
 
 measures_leaf_intervals ms = (concatMap (uncurry measure_leaf_intervals)
-                                                  (zip ms (measures_start_times ms)))
+                              (zip ms (measures_start_times ms)))
 
+-- if leaf start time is not in any iv, then rest. if leaf start time
+-- is in an interval keep it and make it a tie if the end time is not
+-- the same as the end time of the interval
+-- TODO unfinished
+measures_tie_or_rest ms ivs =
+    map (transform_leafs trans) ms
+        where 
+              trans (L dur tie) = (L dur tie)
+              trans r@(R dur) = r
 
 ---------------------------------------------------------
 
@@ -174,4 +183,3 @@ m1 = M (4,4) (60 % 1)
 
 m2 = (measures_divide_leafs [m1] (repeat 3)) !! 0
 m3 = (measures_divide_leafs [m2] (repeat 3)) !! 0
-
