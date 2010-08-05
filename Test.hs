@@ -4,6 +4,7 @@ import Test.HUnit
 import Test.QuickCheck
 import Test.Runner
 
+import Main
 import IntervalTest
 
 -- -- use HUnit to assert that helloWorld produces "hello world"
