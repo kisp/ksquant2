@@ -88,7 +88,7 @@ runLily path =
     rawSystem "lilypond" ["--pdf", takeFileName path]
     setCurrentDirectory pwd
 
-openPdf path = rawSystem "open" [replaceExtension path "pdf"]
+openPdf path = rawSystem "gnome-open" [replaceExtension path "pdf"]
 
 validateMeasures xs = and (map isCorrectmeasurelength xs)
 

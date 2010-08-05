@@ -129,10 +129,10 @@ ranked_divs iv xs divs = sortBy test (zip divs (map (div_cost iv xs) divs))
 best_div divs iv xs = (round (fst (head (ranked_divs iv xs (map intToFloat divs))))) :: Int
 
 -- TODO implement this as a binary search
-locate_point ivs x = rec (get_ascending_intervals ivs) (point x) 0
-    where rec (iv:ivs) x index
+locate_point ivs x = r (get_ascending_intervals ivs) (point x) 0
+    where r (iv:ivs) x index
               | isPointInInterval iv x = (iv,(index,index+1))
-              | otherwise = rec ivs x (index+1)
+              | otherwise = r ivs x (index+1)
 
 quantize_iv ivs iv = let s = start iv
                          e = end iv
