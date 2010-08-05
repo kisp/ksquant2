@@ -9,9 +9,13 @@ def safe_system(command)
   end
 end
 
+$counter = 0
+
 def make(target)
-  safe_system "make #{target} >make-#{target}.log 2>&1; touch make-#{target}.log"
-  safe_system "mv make-#{target}.log #{ENV['CC_BUILD_ARTIFACTS']}/make-#{target}.log"
+  $counter += 1
+  name = "#{$counter}-make-#{target}.log"
+  safe_system "make #{target} >#{name} 2>&1; touch #{name}"
+  safe_system "mv #{name} #{ENV['CC_BUILD_ARTIFACTS']}/#{name}"
 end
 
 make "clean"
