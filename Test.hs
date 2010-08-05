@@ -5,6 +5,7 @@ import Test.QuickCheck
 import Test.Runner
 
 import IntervalTest
+import LispTest
 
 import Input
 import Interval
@@ -31,12 +32,14 @@ tests :: [(String, TestRunnerTest)]
 tests = [-- ("helloWorld value", TestRunnerTest hunitTest),
          -- ("hello length", runWithQuickCheck helloLength),
          -- ("value of hello applied to empty string", TestRunnerTest helloEmpty)
-         ("prop_good_iv", runWithQuickCheck prop_good_iv),
-         ("prop_isPointInInterval", runWithQuickCheck prop_isPointInInterval),
-         ("prop_intersect", runWithQuickCheck prop_intersect),
-         ("prop_isStrictlyAfter", runWithQuickCheck prop_isStrictlyAfter),
-         ("prop_groupPointsByIntervalls", runWithQuickCheck prop_groupPointsByIntervalls),
-         ("prop_ascending_intervals2points", runWithQuickCheck prop_ascending_intervals2points)
+         ("prop_good_iv", runWithQuickCheck prop_good_iv)
+         ,("prop_isPointInInterval", runWithQuickCheck prop_isPointInInterval)
+         ,("prop_intersect", runWithQuickCheck prop_intersect)
+         ,("prop_isStrictlyAfter", runWithQuickCheck prop_isStrictlyAfter)
+         ,("prop_groupPointsByIntervalls", runWithQuickCheck prop_groupPointsByIntervalls)
+         ,("prop_ascending_intervals2points", runWithQuickCheck prop_ascending_intervals2points)
+-- LispTest
+         ,("lisp1", TestRunnerTest lisp1)
         ]
 main :: IO ()
 main = testRunnerMain tests
