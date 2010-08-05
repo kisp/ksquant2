@@ -1,5 +1,5 @@
 def safe_system(command)
-  puts "$ " + command
+  puts command
   system command
   res = $?
   if not (res == 0) then
