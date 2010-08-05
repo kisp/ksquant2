@@ -2,3 +2,8 @@
 *.o
 *.hi
 Main
+.hpc
+dist
+test
+test-coverage
+test.tix
