@@ -20,9 +20,11 @@ parseInteger = fmap (LispInteger . read) $ many1 digit
 parseVal :: Parser LispVal
 parseVal = parseInteger
 
-parseValAndEof = do
-  x <- parseVal
+parseValsAndEof = do
+  skipMany space
+  xs <- sepBy1 parseVal spaces
   eof
-  return x
+  return xs
 
-parseLisp s = parse parseValAndEof "" s
+parseLisp :: [Char] -> Either ParseError [LispVal]
+parseLisp s = parse parseValsAndEof "" s
