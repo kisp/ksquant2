@@ -12,4 +12,5 @@
       (list "hslint" (list local-file))))
 
   (add-to-list 'flymake-allowed-file-name-masks
-	       '("\\.l?hs\\'" flymake-hslint-init)))
+	       '("\\.l?hs\\'" flymake-hslint-init))
+  (setq inferior-haskell-find-project-root nil))
