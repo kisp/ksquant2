@@ -78,23 +78,3 @@ prop_ascending_intervals2points :: AscendingIntervals TestInterval -> Bool
 prop_ascending_intervals2points ivs = (ascending_intervals2points ivs) == (safe_ascending_intervals2points ivs)
     where safe_ascending_intervals2points ivs = let ivs' = get_ascending_intervals ivs
                                                 in (ascending_points . sort . nub) ((map start ivs') ++ (map end ivs'))
-
---------------------------------------------------------------------------
-
--- good :: Result -> Bool
--- good Success {} = True
--- good NoExpectedFailure {} = True
--- good _ = False
-
--- runtest name test = do
---   printf "%-45s: " name
---   r <- quickCheckResult test
---   if not (good r) then exitFailure else return ()
-
--- main = do
---   runtest "prop_good_iv" prop_good_iv
---   runtest "prop_isPointInInterval" prop_isPointInInterval
---   runtest "prop_intersect" prop_intersect
---   runtest "prop_isStrictlyAfter" prop_isStrictlyAfter
---   runtest "prop_groupPointsByIntervalls" prop_groupPointsByIntervalls
---   runtest "prop_ascending_intervals2points" prop_ascending_intervals2points
