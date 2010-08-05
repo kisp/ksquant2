@@ -36,7 +36,7 @@ measures' = M.measures_divide_leafs measures (map toInteger best_divs)
 
 quant_grid = (M.measures_leaf_intervals measures')
 quant_grid' = Iv.ascending_intervals (map rational_pair_to_time_pair quant_grid)
-groups' = Iv.groupPointsByIntervalls quant_grid' points
+-- groups' = Iv.groupPointsByIntervalls quant_grid' points
 
 make_qevent ivs ((start_i,end_i),e) = QEvent (Iv.start (ivs!!start_i)) (Iv.start (ivs!!end_i)) [e]
 
