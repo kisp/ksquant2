@@ -24,3 +24,4 @@ make "doc"
 safe_system "mv 'dist/doc/html/haskell-quant/haskell-quant' #{ENV['CC_BUILD_ARTIFACTS']}/doc"
 
 make "test"
+safe_system "mv 'test-coverage' #{ENV['CC_BUILD_ARTIFACTS']}/test-coverage"
