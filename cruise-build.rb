@@ -10,3 +10,5 @@ def safe_system(command)
 end
 
 safe_system "make clean"
+safe_system "make build"
+safe_system "make doc"
