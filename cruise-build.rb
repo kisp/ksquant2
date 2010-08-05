@@ -9,10 +9,12 @@ def safe_system(command)
   end
 end
 
-safe_system "make clean >make-clean.log 2>&1"
-safe_system "mv make-clean.log #{ENV['CC_BUILD_ARTIFACTS']}/make-clean.log"
-safe_system "make build >make-build.log 2>&1"
-safe_system "mv make-build.log #{ENV['CC_BUILD_ARTIFACTS']}/make-build.log"
+def make(target)
+  safe_system "make #{target} >make-#{target}.log 2>&1"
+  safe_system "mv make-#{target}.log #{ENV['CC_BUILD_ARTIFACTS']}/make-#{target}.log"
+end
 
-safe_system "make doc"
+make "clean"
+make "build"
+make "doc"
 safe_system "mv 'dist/doc/html/haskell-quant/haskell-quant' #{ENV['CC_BUILD_ARTIFACTS']}/doc"
