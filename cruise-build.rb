@@ -10,7 +10,7 @@ def safe_system(command)
 end
 
 safe_system "make clean"
-safe_system "make build >build.log 2>&1"
+safe_system "make build 2>&1 >build.log"
 safe_system "mv build.log #{ENV['CC_BUILD_ARTIFACTS']}/build.log"
 
 safe_system "make doc"
