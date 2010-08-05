@@ -87,7 +87,7 @@ good NoExpectedFailure {} = True
 good _ = False
 
 runtest name test = do
-  printf "%-25s: " name
+  printf "%-45s: " name
   r <- quickCheckResult test
   if not (good r) then exitFailure else return ()
 
