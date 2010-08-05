@@ -10,7 +10,7 @@ def safe_system(command)
 end
 
 def make(target)
-  safe_system "make #{target} >make-#{target}.log 2>&1"
+  safe_system "make #{target} >make-#{target}.log 2>&1; touch make-#{target}.log"
   safe_system "mv make-#{target}.log #{ENV['CC_BUILD_ARTIFACTS']}/make-#{target}.log"
 end
 
