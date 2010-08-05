@@ -40,10 +40,10 @@ prop_isStrictlyAfter a b = isStrictlyAfter a b == safeisStrictlyAfter a b
     where safeisStrictlyAfter a b = not (intersect a b) && start b >= end a
 
 filteredDomain2Intervalls [] = []
-filteredDomain2Intervalls (x:xs) = map TestInterval (rec xs x x)
-    where rec [] start last = [(start,last+1)]
-          rec (x:xs) start last | (x == last + 1) = rec xs start x
-                                | otherwise = (start,last+1) : (rec xs x x)
+filteredDomain2Intervalls (x:xs) = map TestInterval (r xs x x)
+    where r [] start last = [(start,last+1)]
+          r (x:xs) start last | (x == last + 1) = r xs start x
+                                | otherwise = (start,last+1) : (r xs x x)
 
 delete_random list = do
   pos <- choose (0, (length list) - 1)
@@ -81,20 +81,20 @@ prop_ascending_intervals2points ivs = (ascending_intervals2points ivs) == (safe_
 
 --------------------------------------------------------------------------
 
-good :: Result -> Bool
-good Success {} = True
-good NoExpectedFailure {} = True
-good _ = False
+-- good :: Result -> Bool
+-- good Success {} = True
+-- good NoExpectedFailure {} = True
+-- good _ = False
 
-runtest name test = do
-  printf "%-45s: " name
-  r <- quickCheckResult test
-  if not (good r) then exitFailure else return ()
+-- runtest name test = do
+--   printf "%-45s: " name
+--   r <- quickCheckResult test
+--   if not (good r) then exitFailure else return ()
 
-main = do
-  runtest "prop_good_iv" prop_good_iv
-  runtest "prop_isPointInInterval" prop_isPointInInterval
-  runtest "prop_intersect" prop_intersect
-  runtest "prop_isStrictlyAfter" prop_isStrictlyAfter
-  runtest "prop_groupPointsByIntervalls" prop_groupPointsByIntervalls
-  runtest "prop_ascending_intervals2points" prop_ascending_intervals2points
+-- main = do
+--   runtest "prop_good_iv" prop_good_iv
+--   runtest "prop_isPointInInterval" prop_isPointInInterval
+--   runtest "prop_intersect" prop_intersect
+--   runtest "prop_isStrictlyAfter" prop_isStrictlyAfter
+--   runtest "prop_groupPointsByIntervalls" prop_groupPointsByIntervalls
+--   runtest "prop_ascending_intervals2points" prop_ascending_intervals2points

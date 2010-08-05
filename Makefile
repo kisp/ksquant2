@@ -3,9 +3,12 @@ all:
 	./Main
 
 
+.PHONY: test
 test:
-	runghc HelloTest.hs 2>/dev/null | tee test.log 
+	ghc -fglasgow-exts --make HelloTest.hs -o test
+	./test 2>/dev/null >test.log
 	tail -n 1 <test.log | grep 'tests passed'
+	cat test.log
 	rm -f test.log
 
 test2:
