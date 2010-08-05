@@ -11,5 +11,6 @@ end
 
 safe_system "make clean"
 safe_system "make build"
+
 safe_system "make doc"
-safe_system "mv 'dist/doc/html/haskell-quant/haskell-quant' #{ENV['CC_BUILD_ARTIFACTS']}"
+safe_system "mv 'dist/doc/html/haskell-quant/haskell-quant' #{ENV['CC_BUILD_ARTIFACTS']}/doc"
