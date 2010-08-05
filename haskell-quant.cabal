@@ -1,0 +1,13 @@
+Name:                haskell-quant
+Version:             0.1
+Description:         Super cool mega lambdas
+License:             GPL
+-- License-file:        LICENSE
+Author:              Don Stewart
+Maintainer:          dons@cse.unsw.edu.au
+Build-Type:          Simple
+Cabal-Version:       >=1.2
+
+Executable haskell-quant
+  Main-is:           Main.hs
+  Build-Depends:     base >= 3 && < 5
