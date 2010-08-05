@@ -4,8 +4,14 @@ import Test.HUnit
 import Test.QuickCheck
 import Test.Runner
 
-import Measure
 import IntervalTest
+
+import Input
+import Interval
+import Lily
+import Measure
+import MeasureToLily
+import Utils
 
 -- -- use HUnit to assert that helloWorld produces "hello world"
 -- hunitTest :: Test
