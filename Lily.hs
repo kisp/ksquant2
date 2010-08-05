@@ -6,6 +6,7 @@ import System.Directory
 import System.FilePath
 import Data.Ratio
 
+-- |This represents durations without dot.
 data SimpleDur = D1 | D2 | D4 | D8 | D16 | D32 | D64 | D128
            deriving (Show,Enum)
 
