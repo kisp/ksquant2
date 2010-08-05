@@ -4,7 +4,7 @@ all:
 
 
 test:
-	runghc HelloTest.hs | tee test.log 
+	runghc HelloTest.hs 2>/dev/null | tee test.log 
 	tail -n 1 <test.log | grep 'tests passed'
 	rm -f test.log
 
