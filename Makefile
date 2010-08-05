@@ -2,7 +2,13 @@ all:
 	ghc -fglasgow-exts --make Main.hs
 	./Main
 
+
 test:
+	runghc HelloTest.hs | tee test.log 
+	tail -n 1 <test.log | grep 'tests passed'
+	rm -f test.log
+
+test2:
 	runhaskell -XMultiParamTypeClasses -XFunctionalDependencies -XFlexibleInstances IntervalTest.hs 
 
 clean:

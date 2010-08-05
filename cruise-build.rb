@@ -23,4 +23,5 @@ make "build"
 make "doc"
 safe_system "mv 'dist/doc/html/haskell-quant/haskell-quant' #{ENV['CC_BUILD_ARTIFACTS']}/doc"
 
-safe_system "runghc HelloTest.hs | tail -n 1 | grep 'tests passed'"
+make "test"
+
