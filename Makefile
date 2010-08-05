@@ -6,8 +6,7 @@ test:
 	runhaskell -XMultiParamTypeClasses -XFunctionalDependencies -XFlexibleInstances IntervalTest.hs 
 
 clean:
-	rm -f *flymake* *.hi *.o Main
-	rm -rf dist
+	git clean -f -x -d 
 
 # ----------------------------------------------------------------
 
