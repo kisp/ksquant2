@@ -89,8 +89,6 @@ runLily path =
     rawSystem "lilypond" ["--pdf", takeFileName path]
     setCurrentDirectory pwd
 
-openPdf path = rawSystem "gnome-open" [replaceExtension path "pdf"]
-
 validateMeasures xs = and (map isCorrectmeasurelength xs)
 
 exportLily name xs =
@@ -101,7 +99,6 @@ exportLily name xs =
         hPutStr outh (lilyString xs)
         hClose outh
         runLily path
-        openPdf path
   else
       error "measures are not valid"
 
