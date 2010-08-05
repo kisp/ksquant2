@@ -12,6 +12,14 @@ test:
 	hpc markup --destdir=test-coverage test 2>/dev/null >/dev/null
 	hpc report test
 
+
+runmain:
+	rm -f *.o *.hi
+	ghc -fglasgow-exts -fhpc --make Main.hs -o main
+	./main
+	hpc markup --destdir=main-coverage main 2>/dev/null >/dev/null
+	hpc report main
+
 clean:
 	git clean -f -x -d 
 

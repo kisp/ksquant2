@@ -26,3 +26,8 @@ safe_system "mv 'dist/doc/html/haskell-quant/haskell-quant' #{ENV['CC_BUILD_ARTI
 make "test"
 safe_system "ln -s hpc_index.html test-coverage/index.html"
 safe_system "mv 'test-coverage' #{ENV['CC_BUILD_ARTIFACTS']}/test-coverage"
+
+
+make "runmain"
+safe_system "ln -s hpc_index.html main-coverage/index.html"
+safe_system "mv 'main-coverage' #{ENV['CC_BUILD_ARTIFACTS']}/main-coverage"
