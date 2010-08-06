@@ -7,3 +7,4 @@ dist
 test
 test-coverage
 test.tix
+.DS_Store
