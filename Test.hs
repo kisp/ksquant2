@@ -40,6 +40,8 @@ tests = [-- ("helloWorld value", TestRunnerTest hunitTest),
          ,("prop_ascending_intervals2points", runWithQuickCheck prop_ascending_intervals2points)
 -- LispTest
          ,("lisp1", TestRunnerTest lisp1)
+         ,("lisp2", TestRunnerTest lisp2)
+         ,("lisp3", TestRunnerTest lisp3)
         ]
 main :: IO ()
 main = testRunnerMain tests
