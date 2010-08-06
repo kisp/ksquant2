@@ -3,12 +3,9 @@ module Lisp (LispVal(..)
             ,parseLisp
             )
 where
-import Text.ParserCombinators.Parsec hiding (spaces)
+import Text.ParserCombinators.Parsec
 import Data.Char (toUpper)
 import Data.List (intercalate)
-
-spaces :: Parser ()
-spaces = skipMany1 space
 
 data LispVal = LispInteger Integer
              | LispKeyword String
@@ -24,11 +21,13 @@ printLisp (LispKeyword x) = ":" ++ x
 printLisp (LispList xs) =
     "(" ++ (intercalate " " (map printLisp xs)) ++ ")"
 
+symbol = oneOf "/!$%"
+
 parseKeyword :: Parser LispVal
 parseKeyword =
     do
       char ':'
-      s <- many1 letter
+      s <- many1 (letter <|> symbol)
       return (LispKeyword (map toUpper s))
 
 parseInteger :: Parser LispVal
@@ -65,7 +64,7 @@ parseVal = parseKeyword <|>
 
 parseValsAndEof = do
   skipMany space
-  xs <- sepBy1 parseVal spaces
+  xs <- endBy1 parseVal spaces
   eof
   return xs
 

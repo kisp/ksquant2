@@ -43,6 +43,9 @@ lisp2 = TestList
         ,[(LispFloat (-123.12))] ~=?
          case (parseLisp "-123.12") of
            Right x -> x
+        ,[(LispInteger 1)] ~=?
+         case (parseLisp "1 ") of
+           Right x -> x
         ]
 
 lisp3 = TestList

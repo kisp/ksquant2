@@ -1,12 +1,13 @@
 module Main where
+
+import Data.Ratio
+
 import qualified Lily as L
 import Input
 import qualified Interval as Iv
-
 import qualified Measure as M
 import MeasureToLily
-
-import Data.Ratio
+import Lisp
 
 ----------------
 
@@ -48,7 +49,7 @@ nice_show label obj = do
   putStrLn "------------"
   putStrLn $ (label ++ ":\n" ++ (show obj))
 
-main = do
+main2 = do
   nice_show "input" input
   -- nice_show "input'" input'
   -- nice_show "groups" groups
@@ -57,3 +58,10 @@ main = do
   -- nice_show "groups'" groups'
   nice_show "qevents" qevents
   L.exportLily "atest" (map m_to_lily measures')
+
+---------------------
+
+main = do
+  s <- getContents
+  putStrLn $ show (parseLisp s)
+  
