@@ -19,7 +19,7 @@ itest:
 runmain:
 	rm -f *.o *.hi
 	ghc -fglasgow-exts -fhpc --make Main.hs -o main
-	./main <examples/simple-format-01.lisp
+	./main <examples/sample-input.lisp
 	hpc markup --destdir=main-coverage main 2>/dev/null >/dev/null
 	hpc report main
 
