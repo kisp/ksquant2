@@ -21,7 +21,7 @@ end
 make "clean"
 make "build"
 make "doc"
-safe_system "mv 'dist/doc/html/haskell-quant/haskell-quant' #{ENV['CC_BUILD_ARTIFACTS']}/doc" if ENV['CC_BUILD_ARTIFACTS']
+safe_system "mv 'dist/doc/html/ksquant2/ksquant2' #{ENV['CC_BUILD_ARTIFACTS']}/doc" if ENV['CC_BUILD_ARTIFACTS']
 
 make "test"
 safe_system "ln -s hpc_index.html test-coverage/index.html"
