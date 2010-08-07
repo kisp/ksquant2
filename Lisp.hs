@@ -27,7 +27,7 @@ parseKeyword :: Parser LispVal
 parseKeyword =
     do
       char ':'
-      s <- many1 (letter <|> symbol)
+      s <- many1 (letter <|> symbol <|> digit)
       return (LispKeyword (map toUpper s))
 
 parseInteger :: Parser LispVal
