@@ -3,7 +3,7 @@ module Lisp (LispVal(..)
             ,parseLisp
             )
 where
-import Text.ParserCombinators.Parse
+import Text.ParserCombinators.Parsec
 import Data.Char (toUpper)
 import Data.List (intercalate)
 
