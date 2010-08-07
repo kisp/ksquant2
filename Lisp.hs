@@ -7,11 +7,13 @@ module Lisp (LispVal(..)
             ,cons
             ,car
             ,cdr
+            ,propertyListP
+            ,getf
             )
 where
 import Text.ParserCombinators.Parsec
 import Data.Char (toUpper)
-import Data.List (intercalate)
+import Data.List (intercalate,elemIndex)
 
 data LispVal = LispInteger Integer
              | LispKeyword String
@@ -127,3 +129,21 @@ mapcar' _ (LispList []) = []
 mapcar' f xs@(LispList _) = (f a) : (mapcar' f b)
     where a = car xs
           b = cdr xs
+
+keywordp (LispKeyword _) = True
+keywordp _ = False
+
+propertyListP (LispList xs) = (even . length) xs &&
+                              all keywordp (everySecond xs)
+    where everySecond [] = []
+          everySecond (a:b:ys) = a : (everySecond ys) 
+propertyListP _ = False
+
+getf :: LispVal -> LispVal -> Maybe LispVal
+getf xs@(LispList _) field | propertyListP xs =
+                               let xs' = (fromLispList xs)
+                               in do
+                                 index <- elemIndex field xs'
+                                 return (xs'!!(index+1))
+getf x y =
+    error ("getf `" ++ (show x) ++ "' to `" ++ (show y) ++ "'")

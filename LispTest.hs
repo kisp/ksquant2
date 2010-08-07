@@ -67,4 +67,17 @@ lisp3 = TestList
          printLisp (LispList [])
         ,"T" ~=?
          printLisp (LispSymbol "T")
+        ,True ~=?
+         propertyListP (LispList [LispKeyword "FDS",LispInteger 1])
+        ,False ~=?
+         propertyListP (LispList [LispKeyword "FDS"])
+        ,False ~=?
+         propertyListP (LispList [LispInteger 1, LispInteger 2])
+        ,False ~=?
+         propertyListP (LispInteger 1)
+        ,(LispInteger 1) ~=?
+         case (getf (LispList [LispKeyword "FDS",LispInteger 1]) (LispKeyword "FDS")) of
+           Just x -> x
+        ,Nothing ~=?
+         getf (LispList [LispKeyword "FDS",LispInteger 1]) (LispKeyword "BAR")
         ]
