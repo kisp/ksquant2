@@ -10,5 +10,5 @@ Cabal-Version:       >=1.2
 
 Executable haskell-quant
   Main-is:           Main.hs
-  Build-Depends:     base, filepath, directory, process
+  Build-Depends:     base, filepath, directory, process, parsec
   Extensions: MultiParamTypeClasses, FunctionalDependencies, FlexibleInstances, TypeSynonymInstances

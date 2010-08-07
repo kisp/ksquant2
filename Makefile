@@ -30,7 +30,7 @@ clean:
 # ----------------------------------------------------------------
 
 configure: 
-	runghc Setup.hs configure
+	runghc Setup.hs configure --user
 
 doc: configure
 	runghc Setup.hs haddock --executables
