@@ -46,6 +46,12 @@ lisp2 = TestList
         ,[(LispInteger 1)] ~=?
          case (parseLisp "1 ") of
            Right x -> x
+        ,[(LispFloat 0.5)] ~=?
+         case (parseLisp "1/2") of
+           Right x -> x
+        ,[(LispFloat (-0.1))] ~=?
+         case (parseLisp "-1/10") of
+           Right x -> x
         ]
 
 lisp3 = TestList

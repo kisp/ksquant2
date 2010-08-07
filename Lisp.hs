@@ -48,6 +48,18 @@ parseFloat =
       ds2 <- many1 digit
       return $ (LispFloat . (*sign) . read) (ds ++ [dot] ++ ds2)
 
+parseRatio :: Parser LispVal
+parseRatio =
+    do
+      sign <- (char '-' >> return (-1)) <|>
+              return 1
+      numerator <- many1 digit
+      char '/'
+      denominator <- many1 digit
+      numerator' <- return (read numerator)
+      denominator' <- return (read denominator)
+      return $ (LispFloat . (*sign)) (numerator' / denominator')
+
 parseList :: Parser LispVal
 parseList =
     do
@@ -60,6 +72,7 @@ parseVal :: Parser LispVal
 parseVal = parseKeyword <|>
            parseList <|>
            (try parseFloat) <|>
+           (try parseRatio) <|>
            parseInteger
 
 parseValsAndEof = do
