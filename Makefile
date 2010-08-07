@@ -12,6 +12,10 @@ test:
 	hpc markup --destdir=test-coverage test 2>/dev/null >/dev/null
 	hpc report test
 
+.PHONY: itest
+itest:
+	ghc -fglasgow-exts --make Test.hs -o test
+	./test
 
 runmain:
 	rm -f *.o *.hi

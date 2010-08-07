@@ -9,6 +9,7 @@ import Data.List (intercalate)
 
 data LispVal = LispInteger Integer
              | LispKeyword String
+             | LispSymbol String
              | LispFloat Float
              | LispList [LispVal]
              deriving (Show, Eq)
@@ -18,6 +19,7 @@ printLisp :: LispVal -> String
 printLisp (LispInteger x) = show x
 printLisp (LispFloat x) = show x
 printLisp (LispKeyword x) = ":" ++ x
+printLisp (LispSymbol x) = x
 printLisp (LispList xs) =
     "(" ++ (intercalate " " (map printLisp xs)) ++ ")"
 
@@ -29,6 +31,12 @@ parseKeyword =
       char ':'
       s <- many1 (letter <|> symbol <|> digit)
       return (LispKeyword (map toUpper s))
+
+parseSymbol :: Parser LispVal
+parseSymbol =
+    do
+      s <- many1 (letter <|> symbol <|> digit)
+      return (LispSymbol (map toUpper s))
 
 parseInteger :: Parser LispVal
 parseInteger =
@@ -73,7 +81,8 @@ parseVal = parseKeyword <|>
            parseList <|>
            (try parseFloat) <|>
            (try parseRatio) <|>
-           parseInteger
+           parseInteger <|>
+           parseSymbol
 
 parseValsAndEof = do
   skipMany space

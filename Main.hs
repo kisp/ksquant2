@@ -1,6 +1,7 @@
 module Main where
 
 import Data.Ratio
+import Data.List
 
 import qualified Lily as L
 import Input
@@ -63,5 +64,6 @@ main2 = do
 
 main = do
   s <- getContents
-  putStrLn $ show (parseLisp s)
+  putStrLn $ case (parseLisp s) of
+               Right s -> intercalate "\n" (map printLisp s)
   

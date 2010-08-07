@@ -54,6 +54,9 @@ lisp2 = TestList
         ,[(LispFloat (-0.1))] ~=?
          case (parseLisp "-1/10") of
            Right x -> x
+        ,[(LispSymbol "T")] ~=?
+         case (parseLisp "t") of
+           Right x -> x
         ]
 
 lisp3 = TestList
@@ -62,4 +65,6 @@ lisp3 = TestList
          printLisp (LispList [LispKeyword "FDS",LispInteger 1,LispFloat 2.3])
         ,"()" ~=?
          printLisp (LispList [])
+        ,"T" ~=?
+         printLisp (LispSymbol "T")
         ]
