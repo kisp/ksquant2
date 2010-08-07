@@ -31,7 +31,7 @@ printLisp (LispSymbol x) = x
 printLisp (LispList xs) =
     "(" ++ (intercalate " " (map printLisp xs)) ++ ")"
 
-symbol = oneOf "/!$%"
+symbol = oneOf "/!$%-"
 
 parseKeyword :: Parser LispVal
 parseKeyword =

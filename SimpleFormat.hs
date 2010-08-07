@@ -14,7 +14,6 @@ data Voice = Voice { voiceEvents :: [Event] }
            deriving Show
 data Event = Chord Time
            | Rest Time
-           | EndMarker Time
            deriving Show
 
 sexp2simpleFormat :: LispVal -> Score

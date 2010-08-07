@@ -63,8 +63,12 @@ main2 = do
 
 ---------------------
 
+getSimple x = case getf x (LispKeyword "SIMPLE") of
+                Just s -> s
+                Nothing -> error "Could not find :simple"
+
 main = do
   s <- getContents
-  putStrLn $ case (parseLisp s) of
-               Right s -> intercalate "\n" (map (show . sexp2simpleFormat) s)
-  
+  case (parseLisp s) of
+    Right [s] -> (print . sexp2simpleFormat . getSimple) s
+    Left err -> do { print err ; error "parse error" }
