@@ -25,6 +25,8 @@ lisp2 = TestList
                                    Right x -> x
         ,[(LispKeyword "BAR")] ~=? case (parseLisp ":bar") of
                                    Right x -> x
+        ,[(LispKeyword "F/123")] ~=? case (parseLisp ":f/123") of
+                                   Right x -> x
         ,[(LispList [LispInteger 1])] ~=?
          case (parseLisp "(1)") of
            Right x -> x
