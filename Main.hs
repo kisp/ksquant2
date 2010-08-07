@@ -51,7 +51,7 @@ nice_show label obj = do
   putStrLn "------------"
   putStrLn $ (label ++ ":\n" ++ (show obj))
 
-main2 = do
+main = do
   nice_show "input" input
   -- nice_show "input'" input'
   -- nice_show "groups" groups
@@ -67,7 +67,7 @@ getSimple x = case getf x (LispKeyword "SIMPLE") of
                 Just s -> s
                 Nothing -> error "Could not find :simple"
 
-main = do
+main2 = do
   s <- getContents
   case (parseLisp s) of
     Right [s] -> (print . sexp2simpleFormat . getSimple) s

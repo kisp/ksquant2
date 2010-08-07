@@ -2,6 +2,7 @@ module Measure (m
                ,l
                ,d
                ,r
+               ,dur
                ,E(L,D,R)
                ,M(M)
                ,transform_leafs

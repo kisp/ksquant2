@@ -1,6 +1,7 @@
 module Lisp (LispVal(..)
             ,printLisp
             ,parseLisp
+            ,parseLisp'
             ,fromLispList
             ,mapcar
             ,mapcar'
@@ -102,6 +103,9 @@ parseValsAndEof = do
 -- |contain more than one form), or to ParseError.
 parseLisp :: [Char] -> Either ParseError [LispVal]
 parseLisp s = parse parseValsAndEof "" s
+
+parseLisp' s = case parseLisp s of
+                 Right xs -> LispList xs
 
 ----------------------------------------------
 
