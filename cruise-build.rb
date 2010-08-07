@@ -14,7 +14,7 @@ $counter = 0
 def make(target)
   $counter += 1
   name = "#{$counter}-make-#{target}.log"
-  safe_system "make #{target} >#{name} 2>&1; touch #{name}"
+  safe_system "make #{target} >#{name} 2>&1 && touch #{name}"
   safe_system "mv #{name} #{ENV['CC_BUILD_ARTIFACTS']}/#{name}"
 end
 
