@@ -9,6 +9,7 @@ import qualified Interval as Iv
 import qualified Measure as M
 import MeasureToLily
 import Lisp
+import SimpleFormat
 
 ----------------
 
@@ -65,5 +66,5 @@ main2 = do
 main = do
   s <- getContents
   putStrLn $ case (parseLisp s) of
-               Right s -> intercalate "\n" (map printLisp s)
+               Right s -> intercalate "\n" (map (show . sexp2simpleFormat) s)
   

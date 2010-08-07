@@ -1,6 +1,5 @@
 all:
-	ghc -fglasgow-exts --make Main.hs
-	./Main
+	ghc -fglasgow-exts --make Main.hs	
 
 .PHONY: test
 test:

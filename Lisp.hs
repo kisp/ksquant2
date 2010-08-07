@@ -1,6 +1,12 @@
 module Lisp (LispVal(..)
             ,printLisp
             ,parseLisp
+            ,fromLispList
+            ,mapcar
+            ,mapcar'
+            ,cons
+            ,car
+            ,cdr
             )
 where
 import Text.ParserCombinators.Parsec
@@ -94,3 +100,30 @@ parseValsAndEof = do
 -- |contain more than one form), or to ParseError.
 parseLisp :: [Char] -> Either ParseError [LispVal]
 parseLisp s = parse parseValsAndEof "" s
+
+----------------------------------------------
+
+cons :: LispVal -> LispVal -> LispVal
+cons x (LispList ys) = LispList (x:ys)
+cons x y             =
+    error ("cons `" ++ (show x) ++ "' to `" ++ (show y) ++ "'")
+
+car :: LispVal -> LispVal
+car (LispList (x:_)) = x
+
+cdr :: LispVal -> LispVal
+cdr (LispList (_:xs)) = LispList xs
+
+fromLispList (LispList xs) = xs
+
+mapcar :: (LispVal -> LispVal) -> LispVal -> LispVal
+mapcar _ (LispList []) = LispList []
+mapcar f xs@(LispList _) = (f a) `cons` (mapcar f b)
+    where a = car xs
+          b = cdr xs
+
+mapcar' :: (LispVal -> a) -> LispVal -> [a]
+mapcar' _ (LispList []) = []
+mapcar' f xs@(LispList _) = (f a) : (mapcar' f b)
+    where a = car xs
+          b = cdr xs
