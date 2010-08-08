@@ -23,30 +23,17 @@ rational_to_time x = fromRational x
 rational_pair_to_time_pair (x,y) = (rational_to_time x, rational_to_time y)
 
 ----------------
-measures = M.measures_with_beats (take 4 (repeat (4,4))) (repeat 60)
-input = [Event 0 0.3333333, Event 1.25 2.25, Event 2.25 4, Event 5 7.33333333]
 divs = [1..8] :: [Int]
 
 ----------------
 
-input' = Iv.ascending_intervals input
-
-beats_intervals = Iv.ascending_intervals (map rational_pair_to_time_pair (M.measures_leaf_intervals measures))
-
-points = Iv.ascending_intervals2points input'
-groups = Iv.groupPointsByIntervalls beats_intervals points
-
-best_divs = (map (uncurry (Iv.best_div divs)) (zip (Iv.get_ascending_intervals beats_intervals) groups))
-
-measures' = M.measures_divide_leafs measures (map toInteger best_divs)
-
-quant_grid = (M.measures_leaf_intervals measures')
-quant_grid' = Iv.ascending_intervals (map rational_pair_to_time_pair quant_grid)
+-- quant_grid = (M.measures_leaf_intervals measures')
+-- quant_grid' = Iv.ascending_intervals (map rational_pair_to_time_pair quant_grid)
 -- groups' = Iv.groupPointsByIntervalls quant_grid' points
 
-make_qevent ivs ((start_i,end_i),e) = QEvent (Iv.start (ivs!!start_i)) (Iv.start (ivs!!end_i)) [e]
+-- make_qevent ivs ((start_i,end_i),e) = QEvent (Iv.start (ivs!!start_i)) (Iv.start (ivs!!end_i)) [e]
 
-qevents = Iv.ascending_intervals (map ((make_qevent quant_grid) . (Iv.quantize_iv quant_grid')) input)
+-- qevents = Iv.ascending_intervals (map ((make_qevent quant_grid) . (Iv.quantize_iv quant_grid')) input)
 
 ----------------
 
@@ -54,14 +41,14 @@ nice_show label obj = do
   putStrLn "------------"
   putStrLn $ (label ++ ":\n" ++ (show obj))
 
-main2 = do
-  nice_show "input" input
+-- main2 = do
+  -- nice_show "input" input
   -- nice_show "input'" input'
   -- nice_show "groups" groups
   -- nice_show "best_divs" best_divs
-  nice_show "quant_grid" quant_grid
+  -- nice_show "quant_grid" quant_grid
   -- nice_show "groups'" groups'
-  nice_show "qevents" qevents
+  -- nice_show "qevents" qevents
   -- L.exportLily "atest" (map m_to_lily measures')
 
 ---------------------
@@ -74,8 +61,16 @@ getSimple x = case getf x (LispKeyword "SIMPLE") of
 type MeasureStructure = M.Voice
 
 quantifyVoice :: MeasureStructure -> SF2.Voice -> M.Voice
--- TODO xxx
-quantifyVoice a b = ms
+quantifyVoice ms v =
+    let measures = A.voiceMeasures ms
+        input = A.voiceMeasures v
+        input' = Iv.ascending_intervals input
+        beats_intervals = Iv.ascending_intervals (map rational_pair_to_time_pair (M.measures_leaf_intervals measures))
+        points = Iv.ascending_intervals2points input'
+        groups = Iv.groupPointsByIntervalls beats_intervals points
+        best_divs = (map (uncurry (Iv.best_div divs)) (zip (Iv.get_ascending_intervals beats_intervals) groups))
+        measures' = M.measures_divide_leafs measures (map toInteger best_divs)
+    in A.Voice measures' 
 
 processSimpleFormat :: MeasureStructure -> Lisp.LispVal -> String
 processSimpleFormat ms s =

@@ -1,12 +1,14 @@
 module SimpleFormat2 (toSimpleFormat2
                      ,Score
                      ,Part
-                     ,Voice)
+                     ,Voice
+                     ,sampleVoice)
 where
 
 import Utils
 import qualified SimpleFormat as SF1
 import qualified AbstractScore as A
+import Interval
 
 type Time = Float
 type Start = Time
@@ -18,6 +20,10 @@ type Voice = A.Voice Event
 
 data Event = Chord Start End
            deriving Show
+
+instance Interval Event Time where
+    start (Chord s _) = s
+    end (Chord _ e) = e
 
 toSimpleFormat2 :: SF1.Score -> Score
 toSimpleFormat2 s = A.Score (map partToSimpleFormat2 (A.scoreParts s))
@@ -31,3 +37,6 @@ voiceToSimpleFormat2 v =
         startEndPairs = (neighbours (map SF1.eventStart events))
     in A.Voice $ map trans (zip events startEndPairs)
     where trans (event,(start,end)) = Chord start end
+
+sampleVoice :: Voice
+sampleVoice = A.Voice []
