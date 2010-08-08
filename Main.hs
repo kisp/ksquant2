@@ -94,4 +94,5 @@ main = do
   s <- getContents
   case (parseLisp s) of
     Right [s] -> (putStrLn . (processSimpleFormat ms) . getSimple) s
+    Right [s,expected] -> (putStrLn . (processSimpleFormat ms) . getSimple) s
     Left err -> do { print err ; error "parse error" }

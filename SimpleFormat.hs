@@ -2,6 +2,7 @@ module SimpleFormat (sexp2simpleFormat
                     ,Score
                     ,Part
                     ,Voice
+                    ,Event(..)
                     ,eventStart)
 where
 

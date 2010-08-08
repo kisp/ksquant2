@@ -36,8 +36,9 @@ voiceToSimpleFormat2 :: SF1.Voice -> Voice
 voiceToSimpleFormat2 v =
     let events = A.voiceItems v
         startEndPairs = (neighbours (map SF1.eventStart events))
-    in A.Voice $ map trans (zip events startEndPairs)
-    where trans (event,(start,end)) = Chord start end
+    in A.Voice $ concatMap trans (zip events startEndPairs)
+    where trans ((SF1.Chord _),(start,end)) = [Chord start end]
+          trans _ = []
 
 sampleVoice :: Voice
 sampleVoice = A.Voice []
