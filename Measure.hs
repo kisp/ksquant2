@@ -16,11 +16,13 @@ module Measure (m
                ,Score
                ,Part
                ,Voice
+               ,measures_tie_or_rest
                )
 where
 import Data.Ratio
 import Utils
 import qualified AbstractScore as A
+import qualified Interval as Iv
 
 isPowerOfTwo 1 = True
 isPowerOfTwo x | x > 1 = if (even x) then
@@ -186,11 +188,18 @@ measures_leaf_intervals ms = (concatMap (uncurry measure_leaf_intervals)
 -- is in an interval keep it and make it a tie if the end time is not
 -- the same as the end time of the interval
 -- TODO unfinished
-measures_tie_or_rest ms ivs =
-    map (transform_leafs trans) ms
+-- measures_tie_or_rest ms ivs =
+--     map (transform_leafs trans) ms
+--         where 
+--               trans (L dur tie) = (L dur tie)
+--               trans r@(R dur) = r
+measures_tie_or_rest ms ivs leaf_times = 
+    (fst (smap (transform_leafs' trans) ms leaf_times))
         where 
-              trans (L dur tie) = (L dur tie)
-              trans r@(R dur) = r
+              trans (L dur tie) ((start,_):leaf_times) =
+                  let restp = not (any ((flip Iv.isPointInInterval) start) ivs)
+                  in ((if restp then (r dur) else (l dur tie)), leaf_times)
+              --trans r@(R dur) ds = (r,ds)
 
 wrapWithD :: E -> E
 wrapWithD e = d (dur e) 1 [e]

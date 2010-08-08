@@ -1,5 +1,6 @@
 module Utils where
 import Data.Ratio
+import Debug.Trace
 
 neighbours list = zip list (tail list)
 
@@ -15,3 +16,5 @@ expand a b = let f = lcm (denominator a) (denominator b)
 
 expand' xs = let f = (foldl1 lcm (map denominator xs)) % 1
              in sum (map (numerator . (*f)) xs)
+
+mtr x = trace (show x) x

@@ -2,7 +2,6 @@ module MeasureToEnp where
 import qualified Measure as M
 import qualified Enp as E
 import Data.Ratio
-import Debug.Trace
 
 durs2factor xs = (foldl1 lcm (map denominator xs)) % 1
 ratio2integer r | denominator r == 1 = numerator r

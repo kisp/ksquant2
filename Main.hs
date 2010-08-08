@@ -3,6 +3,8 @@ module Main where
 import Data.Ratio
 import Data.List
 
+import Debug.Trace
+import Utils
 import qualified Lily as L
 import Input
 import qualified Interval as Iv
@@ -27,8 +29,6 @@ divs = [1..8] :: [Int]
 
 ----------------
 
--- quant_grid = (M.measures_leaf_intervals measures')
--- quant_grid' = Iv.ascending_intervals (map rational_pair_to_time_pair quant_grid)
 -- groups' = Iv.groupPointsByIntervalls quant_grid' points
 
 -- make_qevent ivs ((start_i,end_i),e) = QEvent (Iv.start (ivs!!start_i)) (Iv.start (ivs!!end_i)) [e]
@@ -63,14 +63,22 @@ type MeasureStructure = M.Voice
 quantifyVoice :: MeasureStructure -> SF2.Voice -> M.Voice
 quantifyVoice ms v =
     let measures = A.voiceItems ms
-        input = A.voiceItems v
+        input = A.voiceItems v :: [SF2.Event]
         input' = Iv.ascending_intervals input
-        beats_intervals = Iv.ascending_intervals (map rational_pair_to_time_pair (M.measures_leaf_intervals measures))
+        beats_intervals = Iv.ascending_intervals
+                          (map rational_pair_to_time_pair
+                                   (M.measures_leaf_intervals measures))
         points = Iv.ascending_intervals2points input'
         groups = Iv.groupPointsByIntervalls beats_intervals points
-        best_divs = (map (uncurry (Iv.best_div divs)) (zip (Iv.get_ascending_intervals beats_intervals) groups))
+        best_divs = (map (uncurry (Iv.best_div divs))
+                     (zip (Iv.get_ascending_intervals beats_intervals) groups))
         measures' = M.measures_divide_leafs measures (map toInteger best_divs)
-    in A.Voice measures' 
+        quant_grid = (M.measures_leaf_intervals measures')
+        quant_grid' = Iv.ascending_intervals (map rational_pair_to_time_pair quant_grid)
+        qevents = map ((make_qevent quant_grid) . (Iv.quantize_iv quant_grid')) input
+        measures'' = M.measures_tie_or_rest measures qevents quant_grid
+    in A.Voice measures''
+    where make_qevent ivs ((start_i,end_i),e) = ((Iv.start (ivs!!start_i)),(Iv.start (ivs!!end_i)))
 
 processSimpleFormat :: MeasureStructure -> Lisp.LispVal -> String
 processSimpleFormat ms s =

@@ -2,6 +2,7 @@ module SimpleFormat2 (toSimpleFormat2
                      ,Score
                      ,Part
                      ,Voice
+                     ,Event
                      ,sampleVoice)
 where
 
