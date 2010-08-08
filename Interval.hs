@@ -131,8 +131,10 @@ best_div divs iv xs = (round (fst (head (ranked_divs iv xs (map intToFloat divs)
 -- TODO implement this as a binary search
 locate_point ivs x = r (get_ascending_intervals ivs) (point x) 0
     where r (iv:ivs) x index
-              | isPointInInterval iv x = (iv,(index,index+1))
+              | isPointInInterval iv x ||
+                ((ivs == []) && (x >= end iv)) = (iv,(index,index+1))
               | otherwise = r ivs x (index+1)
+          r a b c = error $ "locate_point " ++ show a ++ " " ++ show b ++ " " ++ show c
 
 quantize_iv ivs iv = let s = start iv
                          e = end iv
