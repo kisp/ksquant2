@@ -1,10 +1,21 @@
-module Lily where
+module Lily (exportLily
+            ,Dur(..)
+            ,Elt(..)
+            ,Measure(..)
+            ,power_to_simple_dur
+            )
+where
 import Data.List
 import System.IO
 import System.Cmd
 import System.Directory
 import System.FilePath
 import Data.Ratio
+import qualified AbstractScore as A
+
+type Score = A.Score Measure
+type Part = A.Part Measure
+type Voice = A.Voice Measure
 
 -- |This represents durations without dot.
 data SimpleDur = D1 | D2 | D4 | D8 | D16 | D32 | D64 | D128
@@ -91,16 +102,18 @@ runLily path =
 
 validateMeasures xs = and (map isCorrectmeasurelength xs)
 
-exportLily name xs =
-  if validateMeasures xs then
-      let path = "/tmp" </> (replaceExtension name "ly") in
-      do
-        outh <- openFile path WriteMode
-        hPutStr outh (lilyString xs)
-        hClose outh
-        runLily path
-  else
-      error "measures are not valid"
+exportLily :: FilePath -> Score -> IO ()
+exportLily name score =
+    let xs = A.voiceMeasures $ (A.partVoices $ (A.scoreParts score)!!0)!!0
+    in if validateMeasures xs then
+           let path = "/tmp" </> (replaceExtension name "ly") in
+           do
+             outh <- openFile path WriteMode
+             hPutStr outh (lilyString xs)
+             hClose outh
+             runLily path
+       else
+           error "measures are not valid"
 
 m1 = [Measure 4 4 [Note (Dur D4 1) False, Note (Dur D8 0) True, Note (Dur D2 0) False],
       Measure 4 4 [Note (Dur D4 2) False, Note (Dur D16 0) False, Note (Dur D2 0) False],

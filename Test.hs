@@ -6,6 +6,7 @@ import Test.Runner
 
 import IntervalTest
 import LispTest
+import MeasureTest
 
 import Input
 import Interval
@@ -38,10 +39,12 @@ tests = [-- ("helloWorld value", TestRunnerTest hunitTest),
          ,("prop_isStrictlyAfter", runWithQuickCheck prop_isStrictlyAfter)
          ,("prop_groupPointsByIntervalls", runWithQuickCheck prop_groupPointsByIntervalls)
          ,("prop_ascending_intervals2points", runWithQuickCheck prop_ascending_intervals2points)
--- LispTest
+         -- LispTest
          ,("lisp1", TestRunnerTest lisp1)
          ,("lisp2", TestRunnerTest lisp2)
          ,("lisp3", TestRunnerTest lisp3)
+         -- Measure Test
+         ,("measure1", TestRunnerTest measure1)
         ]
 main :: IO ()
 main = testRunnerMain tests

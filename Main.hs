@@ -51,7 +51,7 @@ nice_show label obj = do
   putStrLn "------------"
   putStrLn $ (label ++ ":\n" ++ (show obj))
 
-main = do
+main2 = do
   nice_show "input" input
   -- nice_show "input'" input'
   -- nice_show "groups" groups
@@ -59,7 +59,7 @@ main = do
   nice_show "quant_grid" quant_grid
   -- nice_show "groups'" groups'
   nice_show "qevents" qevents
-  L.exportLily "atest" (map m_to_lily measures')
+  -- L.exportLily "atest" (map m_to_lily measures')
 
 ---------------------
 
@@ -67,7 +67,7 @@ getSimple x = case getf x (LispKeyword "SIMPLE") of
                 Just s -> s
                 Nothing -> error "Could not find :simple"
 
-main2 = do
+main = do
   s <- getContents
   case (parseLisp s) of
     Right [s] -> (print . sexp2simpleFormat . getSimple) s

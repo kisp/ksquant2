@@ -11,7 +11,9 @@ module Measure (m
                ,measures_with_beats
                ,leaf_durs
                ,leaf_effective_durs
-               ,measures_leaf_intervals)
+               ,measures_leaf_intervals
+               ,wrapWithD
+               )
 where
 import Data.Ratio
 import Utils
@@ -46,7 +48,7 @@ type Timesig = (Integer,Integer)
 type Tempo = Rational
 
 data M = M Timesig Tempo E
-       deriving Show
+       deriving (Show,Eq)
 
 mdiv (M _ _ e) = e
 
@@ -57,7 +59,7 @@ data E =
        | L Rational Bool
 --         dur
        | R Rational
-         deriving Show
+         deriving (Show,Eq)
 
 dur (D d _ _) = d
 dur (L d _)   = d
@@ -115,9 +117,8 @@ instance Transformable E E where
 measures_divide_leafs ms divs =
     (fst (smap (transform_leafs' trans) ms divs))
         where 
-              trans (L dur tie) (d':ds) =
-                  let n = d'
-                      r = div_to_ratio n
+              trans (L dur tie) (n:ds) =
+                  let r = if (notableDur (dur / (n%1))) then 1 else div_to_ratio n
                   in (d dur r (take (fromInteger n) (repeat (l ((dur/(n%1)/r)) False))),
                         ds)
               trans r@(R dur) ds = (r,ds)
@@ -181,6 +182,9 @@ measures_tie_or_rest ms ivs =
         where 
               trans (L dur tie) = (L dur tie)
               trans r@(R dur) = r
+
+wrapWithD :: E -> E
+wrapWithD e = d (dur e) 1 [e]
 
 ---------------------------------------------------------
 

@@ -2,6 +2,7 @@ module Lisp (LispVal(..)
             ,printLisp
             ,parseLisp
             ,parseLisp'
+            ,readLisp
             ,fromLispList
             ,mapcar
             ,mapcar'
@@ -10,6 +11,9 @@ module Lisp (LispVal(..)
             ,cdr
             ,propertyListP
             ,getf
+            ,Sexp
+            ,toSexp
+            ,fromSexp
             )
 where
 import Text.ParserCombinators.Parsec
@@ -21,7 +25,10 @@ data LispVal = LispInteger Integer
              | LispSymbol String
              | LispFloat Float
              | LispList [LispVal]
-             deriving (Show, Eq)
+             deriving (Eq)
+
+instance Show LispVal where
+    show x = "readLisp \"" ++ printLisp x ++ "\""
 
 -- |Print a LispVal to String.
 printLisp :: LispVal -> String
@@ -107,6 +114,9 @@ parseLisp s = parse parseValsAndEof "" s
 parseLisp' s = case parseLisp s of
                  Right xs -> LispList xs
 
+readLisp s = case parseLisp s of
+                 Right [x] -> x
+
 ----------------------------------------------
 
 cons :: LispVal -> LispVal -> LispVal
@@ -151,3 +161,13 @@ getf xs@(LispList _) field | propertyListP xs =
                                  return (xs'!!(index+1))
 getf x y =
     error ("getf `" ++ (show x) ++ "' to `" ++ (show y) ++ "'")
+
+----------------------------------------------------
+
+class Sexp a where
+    toSexp :: a -> LispVal
+    fromSexp :: LispVal -> a
+
+instance Sexp Integer where
+    toSexp x = LispInteger x
+    fromSexp (LispInteger x) = x
