@@ -14,8 +14,7 @@
 			  (forbidden-divs (7)))
   :non-generic t
   (let ((*default-pathname-defaults* (asdf:component-pathname (asdf:find-system :ksquant2))))
-    (with-open-stream (io (sys:open-pipe (namestring (merge-pathnames "bin/ksquant2-kernel"))
-					 :direction :io))
+    (with-open-file (out "/tmp/ksquant2" :direction :output :if-exists :supersede)
       (with-standard-io-syntax
 	(write
 	 `(:simple
@@ -25,8 +24,10 @@
 	   :scale ,scale
 	   :max-div ,max-div
 	   :forbidden-divs ,forbidden-divs)
-	 :stream io)
-	(force-output io)
-	(ccl::make-score (read io))))))
+	 :stream out)))
+    (assert (zerop (sys:call-system (format nil "'~A' </tmp/ksquant2 >/tmp/ksquant2.out"
+					    (namestring (merge-pathnames "bin/ksquant2-kernel"))))))
+    (with-open-file (in "/tmp/ksquant2.out")
+      (ccl::make-score (read in)))))
 
 (install-menu ksquant2)
