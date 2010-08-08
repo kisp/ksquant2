@@ -1,8 +1,13 @@
-module SimpleFormat (sexp2simpleFormat)
+module SimpleFormat (sexp2simpleFormat
+                    ,Score
+                    ,Part
+                    ,Voice
+                    ,eventStart)
 where
 
 import Utils
 import Lisp
+import Interval
 
 import qualified AbstractScore as A
 
@@ -15,6 +20,10 @@ type Voice = A.Voice Event
 data Event = Chord Time
            | Rest Time
            deriving Show
+
+-- TODO can we use point from Interval?
+eventStart (Chord x) = x
+eventStart (Rest x) = x
 
 sexp2simpleFormat :: LispVal -> Score
 sexp2simpleFormat = sexp2score

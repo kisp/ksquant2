@@ -13,10 +13,14 @@ module Measure (m
                ,leaf_effective_durs
                ,measures_leaf_intervals
                ,wrapWithD
+               ,Score
+               ,Part
+               ,Voice
                )
 where
 import Data.Ratio
 import Utils
+import qualified AbstractScore as A
 
 isPowerOfTwo 1 = True
 isPowerOfTwo x | x > 1 = if (even x) then
@@ -46,6 +50,10 @@ notableDur x = h (numerator x) (denominator x)
 
 type Timesig = (Integer,Integer)
 type Tempo = Rational
+
+type Score = A.Score M
+type Part = A.Part M
+type Voice = A.Voice M
 
 data M = M Timesig Tempo E
        deriving (Show,Eq)

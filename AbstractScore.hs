@@ -2,7 +2,8 @@ module AbstractScore
     (Score(..)
     ,Part(..)
     ,Voice(..)
-    ,completeToScore)
+    ,completeToScore
+    ,mapVoices)
 where
 import Lisp
       
@@ -15,15 +16,19 @@ data Voice a = Voice { voiceMeasures :: [a] }
 
 class AbstractScore c a where
     completeToScore :: (c a) -> Score a
+    mapVoices :: (Voice a -> Voice b) -> (c a) -> (c b)
 
 instance AbstractScore Score a where
     completeToScore = id
+    mapVoices f x = Score $ map (mapVoices f) (scoreParts x)
 
 instance AbstractScore Part a where
     completeToScore x = Score [x]
+    mapVoices f x = Part $ map (mapVoices f) (partVoices x)
 
 instance AbstractScore Voice a where
     completeToScore x = completeToScore (Part [x])
+    mapVoices f x = f x
 
 -- Functor
 instance Functor Score where
@@ -34,9 +39,6 @@ instance Functor Part where
 
 instance Functor Voice where
     fmap f x = Voice $ f `fmap` voiceMeasures x
-
--- score2sexp :: Score -> LispVal
--- score2sexp e = LispList $ map part2sexp (A.scoreParts e)
 
 -- Sexp
 instance (Sexp a) => Sexp (Score a) where

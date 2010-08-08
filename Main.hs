@@ -8,8 +8,12 @@ import Input
 import qualified Interval as Iv
 import qualified Measure as M
 import MeasureToLily
+import MeasureToEnp
 import Lisp
-import SimpleFormat
+import qualified SimpleFormat as SF
+import qualified SimpleFormat2 as SF2
+import qualified AbstractScore as A
+import qualified Enp as Enp
 
 ----------------
 
@@ -19,9 +23,8 @@ rational_to_time x = fromRational x
 rational_pair_to_time_pair (x,y) = (rational_to_time x, rational_to_time y)
 
 ----------------
-
-input = [Event 0 0.3333333, Event 1.25 2.25, Event 2.25 4, Event 5 7.33333333]
 measures = M.measures_with_beats (take 4 (repeat (4,4))) (repeat 60)
+input = [Event 0 0.3333333, Event 1.25 2.25, Event 2.25 4, Event 5 7.33333333]
 divs = [1..8] :: [Int]
 
 ----------------
@@ -67,8 +70,25 @@ getSimple x = case getf x (LispKeyword "SIMPLE") of
                 Just s -> s
                 Nothing -> error "Could not find :simple"
 
+
+type MeasureStructure = M.Voice
+
+quantifyVoice :: MeasureStructure -> SF2.Voice -> M.Voice
+-- TODO xxx
+quantifyVoice a b = ms
+
+processSimpleFormat :: MeasureStructure -> Lisp.LispVal -> String
+processSimpleFormat ms s =
+    let sf1 = SF.sexp2simpleFormat s :: SF.Score
+        sf2 = SF2.toSimpleFormat2 sf1 :: SF2.Score
+        trans = (quantifyVoice ms) :: SF2.Voice -> M.Voice
+        enp = fmap m_to_enp (A.mapVoices trans sf2) :: Enp.Score
+    in printLisp (Enp.score2sexp enp)
+
+ms = A.Voice $ M.measures_with_beats (take 4 (repeat (4,4))) (repeat 60)
+
 main = do
   s <- getContents
   case (parseLisp s) of
-    Right [s] -> (print . sexp2simpleFormat . getSimple) s
+    Right [s] -> (putStrLn . (processSimpleFormat ms) . getSimple) s
     Left err -> do { print err ; error "parse error" }
