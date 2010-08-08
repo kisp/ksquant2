@@ -11,8 +11,7 @@ import System.Cmd
 import Data.Ratio
 import qualified AbstractScore as A
 
-
-ms = M.measures_with_beats [(4,4),(3,4)] (repeat 60)
+ms = M.measures_with_beats [(5,8),(13,4)] (repeat 60)
 score = A.completeToScore (A.Voice ms)
 -- m = M.measures_divide_leafs (M.measures_with_beats [(4,4)] [60]) (repeat 1)
 -- m = [(M.m (4,4) 60 (M.l (4%4) False))]

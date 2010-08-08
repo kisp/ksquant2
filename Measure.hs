@@ -73,8 +73,8 @@ m timesig tempo d = if not(check timesig tempo d) then
     where check timesig tempo d = (dur d) == (timesig_dur timesig)
 
 l d tie = if not(check) then
-          error "l d tie not valid"
-      else L d tie
+              error $ "cannot construct L from " ++ show d ++ " " ++ show tie
+          else L d tie
     where check = notableDur d
 
 r d = if not(check) then
@@ -127,7 +127,8 @@ measures_with_beats timesigs tempos =
     let divs = map fst timesigs
     in measures_divide_leafs (map mes (zip timesigs tempos)) divs
     where mes (timesig,tempo) =
-              (m timesig tempo (l (timesig_dur timesig) False))
+              -- use L here, so that we are allowed to have a duration of e.g. 5/4
+              (m timesig tempo (L (timesig_dur timesig) False))
 
 leaf_durs :: E -> [Rational]
 leaf_durs (L d _) = [d]
