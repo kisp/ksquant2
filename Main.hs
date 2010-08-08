@@ -76,9 +76,9 @@ quantifyVoice ms v =
         quant_grid = (M.measures_leaf_intervals measures')
         quant_grid' = Iv.ascending_intervals (map rational_pair_to_time_pair quant_grid)
         qevents = map ((make_qevent quant_grid) . (Iv.quantize_iv quant_grid')) input
-        measures'' = M.measures_tie_or_rest measures qevents quant_grid
+        measures'' = M.measures_tie_or_rest measures' qevents quant_grid
     in A.Voice measures''
-    where make_qevent ivs ((start_i,end_i),e) = ((Iv.start (ivs!!start_i)),(Iv.start (ivs!!end_i)))
+    where make_qevent ivs ((start_i,end_i),e) = ((Iv.start (ivs!!start_i)),(Iv.end (ivs!!start_i)))
 
 processSimpleFormat :: MeasureStructure -> Lisp.LispVal -> String
 processSimpleFormat ms s =
