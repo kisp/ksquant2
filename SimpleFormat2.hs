@@ -33,7 +33,7 @@ partToSimpleFormat2 s = A.Part (map voiceToSimpleFormat2 (A.partVoices s))
 
 voiceToSimpleFormat2 :: SF1.Voice -> Voice
 voiceToSimpleFormat2 v =
-    let events = A.voiceMeasures v
+    let events = A.voiceItems v
         startEndPairs = (neighbours (map SF1.eventStart events))
     in A.Voice $ map trans (zip events startEndPairs)
     where trans (event,(start,end)) = Chord start end

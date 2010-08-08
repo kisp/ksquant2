@@ -104,7 +104,7 @@ validateMeasures xs = and (map isCorrectmeasurelength xs)
 
 exportLily :: FilePath -> Score -> IO ()
 exportLily name score =
-    let xs = A.voiceMeasures $ (A.partVoices $ (A.scoreParts score)!!0)!!0
+    let xs = A.voiceItems $ (A.partVoices $ (A.scoreParts score)!!0)!!0
     in if validateMeasures xs then
            let path = "/tmp" </> (replaceExtension name "ly") in
            do

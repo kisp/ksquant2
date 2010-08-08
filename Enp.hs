@@ -52,7 +52,7 @@ part2sexp e = LispList $ map voice2sexp (A.partVoices e)
 
 voice2sexp :: Voice -> LispVal
 voice2sexp e = 
-    LispList $ (map measure2sexp (A.voiceMeasures e)) ++
+    LispList $ (map measure2sexp (A.voiceItems e)) ++
              fromLispList (parseLisp' ":instrument NIL :staff :treble-staff")
 
 measure2sexp :: Measure -> LispVal

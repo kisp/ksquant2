@@ -11,7 +11,7 @@ data Score a = Score { scoreParts :: [Part a] }
            deriving Show
 data Part a = Part { partVoices :: [Voice a] }
            deriving Show
-data Voice a = Voice { voiceMeasures :: [a] }
+data Voice a = Voice { voiceItems :: [a] }
            deriving Show
 
 class AbstractScore c a where
@@ -38,7 +38,7 @@ instance Functor Part where
     fmap f x = Part $ map (fmap f) (partVoices x)
 
 instance Functor Voice where
-    fmap f x = Voice $ f `fmap` voiceMeasures x
+    fmap f x = Voice $ f `fmap` voiceItems x
 
 -- Sexp
 instance (Sexp a) => Sexp (Score a) where
@@ -50,6 +50,6 @@ instance (Sexp a) => Sexp (Part a) where
     fromSexp s = error ""
 
 instance (Sexp a) => Sexp (Voice a) where
-    toSexp s = LispList $ map toSexp (voiceMeasures s)
+    toSexp s = LispList $ map toSexp (voiceItems s)
     fromSexp s = error ""
 

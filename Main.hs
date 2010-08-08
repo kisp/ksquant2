@@ -62,8 +62,8 @@ type MeasureStructure = M.Voice
 
 quantifyVoice :: MeasureStructure -> SF2.Voice -> M.Voice
 quantifyVoice ms v =
-    let measures = A.voiceMeasures ms
-        input = A.voiceMeasures v
+    let measures = A.voiceItems ms
+        input = A.voiceItems v
         input' = Iv.ascending_intervals input
         beats_intervals = Iv.ascending_intervals (map rational_pair_to_time_pair (M.measures_leaf_intervals measures))
         points = Iv.ascending_intervals2points input'
