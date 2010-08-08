@@ -14,7 +14,7 @@
     ;; (with-standard-io-syntax
     ;;   (write data :stream out))
     (prin1 data out))
-  (and (not (run-shell-command "Main <tmp >out"))
+  (and (not (run-shell-command "./Main <tmp >out"))
        (equal expected (with-open-file (in "out") (read in)))))
 
 (defun report-on-file (path)
