@@ -7,6 +7,7 @@ import Test.Runner
 import IntervalTest
 import LispTest
 import MeasureTest
+import MeasureToEnpTest
 
 import Input
 import Interval
@@ -45,6 +46,7 @@ tests = [-- ("helloWorld value", TestRunnerTest hunitTest),
          ,("lisp3", TestRunnerTest lisp3)
          -- Measure Test
          ,("measure1", TestRunnerTest measure1)
-        ]
+         ,("mtoenp1", TestRunnerTest mtoenp1)
+         ]
 main :: IO ()
 main = testRunnerMain tests

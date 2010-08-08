@@ -21,12 +21,12 @@ type Part = A.Part Measure
 type Voice = A.Voice Measure
 
 data Measure = Measure Timesig [Elt]
-           deriving Show
+           deriving (Show, Eq)
 
 data Elt = Chord Dur
            | Rest Dur
            | Div Dur [Elt]
-           deriving Show
+           deriving (Show, Eq)
 
 dur (Chord d) = d
 dur (Rest d) = d
@@ -35,7 +35,7 @@ dur (Div d _) = d
 scaleElt :: Integer -> Elt -> Elt
 scaleElt n (Chord d) = (Chord (n * d))
 scaleElt n (Rest d) = (Rest (n * d))
-scaleElt n (Div d es ) = (Div (n * d) es)
+scaleElt n (Div d es) = (Div (n * d) es)
 
 makeMeasure :: Timesig -> [Elt] -> Measure
 makeMeasure (n,d) es =
