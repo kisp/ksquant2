@@ -16,6 +16,10 @@ itest:
 	ghc -fglasgow-exts --make Test.hs -o test
 	./test
 
+.PHONY: shell-tests
+shell-tests: all
+	clisp -norc lisp/test-runner.lisp
+
 runmain:
 	rm -f *.o *.hi
 	ghc -fglasgow-exts -fhpc --make Main.hs -o main

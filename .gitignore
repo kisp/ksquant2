@@ -10,3 +10,5 @@ test.tix
 .DS_Store
 *.clufasl
 *.xfasl
+*.fas
+*.lib

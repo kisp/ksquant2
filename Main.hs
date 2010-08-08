@@ -80,7 +80,7 @@ processSimpleFormat ms s =
         enp = fmap m_to_enp (A.mapVoices trans sf2) :: Enp.Score
     in printLisp (Enp.score2sexp enp)
 
-ms = A.Voice $ M.measures_with_beats (take 4 (repeat (4,4))) (repeat 60)
+ms = A.Voice $ M.measures_with_beats (take 1 (repeat (4,4))) (repeat 60)
 
 main = do
   s <- getContents
