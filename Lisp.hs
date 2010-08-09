@@ -15,7 +15,8 @@ module Lisp (LispVal(..)
             ,toSexp
             ,fromSexp
             ,listp
-            ,atom)
+            ,atom
+            ,minus)
 where
 import Text.ParserCombinators.Parsec
 import Data.Char (toUpper)
@@ -178,6 +179,10 @@ getf xs@(LispList _) field | propertyListP xs =
                                  return (xs'!!(index+1))
 getf x y =
     error ("getf `" ++ (show x) ++ "' to `" ++ (show y) ++ "'")
+
+minus (LispInteger x) = LispInteger (-x)
+minus (LispFloat x) = LispFloat (-x)
+minus _ = error "minus"
 
 ----------------------------------------------------
 

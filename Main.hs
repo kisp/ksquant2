@@ -63,7 +63,7 @@ quantifyVoice ms v =
         measures' = M.measures_divide_leafs measures (map toInteger best_divs)
         quant_grid = (M.measures_leaf_intervals measures')
         quant_grid' = Iv.ascending_intervals (map rational_pair_to_time_pair quant_grid)
-        qevents = map ((Iv.quantize_iv (Iv.ascending_intervals quant_grid) quant_grid')) input
+        qevents = map (Iv.quantize_iv (Iv.ascending_intervals quant_grid) quant_grid') input :: [(Rational,Rational)]
         measures'' = M.measures_tie_or_rest measures' qevents quant_grid
     in A.Voice measures''
 

@@ -12,6 +12,7 @@ import Utils
 import qualified SimpleFormat as SF1
 import qualified AbstractScore as A
 import Interval
+import qualified Lisp as L
 
 type Time = Float
 type Start = Time
@@ -21,12 +22,14 @@ type Score = A.Score Event
 type Part = A.Part Event
 type Voice = A.Voice Event
 
-data Event = Chord Start End
+type Notes = L.LispVal
+
+data Event = Chord Start End Notes
            deriving Show
 
 instance Interval Event Time where
-    start (Chord s _) = s
-    end (Chord _ e) = e
+    start (Chord s _ _) = s
+    end (Chord _ e _) = e
 
 toSimpleFormat2 :: SF1.Score -> Score
 toSimpleFormat2 s = A.Score (map partToSimpleFormat2 (A.scoreParts s))
@@ -39,7 +42,7 @@ voiceToSimpleFormat2 v =
     let events = A.voiceItems v
         startEndPairs = (neighbours (map SF1.eventStart events))
     in A.Voice $ concatMap trans (zip events startEndPairs)
-    where trans ((SF1.Chord _),(start,end)) = [Chord start end]
+    where trans ((SF1.Chord _ notes),(start,end)) = [Chord start end notes]
           trans _ = []
 
 voiceEnd :: Voice -> End
