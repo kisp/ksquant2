@@ -93,9 +93,10 @@ processSimpleFormat input =
         sf2 = SF2.toSimpleFormat2 sf1 :: SF2.Score
         sf2end = SF2.scoreEnd sf2
         ms = M.measures_until_time (measureStream (getTimeSignatures input) (getMetronomes input)) sf2end
-        msv = A.Voice $ ms 
-        trans = (quantifyVoice msv) :: SF2.Voice -> M.Voice
-        enp = fmap m_to_enp (A.mapVoices trans sf2) :: Enp.Score
+        measurevoice = A.Voice $ ms 
+        trans = (quantifyVoice measurevoice) :: SF2.Voice -> M.Voice
+        mscore = (A.mapVoices trans sf2) :: M.Score
+        enp = (A.mapVoices v_to_enp mscore) :: Enp.Score
     in printLisp (Enp.score2sexp enp)
     where getSimple x = case getf x (LispKeyword "SIMPLE") of
                           Just s -> s

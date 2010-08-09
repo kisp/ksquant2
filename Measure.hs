@@ -16,8 +16,13 @@ module Measure (m
                ,Score
                ,Part
                ,Voice
+               ,Label
                ,measures_tie_or_rest
                ,measures_until_time
+               ,label_voice
+               ,mleaves
+               ,vleaves
+               ,eid
                )
 where
 import Data.Ratio
@@ -63,18 +68,24 @@ type Voice = A.Voice M
 data M = M Timesig Tempo E
        deriving (Show,Eq)
 
+type Label = Integer
+
 data E =
 --    dur      factor   children
     D Rational Rational [E]
 --         dur      tie
-       | L Rational Bool
+       | L Rational Bool Label
 --         dur
-       | R Rational
+       | R Rational Label
          deriving (Show,Eq)
 
 dur (D d _ _) = d
-dur (L d _)   = d
-dur (R d)     = d
+dur (L d _ _)   = d
+dur (R d _)     = d
+
+eid (D _ _ _) = error "id not for D"
+eid (R _ x) = x
+eid (L _ _ x) = x
 
 timesig_dur (n,d) = (n%d)
 
@@ -85,12 +96,12 @@ m timesig tempo d = if not(check timesig tempo d) then
 
 l d tie = if not(check) then
               error $ "cannot construct L from " ++ show d ++ " " ++ show tie
-          else L d tie
+          else L d tie 0
     where check = notableDur d
 
 r d = if not(check) then
           error "r d not valid"
-      else R d
+      else R d 0
     where check = notableDur d
 
 d d r es = if not(check d r es) then
@@ -128,31 +139,41 @@ instance Transformable E E where
 measures_divide_leafs ms divs =
     (fst (smap (transform_leafs' trans) ms divs))
         where 
-              trans (L dur _) (n:ds) =
+              trans (L dur _ _) (n:ds) =
                   let r = if (notableDur (dur / (n%1))) then 1 else div_to_ratio n
                   in (d dur r (take (fromInteger n) (repeat (l ((dur/(n%1)/r)) False))),
                         ds)
-              trans r@(R _) ds = (r,ds)
+              trans r@(R _ _) ds = (r,ds)
               trans (D _ _ _) _ = error "measures_divide_leafs: did not expect (D _ _ _)"
-              trans (L _ _) [] = error "measures_divide_leafs: divs have run out"
+              trans (L _ _ _) [] = error "measures_divide_leafs: divs have run out"
 
 measures_with_beats timesigs tempos =
     let divs = map fst timesigs
     in measures_divide_leafs (map mes (zip timesigs tempos)) divs
     where mes (timesig,tempo) =
               -- use L here, so that we are allowed to have a duration of e.g. 5/4
-              (m timesig tempo (L (timesig_dur timesig) False))
+              (m timesig tempo (L (timesig_dur timesig) False 0))
+
+
+eleaves :: E -> [E]
+eleaves e@(L _ _ _) = [e]
+eleaves e@(R _ _) = [e]
+eleaves (D _ _ es) = concatMap eleaves es
+
+mleaves :: M -> [E]
+mleaves (M _ _ e) = eleaves e
+
+vleaves :: Voice -> [E]
+vleaves v = concatMap mleaves (A.voiceItems v)
 
 leaf_durs :: E -> [Rational]
-leaf_durs (L d _) = [d]
-leaf_durs (R d) = [d]
-leaf_durs (D _ _ es) = concatMap leaf_durs es
+leaf_durs e = map dur (eleaves e)
 
 leaf_effective_durs :: E -> [Rational]
 leaf_effective_durs x = leaf_effective_durs' 1 x
     where
-      leaf_effective_durs' r (L d _) = [d * r]
-      leaf_effective_durs' r (R d) = [d * r]
+      leaf_effective_durs' r (L d _ _) = [d * r]
+      leaf_effective_durs' r (R d _) = [d * r]
       leaf_effective_durs' r (D _ r' es) =
           concatMap (leaf_effective_durs' (r * r')) es
 
@@ -204,15 +225,23 @@ measures_leaf_intervals ms = (concatMap (uncurry measure_leaf_intervals)
 measures_tie_or_rest ms ivs leaf_times = 
     (fst (smap (transform_leafs' trans) ms leaf_times))
         where 
-              trans (L dur _) ((s,e):leaf_times) =            
+              trans (L dur _ _) ((s,e):leaf_times) =            
                   case find ivContainsStart ivs of
                     Nothing -> ((r dur),leaf_times)
                     Just iv -> let tie = e < Iv.end iv
                                in ((l dur tie),leaf_times)
                   where ivContainsStart = ((flip Iv.isPointInInterval) s)                  
-              trans (L _ _) [] = error "measures_tie_or_rest: leaf_times have run out"
-              trans (R _) _    = error "measures_tie_or_rest: did not expect a rest here"
+              trans (L _ _ _) [] = error "measures_tie_or_rest: leaf_times have run out"
+              trans (R _ _) _    = error "measures_tie_or_rest: did not expect a rest here"
               trans (D _ _ _) _ = error "measures_tie_or_rest: did not expect a D"
+
+label_voice voice =
+    A.Voice (fst (smap (transform_leafs' trans) (A.voiceItems voice) [0..]))
+        where 
+              trans (L dur tie _) (id:ids) = ((L dur tie id),ids)
+              trans (R dur _) (id:ids) = ((R dur id),ids)
+              trans (D _ _ _) _ = error "label_voice: did not expect a D"
+              trans _ [] = error "label_voice: ids have run out? (should never happen)"
 
 wrapWithD :: E -> E
 wrapWithD e = d (dur e) 1 [e]
