@@ -33,7 +33,9 @@
   (unless (probe-file enp-path) (with-open-file (out enp-path :direction :output) (write-line "did not exist" out)))
   (unless (probe-file sf-path) (with-open-file (out sf-path :direction :output) (write-line "did not exist" out)))
   (sys::call-system (format nil "tar cfz /tmp/report.tgz /tmp/report ~A ~A" sf-path enp-path))
-  (capi:display-message "Report has been generated. Please choose a place where to save it.")
+  (capi:display-message (format nil "Report has been generated. Please choose a place where to save it. ~
+                                   ~%Please send then the report file as an attachment to me by mail (sending of the ~
+                                     patch is not absolutely necessary)."))
   (let ((path (capi:prompt-for-file "Where to save report?"
 				    :operation :save
 				    :filters nil
@@ -41,6 +43,9 @@
 									      :type "tgz"
 									      :directory '(:relative "Desktop"))
 							       (user-homedir-pathname)))))
+    (unless path
+      (capi:display-message "Saving of report cancelled.")
+      (abort))
     (sys::call-system (format nil "mv /tmp/report.tgz '~A'" path))))
 
 (define-box simple2score ((simple (0 1 2 3))
@@ -57,7 +62,7 @@
 	 (kernel-path (namestring (merge-pathnames "kernel")))
 	 (simple (ksquant::simple-change-type* :score simple)))
     (unless (probe-file kernel-path)
-      (error "Cannot find kernel! Have you installed the binary version? ~
+      (error "Cannot find ksquant2 kernel! Have you installed the binary version? ~
 	      Or compiled the kernel yourself?"))
     (with-open-file (out sf-path :direction :output :if-exists :supersede)
       (with-standard-io-syntax
@@ -72,7 +77,7 @@
 	 :stream out)))
     (let ((code (sys:call-system
 		 (format nil "'~A' <~A >~A" kernel-path sf-path enp-path))))
-      (unless (and nil (zerop code))
+      (unless (zerop code)
 	(if (capi:prompt-for-confirmation
 	     (format nil "The ksquant2 kernel has exited with an error. ~
 			  Please report this bug (by answering No). ~
