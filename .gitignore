@@ -13,3 +13,9 @@ test.tix
 *.fas
 *.lib
 TAGS
+*.log
+*.tix
+main
+out
+tmp
+main-coverage

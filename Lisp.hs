@@ -44,7 +44,7 @@ symbol = oneOf "/!$%-"
 parseKeyword :: Parser LispVal
 parseKeyword =
     do
-      char ':'
+      _ <- char ':'
       s <- many1 (letter <|> symbol <|> digit)
       return (LispKeyword (map toUpper s))
 
@@ -113,9 +113,12 @@ parseLisp s = parse parseValsAndEof "" s
 
 parseLisp' s = case parseLisp s of
                  Right xs -> LispList xs
+                 Left _ -> error $ "parseLisp': cannot parse '" ++ s ++ "'"
 
 readLisp s = case parseLisp s of
                  Right [x] -> x
+                 Right _   -> error $ "readLisp: expecting only a single form"
+                 Left _    -> error $ "readLisp: cannot parse '" ++ s ++ "'"
 
 ----------------------------------------------
 
@@ -126,23 +129,28 @@ cons x y             =
 
 car :: LispVal -> LispVal
 car (LispList (x:_)) = x
+car x                = error $ "car on '" ++ show x ++ "'"
 
 cdr :: LispVal -> LispVal
 cdr (LispList (_:xs)) = LispList xs
+cdr x                = error $ "cdr on '" ++ show x ++ "'"
 
 fromLispList (LispList xs) = xs
+fromLispList _ = error "fromLispList: not a list"
 
 mapcar :: (LispVal -> LispVal) -> LispVal -> LispVal
 mapcar _ (LispList []) = LispList []
 mapcar f xs@(LispList _) = (f a) `cons` (mapcar f b)
     where a = car xs
           b = cdr xs
+mapcar _ _ = error "mapcar: not a list"
 
 mapcar' :: (LispVal -> a) -> LispVal -> [a]
 mapcar' _ (LispList []) = []
 mapcar' f xs@(LispList _) = (f a) : (mapcar' f b)
     where a = car xs
           b = cdr xs
+mapcar' _ _ = error "mapcar': not a list"
 
 keywordp (LispKeyword _) = True
 keywordp _ = False
@@ -150,7 +158,9 @@ keywordp _ = False
 propertyListP (LispList xs) = (even . length) xs &&
                               all keywordp (everySecond xs)
     where everySecond [] = []
-          everySecond (a:b:ys) = a : (everySecond ys) 
+          everySecond (a:_:ys) = a : (everySecond ys)
+          everySecond [_] = error "propertyListP: is this really a plist?"
+
 propertyListP _ = False
 
 getf :: LispVal -> LispVal -> Maybe LispVal
@@ -171,3 +181,4 @@ class Sexp a where
 instance Sexp Integer where
     toSexp x = LispInteger x
     fromSexp (LispInteger x) = x
+    fromSexp _ = error "fromSexp: not (LispInteger x)"

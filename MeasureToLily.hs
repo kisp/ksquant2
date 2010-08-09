@@ -5,6 +5,7 @@ import Data.Ratio
 
 log2 1 = 0
 log2 n | even n = 1 + (log2 (div n 2))
+log2 _ = error "log2"
 
 dur_to_lily :: Rational -> L.Dur
 dur_to_lily d = (L.Dur (base d) (dots d))
@@ -13,15 +14,16 @@ dur_to_lily d = (L.Dur (base d) (dots d))
                      3 -> 1
                      7 -> 2
                      15 -> 3
+                     _ -> error "dur_to_lily"
           base d = L.power_to_simple_dur ((log2 (denominator d)) - dots d)
 
 e_to_lily :: M.E -> [L.Elt]
 e_to_lily (M.L d tie) = [L.Note (dur_to_lily d) tie]
 e_to_lily (M.R d) = [L.Rest (dur_to_lily d)]
-e_to_lily (M.D d r es) | r == 1 = concatMap e_to_lily es
+e_to_lily (M.D _ r es) | r == 1 = concatMap e_to_lily es
                        | otherwise = let n' = fromInteger (numerator r)
                                          d' = fromInteger (denominator r)
                                      in [L.Times n' d' (concatMap e_to_lily es)]
 
 m_to_lily :: M.M -> L.Measure
-m_to_lily (M.M (n,d) tempo e) = (L.Measure (fromInteger n) (fromInteger d) (e_to_lily e))
+m_to_lily (M.M (n,d) _ e) = (L.Measure (fromInteger n) (fromInteger d) (e_to_lily e))

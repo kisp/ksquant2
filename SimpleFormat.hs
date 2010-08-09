@@ -6,9 +6,7 @@ module SimpleFormat (sexp2simpleFormat
                     ,eventStart)
 where
 
-import Utils
 import Lisp
-import Interval
 
 import qualified AbstractScore as A
 

@@ -29,13 +29,14 @@ isPowerOfTwo x | x > 1 = if (even x) then
                              isPowerOfTwo (x `div` 2)
                          else
                              False
+isPowerOfTwo _ = error  "isPowerOfTwo"
 
 lowerPowerOfTwo 1 = 1
 lowerPowerOfTwo x | x > 1 = if isPowerOfTwo x then
                                 x
                             else
                                 (lowerPowerOfTwo (x-1))
-
+lowerPowerOfTwo _ = error "lowerPowerOfTwo"
 
 -- e.g. when we divide by 9 the tuplet ratio will be 8 % 9
 div_to_ratio :: Integer -> Rational
@@ -60,8 +61,6 @@ type Voice = A.Voice M
 data M = M Timesig Tempo E
        deriving (Show,Eq)
 
-mdiv (M _ _ e) = e
-
 data E =
 --    dur      factor   children
     D Rational Rational [E]
@@ -80,7 +79,7 @@ timesig_dur (n,d) = (n%d)
 m timesig tempo d = if not(check timesig tempo d) then
                         error "m timesig tempo d not valid"
                     else M timesig tempo d
-    where check timesig tempo d = (dur d) == (timesig_dur timesig)
+    where check timesig _ d = (dur d) == (timesig_dur timesig)
 
 l d tie = if not(check) then
               error $ "cannot construct L from " ++ show d ++ " " ++ show tie
@@ -127,11 +126,13 @@ instance Transformable E E where
 measures_divide_leafs ms divs =
     (fst (smap (transform_leafs' trans) ms divs))
         where 
-              trans (L dur tie) (n:ds) =
+              trans (L dur _) (n:ds) =
                   let r = if (notableDur (dur / (n%1))) then 1 else div_to_ratio n
                   in (d dur r (take (fromInteger n) (repeat (l ((dur/(n%1)/r)) False))),
                         ds)
-              trans r@(R dur) ds = (r,ds)
+              trans r@(R _) ds = (r,ds)
+              trans (D _ _ _) _ = error "measures_divide_leafs: did not expect (D _ _ _)"
+              trans (L _ _) [] = error "measures_divide_leafs: divs have run out"
 
 measures_with_beats timesigs tempos =
     let divs = map fst timesigs
@@ -163,20 +164,21 @@ measure_dur (M (n,_) tempo _) = (n%1) * (tempo_to_beat_dur tempo)
 -- foldl f acc (x:xs) =  foldl f (f acc x) xs
 
 dxs_to_xs dxs = scanl (+) 0 dxs
-butlast xs = reverse (tail (reverse xs))
-dxs_to_xs_butlast dxs = butlast (dxs_to_xs dxs)
 
 measures_start_times ms = dxs_to_xs (map measure_dur ms)
 
-measure_leaf_start_times m@(M (n,d) tempo div) start =
-    (map (+start) (dxs_to_xs_butlast (map trans (leaf_effective_durs div))))
-    where trans dur = (tempo_to_beat_dur tempo) * (dur_to_beat dur)
-          dur_to_beat dur = dur * (d%1)
+-- measure_leaf_start_times (M (_,d) tempo div) start =
+--     (map (+start) (dxs_to_xs_butlast (map trans (leaf_effective_durs div))))
+--     where trans dur = (tempo_to_beat_dur tempo) * (dur_to_beat dur)
+--           dur_to_beat dur = dur * (d%1)
+--           butlast xs = reverse (tail (reverse xs))
+--           dxs_to_xs_butlast dxs = butlast (dxs_to_xs dxs)
 
-measures_leaf_start_times ms = (concatMap (uncurry measure_leaf_start_times)
-                                              (zip ms (measures_start_times ms)))
 
-measure_leaf_intervals m@(M (n,d) tempo div) start =
+-- measures_leaf_start_times ms = (concatMap (uncurry measure_leaf_start_times)
+--                                               (zip ms (measures_start_times ms)))
+
+measure_leaf_intervals (M (_,d) tempo div) start =
     (neighbours (map (+start) (dxs_to_xs (map trans (leaf_effective_durs div)))))
     where trans dur = (tempo_to_beat_dur tempo) * (dur_to_beat dur)
           dur_to_beat dur = dur * (d%1)
@@ -199,16 +201,18 @@ measures_tie_or_rest ms ivs leaf_times =
               trans (L dur tie) ((start,_):leaf_times) =
                   let restp = not (any ((flip Iv.isPointInInterval) start) ivs)
                   in ((if restp then (r dur) else (l dur tie)), leaf_times)
-              --trans r@(R dur) ds = (r,ds)
+              trans (L _ _) [] = error "measures_tie_or_rest: leaf_times have run out"
+              trans (R _) _    = error "measures_tie_or_rest: did not expect a rest here"
+              trans (D _ _ _) _ = error "measures_tie_or_rest: did not expect a D"
 
 wrapWithD :: E -> E
 wrapWithD e = d (dur e) 1 [e]
 
 ---------------------------------------------------------
 
-m1 = M (4,4) (60 % 1)
-     (D (1 % 1) (1 % 1)
-      [L (1 % 4) False,L (1 % 4) False,L (1 % 4) False,L (1 % 4) False])
+-- m1 = M (4,4) (60 % 1)
+--      (D (1 % 1) (1 % 1)
+--       [L (1 % 4) False,L (1 % 4) False,L (1 % 4) False,L (1 % 4) False])
 
-m2 = (measures_divide_leafs [m1] (repeat 3)) !! 0
-m3 = (measures_divide_leafs [m2] (repeat 3)) !! 0
+-- m2 = (measures_divide_leafs [m1] (repeat 3)) !! 0
+-- m3 = (measures_divide_leafs [m2] (repeat 3)) !! 0

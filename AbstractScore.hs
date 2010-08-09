@@ -43,13 +43,12 @@ instance Functor Voice where
 -- Sexp
 instance (Sexp a) => Sexp (Score a) where
     toSexp s = LispList $ map toSexp (scoreParts s)
-    fromSexp s = error ""
+    fromSexp _ = error "fromSexp Sexp (Score a) not implemented"
 
 instance (Sexp a) => Sexp (Part a) where
     toSexp s = LispList $ map toSexp (partVoices s)
-    fromSexp s = error ""
+    fromSexp _ = error "fromSexp Sexp (Part a) not implemented"
 
 instance (Sexp a) => Sexp (Voice a) where
     toSexp s = LispList $ map toSexp (voiceItems s)
-    fromSexp s = error ""
-
+    fromSexp _ = error "fromSexp Sexp (Voice a) not implemented"

@@ -33,3 +33,5 @@ safe_system "ln -s hpc_index.html main-coverage/index.html"
 safe_system "mv 'main-coverage' #{ENV['CC_BUILD_ARTIFACTS']}/main-coverage" if ENV['CC_BUILD_ARTIFACTS']
 
 make "shell-tests"
+
+make "check"

@@ -1,7 +1,7 @@
 module Enp (score2sexp
-           ,Score(..)
-           ,Part(..)
-           ,Voice(..)
+           ,Score
+           ,Part
+           ,Voice
            ,Measure(..)
            ,Elt(..)
            ,makeMeasure
@@ -9,7 +9,6 @@ module Enp (score2sexp
            ,dur)
 where
 
-import Utils
 import Lisp
 import qualified AbstractScore as A
 
@@ -23,17 +22,20 @@ type Voice = A.Voice Measure
 data Measure = Measure Timesig [Elt]
            deriving (Show, Eq)
 
-data Elt = Chord Dur
+type Tied = Bool
+
+-- |Tied here has ENP semantics, which is a tie "going to the left".
+data Elt = Chord Dur Tied
            | Rest Dur
            | Div Dur [Elt]
            deriving (Show, Eq)
 
-dur (Chord d) = d
+dur (Chord d _) = d
 dur (Rest d) = d
 dur (Div d _) = d
 
 scaleElt :: Integer -> Elt -> Elt
-scaleElt n (Chord d) = (Chord (n * d))
+scaleElt n (Chord d t) = (Chord (n * d) t)
 scaleElt n (Rest d) = (Rest (n * d))
 scaleElt n (Div d es) = (Div (n * d) es)
 
@@ -42,7 +44,7 @@ makeMeasure (n,d) es =
     if not(check (n,d) es) then
         error $ "Enp.makeMeasure " ++ show (n,d) ++ " " ++ show es
     else Measure (n,d) es
-    where check (n,d) es = n == sum (map dur es)
+    where check (n,_) es = n == sum (map dur es)
 
 score2sexp :: Score -> LispVal
 score2sexp e = LispList $ map part2sexp (A.scoreParts e)
@@ -62,6 +64,7 @@ measure2sexp (Measure (n,d) xs) =
                   LispList [LispInteger n,LispInteger d]]
 
 elt2sexp :: Elt -> LispVal
-elt2sexp (Chord d) = LispInteger d `cons` (parseLisp' ":notes (60)")
+elt2sexp (Chord d False) = LispInteger d `cons` (parseLisp' ":notes (60)")
+elt2sexp (Chord d True) = LispFloat (fromInteger d) `cons` (parseLisp' ":notes (60)")
 elt2sexp (Rest d) = LispInteger (-d) `cons` (parseLisp' ":notes (60)")
 elt2sexp (Div d xs) = (LispInteger d) `cons` (LispList [(LispList (map elt2sexp xs))])

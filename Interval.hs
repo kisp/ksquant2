@@ -42,19 +42,19 @@ instance (Num t) => Interval (t,t) t where
 instance (Num t) => Point t t where
     point x = x
 
--- Do the intervals a and b have common points?
+-- |Do the intervals a and b have common points?
 intersect a b =
     let s1 = start a
         e1 = end a
         s2 = start b
-        e2 = end b
+        -- e2 = end b
     in
       if not (s1 <= s2) then
           intersect b a
       else
           s2 < e1
 
--- Is x in iv?
+-- |Is x in iv?
 isPointInInterval iv x = start iv <= point x && point x < end iv
 
 isStrictlyAfter a b = start b >= end a
@@ -82,11 +82,11 @@ ascending_points xs =
 
 get_ascending_points (AscendingPoints xs) = xs
 
--- for each interval return ascending_points that are all the points
+-- |For each interval return ascending_points that are all the points
 -- from xs contained in the interval
 groupPointsByIntervalls ivs xs = f (get_ascending_intervals ivs) (get_ascending_points xs)
     where f [] _ = []
-          f (iv:ivs) [] = (ascending_points []) : (f ivs [])
+          f (_:ivs) [] = (ascending_points []) : (f ivs [])
           f (iv:ivs) (x:xs)
               | (point x) < (start iv) = f (iv:ivs) xs
               | otherwise = (ascending_points (takeWhile (<(end iv)) (x:xs))) :
@@ -95,6 +95,7 @@ groupPointsByIntervalls ivs xs = f (get_ascending_intervals ivs) (get_ascending_
 -- TODO call internal Constructor instead of safe ascending_points
 ascending_intervals2points ivs = ascending_points (f (get_ascending_intervals ivs))
     where f (iv:ivs) = [start iv,end iv] ++ (g ivs (end iv))
+          f [] = []
           g [] _ = []
           g (iv:ivs) last = if (start iv == last) then
                                 [end iv] ++ (g ivs (end iv))

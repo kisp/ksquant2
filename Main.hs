@@ -1,21 +1,14 @@
 module Main where
 
-import Data.Ratio
-import Data.List
-
-import Debug.Trace
-import Utils
-import qualified Lily as L
 import Input
 import qualified Interval as Iv
 import qualified Measure as M
-import MeasureToLily
-import MeasureToEnp
 import Lisp
 import qualified SimpleFormat as SF
 import qualified SimpleFormat2 as SF2
 import qualified AbstractScore as A
 import qualified Enp as Enp
+import MeasureToEnp
 
 ----------------
 
@@ -78,7 +71,7 @@ quantifyVoice ms v =
         qevents = map ((make_qevent quant_grid) . (Iv.quantize_iv quant_grid')) input
         measures'' = M.measures_tie_or_rest measures' qevents quant_grid
     in A.Voice measures''
-    where make_qevent ivs ((start_i,end_i),e) = ((Iv.start (ivs!!start_i)),(Iv.end (ivs!!start_i)))
+    where make_qevent ivs ((start_i,_),_) = ((Iv.start (ivs!!start_i)),(Iv.end (ivs!!start_i)))
 
 processSimpleFormat :: MeasureStructure -> Lisp.LispVal -> String
 processSimpleFormat ms s =
@@ -94,5 +87,6 @@ main = do
   s <- getContents
   case (parseLisp s) of
     Right [s] -> (putStrLn . (processSimpleFormat ms) . getSimple) s
-    Right [s,expected] -> (putStrLn . (processSimpleFormat ms) . getSimple) s
+    Right [s,_] -> (putStrLn . (processSimpleFormat ms) . getSimple) s
+    Right _ -> error "parseLisp of stdin returned an unexpected number of forms"
     Left err -> do { print err ; error "parse error" }

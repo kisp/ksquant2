@@ -7,3 +7,4 @@ binsearch xs value low high
    | otherwise        = Just mid
    where
    mid = low + ((high - low) `div` 2)
+
