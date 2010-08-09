@@ -61,12 +61,16 @@ quantifyVoice ms v =
         best_divs = (map (uncurry (Iv.best_div divs))
                      (zip (Iv.get_ascending_intervals beats_intervals) groups))
         measures' = M.measures_divide_leafs measures (map toInteger best_divs)
-        quant_grid = (M.measures_leaf_intervals measures')
+        quant_grid = M.measures_leaf_intervals measures'
         quant_grid' = Iv.ascending_intervals (map rational_pair_to_time_pair quant_grid)
         quant_grid_asc = (Iv.ascending_intervals quant_grid)
         qevents = map (Iv.quantize_iv SF2.qevent_from_event quant_grid_asc quant_grid') input :: [SF2.QEvent]
         measures'' = M.measures_tie_or_rest measures' qevents quant_grid
-    in A.Voice measures''
+        getNotes (M.L dur tie label _) qevent = (M.L dur tie label (SF2.qevent_notes qevent))
+        getNotes (M.R _ _) _ = error "getNotes: R"
+        getNotes (M.D _  _ _) _ = error "getNotes: D"
+        measures''' = M.measures_transform_leafs getNotes measures'' qevents quant_grid
+    in A.Voice measures'''
 
 buildMeasureFromLisp :: LispVal -> LispVal -> M.M
 buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])

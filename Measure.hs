@@ -12,6 +12,7 @@ module Measure (m
                ,leaf_durs
                ,leaf_effective_durs
                ,measures_leaf_intervals
+               ,measures_transform_leafs
                ,wrapWithD
                ,Score
                ,Part
@@ -220,12 +221,8 @@ measures_leaf_intervals ms = (concatMap (uncurry measure_leaf_intervals)
 -- if leaf start time is not in any iv, then rest. if leaf start time
 -- is in an interval keep it and make it a tie if the end time is not
 -- the same as the end time of the interval
--- TODO unfinished
--- measures_tie_or_rest ms ivs =
---     map (transform_leafs trans) ms
---         where 
---               trans (L dur tie) = (L dur tie)
---               trans r@(R dur) = r
+measures_tie_or_rest :: (Transformable a1 E, Iv.Interval a b, Ord b) =>
+                        [a1] -> [a] -> [(b, b)] -> [a1]
 measures_tie_or_rest ms ivs leaf_times = 
     (fst (smap (transform_leafs' trans) ms leaf_times))
         where 
@@ -238,6 +235,19 @@ measures_tie_or_rest ms ivs leaf_times =
               trans (L _ _ _ _) [] = error "measures_tie_or_rest: leaf_times have run out"
               trans (R _ _) _    = error "measures_tie_or_rest: did not expect a rest here"
               trans (D _ _ _) _ = error "measures_tie_or_rest: did not expect a D"
+
+measures_transform_leafs :: (Transformable a1 E, Iv.Interval a b, Ord b) =>
+                        (E -> a -> E) -> [a1] -> [a] -> [(b, b)] -> [a1]
+measures_transform_leafs f ms ivs leaf_times =
+    (fst (smap (transform_leafs' trans) ms leaf_times))
+        where 
+              trans (D _ _ _) _ = error "measures_tie_or_rest: did not expect a D"
+              trans _ [] = error "measures_transform_leafs: leaf_times have run out"
+              trans elt ((s,_):leaf_times) =
+                  case find ivContainsStart ivs of
+                    Nothing -> (elt,leaf_times)
+                    Just iv -> (f elt iv,leaf_times)
+                  where ivContainsStart = ((flip Iv.isPointInInterval) s)
 
 label_voice voice =
     A.Voice (fst (smap (transform_leafs' trans) (A.voiceItems voice) [0..]))

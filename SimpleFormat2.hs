@@ -7,7 +7,8 @@ module SimpleFormat2 (toSimpleFormat2
                      ,sampleVoice
                      ,voiceEnd
                      ,scoreEnd
-                     ,qevent_from_event)
+                     ,qevent_from_event
+                     ,qevent_notes)
 where
 
 import Utils
@@ -38,6 +39,8 @@ data QEvent = QChord QStart QEnd Notes
 qevent_from_event :: (Interval a QStart) => a -> Event -> QEvent
 qevent_from_event quantized_iv (Chord _ _ n) =
     (QChord (start quantized_iv) (end quantized_iv) n)
+
+qevent_notes (QChord _ _ notes) = notes
 
 instance Interval Event Time where
     start (Chord s _ _) = s
