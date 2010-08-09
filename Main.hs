@@ -46,11 +46,6 @@ nice_show label obj = do
 
 ---------------------
 
-getSimple x = case getf x (LispKeyword "SIMPLE") of
-                Just s -> s
-                Nothing -> error "Could not find :simple"
-
-
 type MeasureStructure = M.Voice
 
 quantifyVoice :: MeasureStructure -> SF2.Voice -> M.Voice
@@ -73,20 +68,52 @@ quantifyVoice ms v =
     in A.Voice measures''
     where make_qevent ivs ((start_i,_),_) = ((Iv.start (ivs!!start_i)),(Iv.end (ivs!!start_i)))
 
-processSimpleFormat :: MeasureStructure -> Lisp.LispVal -> String
-processSimpleFormat ms s =
-    let sf1 = SF.sexp2simpleFormat s :: SF.Score
+-- :TIME-SIGNATURES (4 4) :METRONOMES (4 60) :SCALE 1/4 :MAX-DIV 8 :FORBIDDEN-DIVS (7))
+buildMeasureFromLisp :: LispVal -> LispVal -> M.M
+buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])
+                         (LispList [LispInteger _,LispInteger t]) =
+                         head (M.measures_with_beats [(n,d)] [fromInteger t])
+buildMeasureFromLisp _ _ = error "buildMeasureFromLisp"
+
+ensureListOfLists :: LispVal -> LispVal
+ensureListOfLists (LispList []) = error "ensureListOfLists: empty list"
+ensureListOfLists (LispList xs@(x:_)) | atom x = LispList [LispList xs]
+                                      | otherwise = LispList xs
+ensureListOfLists _ = error "ensureListOfLists"
+
+stickToLast list = list ++ (repeat (last list))
+
+measureStream :: LispVal -> LispVal -> [M.M]
+measureStream ts metro = (map (uncurry buildMeasureFromLisp)
+                                  (zip (stickToLast (fromLispList ts))
+                                           (stickToLast (fromLispList metro))))
+
+processSimpleFormat :: Lisp.LispVal -> String
+processSimpleFormat input =
+    let s = getSimple input     
+        sf1 = SF.sexp2simpleFormat s :: SF.Score
         sf2 = SF2.toSimpleFormat2 sf1 :: SF2.Score
-        trans = (quantifyVoice ms) :: SF2.Voice -> M.Voice
+        sf2end = SF2.scoreEnd sf2
+        ms = M.measures_until_time (measureStream (getTimeSignatures input) (getMetronomes input)) sf2end
+        msv = A.Voice $ ms 
+        trans = (quantifyVoice msv) :: SF2.Voice -> M.Voice
         enp = fmap m_to_enp (A.mapVoices trans sf2) :: Enp.Score
     in printLisp (Enp.score2sexp enp)
-
-ms = A.Voice $ M.measures_with_beats (take 1 (repeat (4,4))) (repeat 60)
+    where getSimple x = case getf x (LispKeyword "SIMPLE") of
+                          Just s -> s
+                          Nothing -> error "Could not find :simple"
+          getTimeSignatures x = case getf x (LispKeyword "TIME-SIGNATURES") of
+                                  Just s -> ensureListOfLists s
+                                  Nothing -> error "Could not find :time-signatures"
+          getMetronomes x = case getf x (LispKeyword "METRONOMES") of
+                                  Just s -> ensureListOfLists s
+                                  Nothing -> error "Could not find :metronomes"
+                                                                   
 
 main = do
   s <- getContents
   case (parseLisp s) of
-    Right [s] -> (putStrLn . (processSimpleFormat ms) . getSimple) s
-    Right [s,_] -> (putStrLn . (processSimpleFormat ms) . getSimple) s
+    Right [s] -> (putStrLn . processSimpleFormat) s
+    Right [s,_] -> (putStrLn . processSimpleFormat) s
     Right _ -> error "parseLisp of stdin returned an unexpected number of forms"
     Left err -> do { print err ; error "parse error" }

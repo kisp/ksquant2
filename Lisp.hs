@@ -14,7 +14,8 @@ module Lisp (LispVal(..)
             ,Sexp
             ,toSexp
             ,fromSexp
-            )
+            ,listp
+            ,atom)
 where
 import Text.ParserCombinators.Parsec
 import Data.Char (toUpper)
@@ -121,6 +122,12 @@ readLisp s = case parseLisp s of
                  Left _    -> error $ "readLisp: cannot parse '" ++ s ++ "'"
 
 ----------------------------------------------
+
+listp :: LispVal -> Bool
+listp (LispList _) = True
+listp _ = False
+
+atom = not . listp
 
 cons :: LispVal -> LispVal -> LispVal
 cons x (LispList ys) = LispList (x:ys)

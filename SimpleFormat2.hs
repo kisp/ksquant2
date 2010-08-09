@@ -3,7 +3,9 @@ module SimpleFormat2 (toSimpleFormat2
                      ,Part
                      ,Voice
                      ,Event
-                     ,sampleVoice)
+                     ,sampleVoice
+                     ,voiceEnd
+                     ,scoreEnd)
 where
 
 import Utils
@@ -39,6 +41,12 @@ voiceToSimpleFormat2 v =
     in A.Voice $ concatMap trans (zip events startEndPairs)
     where trans ((SF1.Chord _),(start,end)) = [Chord start end]
           trans _ = []
+
+voiceEnd :: Voice -> End
+voiceEnd v = (end . last) $ A.voiceItems v
+
+scoreEnd :: Score -> End
+scoreEnd s = maximum (map voiceEnd (concatMap A.partVoices (A.scoreParts s)))
 
 sampleVoice :: Voice
 sampleVoice = A.Voice []

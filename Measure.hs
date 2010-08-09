@@ -17,6 +17,7 @@ module Measure (m
                ,Part
                ,Voice
                ,measures_tie_or_rest
+               ,measures_until_time
                )
 where
 import Data.Ratio
@@ -166,6 +167,10 @@ measure_dur (M (n,_) tempo _) = (n%1) * (tempo_to_beat_dur tempo)
 dxs_to_xs dxs = scanl (+) 0 dxs
 
 measures_start_times ms = dxs_to_xs (map measure_dur ms)
+
+measures_until_time :: [M] -> Float -> [M]
+measures_until_time ms time = map fst (takeWhile p (zip ms (measures_start_times ms)))
+    where p (_,s) = fromRational s < time
 
 -- measure_leaf_start_times (M (_,d) tempo div) start =
 --     (map (+start) (dxs_to_xs_butlast (map trans (leaf_effective_durs div))))
