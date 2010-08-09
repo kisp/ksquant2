@@ -24,6 +24,7 @@ import Data.Ratio
 import Utils
 import qualified AbstractScore as A
 import qualified Interval as Iv
+import Data.List
 
 isPowerOfTwo 1 = True
 isPowerOfTwo x | x > 1 = if (even x) then
@@ -203,9 +204,12 @@ measures_leaf_intervals ms = (concatMap (uncurry measure_leaf_intervals)
 measures_tie_or_rest ms ivs leaf_times = 
     (fst (smap (transform_leafs' trans) ms leaf_times))
         where 
-              trans (L dur tie) ((start,_):leaf_times) =
-                  let restp = not (any ((flip Iv.isPointInInterval) start) ivs)
-                  in ((if restp then (r dur) else (l dur tie)), leaf_times)
+              trans (L dur _) ((s,e):leaf_times) =            
+                  case find ivContainsStart ivs of
+                    Nothing -> ((r dur),leaf_times)
+                    Just iv -> let tie = e < Iv.end iv
+                               in ((l dur tie),leaf_times)
+                  where ivContainsStart = ((flip Iv.isPointInInterval) s)                  
               trans (L _ _) [] = error "measures_tie_or_rest: leaf_times have run out"
               trans (R _) _    = error "measures_tie_or_rest: did not expect a rest here"
               trans (D _ _ _) _ = error "measures_tie_or_rest: did not expect a D"
