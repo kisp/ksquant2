@@ -137,8 +137,7 @@ locate_point ivs x = r (get_ascending_intervals ivs) (point x) 0
               | otherwise = r ivs x (index+1)
           r a b c = error $ "locate_point " ++ show a ++ " " ++ show b ++ " " ++ show c
 
-quantize_iv :: (Ord b, Interval a b, Interval a1 b1) => AscendingIntervals a1 -> AscendingIntervals (b, b) -> a -> (b1, b1)
-quantize_iv rational_ivs ivs iv =
+quantize_iv f rational_ivs ivs iv =
     let rivs = get_ascending_intervals rational_ivs
         s = start iv
         e = end iv
@@ -152,7 +151,7 @@ quantize_iv rational_ivs ivs iv =
                      not (mid3 a == mid3 b),
                      let ds = abs (s - (fst3 a)),
                      let de = abs (e - (fst3 b))]
-    in snd $ best result
+    in f (snd $ best result) iv
     where cost ds de = abs (de - ds) + abs ds + abs de
           test a b = (fst a) `compare` (fst b)
           best xs = head (sortBy test xs)

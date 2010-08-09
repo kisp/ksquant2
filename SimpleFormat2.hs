@@ -3,9 +3,11 @@ module SimpleFormat2 (toSimpleFormat2
                      ,Part
                      ,Voice
                      ,Event
+                     ,QEvent
                      ,sampleVoice
                      ,voiceEnd
-                     ,scoreEnd)
+                     ,scoreEnd
+                     ,qevent_from_event)
 where
 
 import Utils
@@ -27,9 +29,23 @@ type Notes = L.LispVal
 data Event = Chord Start End Notes
            deriving Show
 
+type QStart = Rational
+type QEnd = Rational
+
+data QEvent = QChord QStart QEnd Notes
+           deriving Show
+
+qevent_from_event :: (Interval a QStart) => a -> Event -> QEvent
+qevent_from_event quantized_iv (Chord _ _ n) =
+    (QChord (start quantized_iv) (end quantized_iv) n)
+
 instance Interval Event Time where
     start (Chord s _ _) = s
     end (Chord _ e _) = e
+
+instance Interval QEvent Rational where
+    start (QChord s _ _) = s
+    end (QChord _ e _) = e
 
 toSimpleFormat2 :: SF1.Score -> Score
 toSimpleFormat2 s = A.Score (map partToSimpleFormat2 (A.scoreParts s))
