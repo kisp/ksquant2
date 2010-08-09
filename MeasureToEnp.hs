@@ -13,11 +13,11 @@ tied_over_from_last assoc id =
       Nothing -> error "tied_over_from_last not found"
       Just x -> has_forward_tie x
     where has_forward_tie (M.R _ _) = False
-          has_forward_tie (M.L _ tie _) = tie
+          has_forward_tie (M.L _ tie _ _) = tie
           has_forward_tie (M.D _ _ _) = error "tied_over_from_last (M.D _ _ _)"
 
 e_to_enp :: [(M.Label, M.E)] -> Rational -> M.E -> E.Elt
-e_to_enp assoc f (M.L d _ id) = E.Chord (ratio2integer (d * f)) (tied_over_from_last assoc id)
+e_to_enp assoc f (M.L d _ id notes) = E.Chord (ratio2integer (d * f)) (tied_over_from_last assoc id) notes
 e_to_enp _ f (M.R d _) = E.Rest (ratio2integer (d * f))
 e_to_enp assoc f (M.D d _ es) =
     let f' = durs2factor (map M.dur es)

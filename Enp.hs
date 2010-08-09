@@ -23,19 +23,20 @@ data Measure = Measure Timesig [Elt]
            deriving (Show, Eq)
 
 type Tied = Bool
+type Notes = LispVal
 
 -- |Tied here has ENP semantics, which is a tie "going to the left".
-data Elt = Chord Dur Tied
+data Elt = Chord Dur Tied Notes
            | Rest Dur
            | Div Dur [Elt]
            deriving (Show, Eq)
 
-dur (Chord d _) = d
+dur (Chord d _ _) = d
 dur (Rest d) = d
 dur (Div d _) = d
 
 scaleElt :: Integer -> Elt -> Elt
-scaleElt n (Chord d t) = (Chord (n * d) t)
+scaleElt n (Chord d t notes) = (Chord (n * d) t notes)
 scaleElt n (Rest d) = (Rest (n * d))
 scaleElt n (Div d es) = (Div (n * d) es)
 
@@ -64,7 +65,7 @@ measure2sexp (Measure (n,d) xs) =
                   LispList [LispInteger n,LispInteger d]]
 
 elt2sexp :: Elt -> LispVal
-elt2sexp (Chord d False) = LispInteger d `cons` (parseLisp' ":notes (60)")
-elt2sexp (Chord d True) = LispFloat (fromInteger d) `cons` (parseLisp' ":notes (60)")
+elt2sexp (Chord d False notes) = LispInteger d `cons` LispList [LispKeyword "NOTES", notes]
+elt2sexp (Chord d True  notes) = LispFloat (fromInteger d) `cons` LispList [LispKeyword "NOTES", notes]
 elt2sexp (Rest d) = LispInteger (-d) `cons` (parseLisp' ":notes (60)")
 elt2sexp (Div d xs) = (LispInteger d) `cons` (LispList [(LispList (map elt2sexp xs))])
