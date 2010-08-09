@@ -155,10 +155,10 @@ leaf_effective_durs x = leaf_effective_durs' 1 x
       leaf_effective_durs' r (D _ r' es) =
           concatMap (leaf_effective_durs' (r * r')) es
 
-tempo_to_beat_dur :: Rational -> Rational
-tempo_to_beat_dur tempo = 60 / tempo
+tempo_to_beat_dur :: Integer -> Rational -> Rational
+tempo_to_beat_dur d tempo = 60 / tempo / (d%4)
 
-measure_dur (M (n,_) tempo _) = (n%1) * (tempo_to_beat_dur tempo)
+measure_dur (M (n,d) tempo _) = (n%1) * (tempo_to_beat_dur d tempo)
 
 -- foldl            :: (a -> b -> a) -> a -> [b] -> a
 -- foldl f acc []     =  acc
@@ -185,7 +185,7 @@ measures_until_time ms time = map fst (takeWhile p (zip ms (measures_start_times
 
 measure_leaf_intervals (M (_,d) tempo div) start =
     (neighbours (map (+start) (dxs_to_xs (map trans (leaf_effective_durs div)))))
-    where trans dur = (tempo_to_beat_dur tempo) * (dur_to_beat dur)
+    where trans dur = (tempo_to_beat_dur d tempo) * (dur_to_beat dur)
           dur_to_beat dur = dur * (d%1)
 
 measures_leaf_intervals ms = (concatMap (uncurry measure_leaf_intervals)
