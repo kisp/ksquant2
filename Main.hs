@@ -63,12 +63,10 @@ quantifyVoice ms v =
         measures' = M.measures_divide_leafs measures (map toInteger best_divs)
         quant_grid = (M.measures_leaf_intervals measures')
         quant_grid' = Iv.ascending_intervals (map rational_pair_to_time_pair quant_grid)
-        qevents = map ((make_qevent quant_grid) . (Iv.quantize_iv quant_grid')) input
+        qevents = map ((Iv.quantize_iv (Iv.ascending_intervals quant_grid) quant_grid')) input
         measures'' = M.measures_tie_or_rest measures' qevents quant_grid
     in A.Voice measures''
-    where make_qevent ivs ((start_i,_),_) = ((Iv.start (ivs!!start_i)),(Iv.end (ivs!!start_i)))
 
--- :TIME-SIGNATURES (4 4) :METRONOMES (4 60) :SCALE 1/4 :MAX-DIV 8 :FORBIDDEN-DIVS (7))
 buildMeasureFromLisp :: LispVal -> LispVal -> M.M
 buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])
                          (LispList [LispInteger _,LispInteger t]) =

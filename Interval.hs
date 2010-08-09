@@ -137,17 +137,24 @@ locate_point ivs x = r (get_ascending_intervals ivs) (point x) 0
               | otherwise = r ivs x (index+1)
           r a b c = error $ "locate_point " ++ show a ++ " " ++ show b ++ " " ++ show c
 
-quantize_iv ivs iv = let s = start iv
-                         e = end iv
-                         ((s0,s1),(si0,si1)) = locate_point ivs s
-                         ((e0,e1),(ei0,ei1)) = locate_point ivs e
-                     in (snd (head (sortBy
-                                   test [(cost ds de,(snd a,snd b)) |
-                                         a <- [(s0,si0),(s1,si1)],
-                                         b <- [(e0,ei0),(e1,ei1)],
-                                         not (snd a == snd b),
-                                         let ds = abs (s - (fst a)),
-                                         let de = abs (e - (fst b))])),
-                         iv)
+quantize_iv rational_ivs ivs iv =
+    let rivs = get_ascending_intervals rational_ivs
+        s = start iv
+        e = end iv
+        ((s0,s1),(si0,si1)) = locate_point ivs s
+        ((e0,e1),(ei0,ei1)) = locate_point ivs e
+        result = [(cost ds de,(end3 a,end3 b)) |
+                     a <- [(s0,si0,start $ rivs !! si0),
+                           (s1,si1,end $ rivs !! si0)],
+                     b <- [(e0,ei0,start $ rivs !! ei0),
+                           (e1,ei1,end $ rivs !! ei0)],
+                     not (mid3 a == mid3 b),
+                     let ds = abs (s - (fst3 a)),
+                     let de = abs (e - (fst3 b))]
+    in snd $ best result
     where cost ds de = abs (de - ds) + abs ds + abs de
           test a b = (fst a) `compare` (fst b)
+          best xs = head (sortBy test xs)
+          fst3 (x,_,_) = x
+          mid3 (_,x,_) = x
+          end3 (_,_,x) = x
