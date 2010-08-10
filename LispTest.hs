@@ -21,6 +21,8 @@ lisp1 = TestList
 lisp2 = TestList
         [
          [(LispFloat 123.12)] ~=? rightOrError (parseLisp "123.12")
+        ,[(LispFloat 123.12)] ~=? rightOrError (parseLisp "123.12d0")
+        ,[(LispFloat 12.312)] ~=? rightOrError (parseLisp "123.12D-1")
         ,[(LispKeyword "FOO")] ~=? rightOrError (parseLisp ":FOO")
         ,[(LispKeyword "BAR")] ~=? rightOrError (parseLisp ":bar")
         ,[(LispKeyword "F/123")] ~=? rightOrError (parseLisp ":f/123")

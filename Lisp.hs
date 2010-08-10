@@ -56,23 +56,28 @@ parseSymbol =
       s <- many1 (letter <|> symbol <|> digit)
       return (LispSymbol (map toUpper s))
 
+parseSign :: (Num a) => Parser a
+parseSign = (char '-' >> return (-1)) <|>
+            (char '+' >> (return 1)) <|>
+            return 1
+
 parseInteger :: Parser LispVal
 parseInteger =
     do
-      sign <- (char '-' >> return (-1)) <|>
-              return 1
+      sign <- parseSign
       ds <- many1 digit
       return $ (LispInteger . (*sign) . read) ds
 
 parseFloat :: Parser LispVal
 parseFloat =
     do
-      sign <- (char '-' >> return (-1)) <|>
-              return 1
+      sign <- parseSign
       ds <- many1 digit
       dot <- char '.'
       ds2 <- many1 digit
-      return $ (LispFloat . (*sign) . read) (ds ++ [dot] ++ ds2)
+      (LispInteger e) <- (oneOf "sfdleSFDLE" >> parseInteger) <|>
+                         (return (LispInteger 0))
+      return $ (LispFloat . (*10^^e) . (*sign) . read) (ds ++ [dot] ++ ds2)
 
 parseRatio :: Parser LispVal
 parseRatio =
