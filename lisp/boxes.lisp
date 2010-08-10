@@ -2,7 +2,7 @@
 
 (in-package #:ksquant2)
 
-(define-menu ksquant2)
+(define-menu ksquant2 :print-name "**KSQuant2")
 (in-menu ksquant2)
 
 (defun format-time-stamp (&optional (utime (get-universal-time)))
@@ -10,7 +10,7 @@
     (declare (ignore day))
     (format nil "~2,'0D~2,'0D~2,'0D_~2,'0D~2,'0D~2,'0D" (mod y 100) m d hr mn sc)))
 
-(defun report-bug (code sf-path enp-path)
+(defun report-bug (code sf-path enp-path err-path)
   (macrolet ((form (form)
 	       `(progn
 		  (princ ',form out)
@@ -31,8 +31,9 @@
       (form (probe-file "/opt/"))
       (form (with-output-to-string (*standard-output*) (sys::call-system-showing-output "uname -a")))))
   (unless (probe-file enp-path) (with-open-file (out enp-path :direction :output) (write-line "did not exist" out)))
+  (unless (probe-file err-path) (with-open-file (out err-path :direction :output) (write-line "did not exist" out)))
   (unless (probe-file sf-path) (with-open-file (out sf-path :direction :output) (write-line "did not exist" out)))
-  (sys::call-system (format nil "tar cfz /tmp/report.tgz /tmp/report ~A ~A" sf-path enp-path))
+  (sys::call-system (format nil "tar cfz /tmp/report.tgz /tmp/report ~A ~A ~A" sf-path enp-path err-path))
   (capi:display-message (format nil "Report has been generated. Please choose a place where to save it. ~
                                    ~%Please send then the report file as an attachment to me by mail (sending of the ~
                                      patch is not absolutely necessary)."))
@@ -59,6 +60,7 @@
   (let* ((*default-pathname-defaults* (asdf:component-pathname (asdf:find-system :ksquant2)))
 	 (sf-path (format nil "/tmp/ksquant2-~A" (sys::getpid)))
 	 (enp-path (format nil "/tmp/ksquant2-out-~A" (sys::getpid)))
+	 (err-path (format nil "/tmp/ksquant2-err-~A" (sys::getpid)))
 	 (kernel-path (namestring (merge-pathnames "kernel")))
 	 (simple (ksquant::simple-change-type* :score simple)))
     (unless (probe-file kernel-path)
@@ -76,26 +78,29 @@
 	   :forbidden-divs ,forbidden-divs)
 	 :stream out)))
     (let ((code (sys:call-system
-		 (format nil "'~A' <~A >~A" kernel-path sf-path enp-path))))
+		 (format nil "'~A' <~A >~A 2>~A" kernel-path sf-path enp-path err-path))))
       (unless (zerop code)
-	(if (capi:prompt-for-confirmation
-	     (format nil "The ksquant2 kernel has exited with an error. ~
-			  Please report this bug (by answering No). ~
-			~2%Do you want to try with ksquant version 1 instead?")
-	     :default-button :ok)
-	    (return-from simple2score
-	      (ksquant:simple2score simple
-				    :time-signatures time-signatures
-				    :metronomes metronomes
-				    :scale scale
-				    :max-div max-div
-				    :forbidden-divs forbidden-divs))
-	    (progn
-	      (when (capi:prompt-for-confirmation
-		     "Do you want to generate a bug report?"
-		     :default-button :ok)
-		(report-bug code sf-path enp-path))
-	      (abort)))))
+	(let ((err-message (or (ignore-errors (with-open-file (in err-path) (read-line in)))
+			       "<no message>")))
+	  (if (capi:prompt-for-confirmation
+	       (format nil "Error: ~S~2%The ksquant2 kernel has exited with an error. ~
+			  If you think this is a bug, please report it (by answering No). ~
+			~2%Do you want to try with ksquant version 1 instead?"
+		       err-message)
+	       :default-button :yes)
+	      (return-from simple2score
+		(ksquant:simple2score simple
+				      :time-signatures time-signatures
+				      :metronomes metronomes
+				      :scale scale
+				      :max-div max-div
+				      :forbidden-divs forbidden-divs))
+	      (progn
+		(when (capi:prompt-for-confirmation
+		       "Do you want to generate a bug report?"
+		       :default-button :no)
+		  (report-bug code sf-path enp-path err-path))
+		(abort))))))
     (with-open-file (in enp-path)
       (ccl::make-score (read in)))))
 
