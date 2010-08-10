@@ -129,6 +129,7 @@ processSimpleFormat input =
                            Nothing -> error "Could not find :max-div"
           getForbDivs s =  case getf s (LispKeyword "FORBIDDEN-DIVS") of
                            Just xs@(LispList _) -> ensureListOfIntegers xs
+                           Just (LispSymbol "NIL") -> []
                            Just _ -> error "incorrect :forbidden-divs"
                            Nothing -> error "Could not find :forbidden-divs"
 main = do
