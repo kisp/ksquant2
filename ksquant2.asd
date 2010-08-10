@@ -1,7 +1,7 @@
 ;;; -*- Mode:Lisp; Syntax:ANSI-Common-Lisp  -*-
 
 (asdf:defsystem ksquant2
-  :version "0.1.6"
+  :version "0.1.7"
   :description " Score quantization for PWGL - successor of ksquant"
   :maintainer "Kilian Sprotte <kilian.sprotte@gmail.com>"
   :author "Kilian Sprotte <kilian.sprotte@gmail.com>"

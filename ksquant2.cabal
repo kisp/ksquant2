@@ -1,5 +1,5 @@
 Name:                ksquant2
-Version:             0.1.6
+Version:             0.1.7
 Description:         Haskell implementation of simple2score from ksquant.
 License:             GPL
 License-file:        COPYING
