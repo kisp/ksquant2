@@ -52,8 +52,7 @@
 (define-box simple2score ((simple (0 1 2 3))
 			  &key
 			  (time-signatures (4 4))
-			  (metronomes (4 60))
-			  (scale 1/4)
+			  (metronomes (4 60))			  
 			  (max-div 8)
 			  (forbidden-divs (7)))
   :non-generic t
@@ -73,12 +72,12 @@
 	   ,simple
 	   :time-signatures ,time-signatures
 	   :metronomes ,metronomes
-	   :scale ,scale
 	   :max-div ,max-div
 	   :forbidden-divs ,forbidden-divs)
 	 :stream out)))
-    (let ((code (sys:call-system
-		 (format nil "'~A' <~A >~A 2>~A" kernel-path sf-path enp-path err-path))))
+    (let ((code (ccl::with-message-dialog "KSQuant2: kernel..."
+		  (sys:call-system
+		   (format nil "'~A' <~A >~A 2>~A" kernel-path sf-path enp-path err-path)))))
       (unless (zerop code)
 	(let ((err-message (or (ignore-errors (with-open-file (in err-path) (read-line in)))
 			       "<no message>")))
@@ -92,7 +91,7 @@
 		(ksquant:simple2score simple
 				      :time-signatures time-signatures
 				      :metronomes metronomes
-				      :scale scale
+				      :scale 1/4
 				      :max-div max-div
 				      :forbidden-divs forbidden-divs))
 	      (progn
@@ -102,6 +101,6 @@
 		  (report-bug code sf-path enp-path err-path))
 		(abort))))))
     (with-open-file (in enp-path)
-      (ccl::make-score (read in)))))
+      (ccl::adjoin-ties (ccl::make-score (read in))))))
 
 (install-menu ksquant2)
