@@ -18,8 +18,8 @@ dur_to_lily d = (L.Dur (base d) (dots d))
           base d = L.power_to_simple_dur ((log2 (denominator d)) - dots d)
 
 e_to_lily :: M.E -> [L.Elt]
-e_to_lily (M.L d tie) = [L.Note (dur_to_lily d) tie]
-e_to_lily (M.R d) = [L.Rest (dur_to_lily d)]
+e_to_lily (M.L d tie _ _) = [L.Note (dur_to_lily d) tie]
+e_to_lily (M.R d _) = [L.Rest (dur_to_lily d)]
 e_to_lily (M.D _ r es) | r == 1 = concatMap e_to_lily es
                        | otherwise = let n' = fromInteger (numerator r)
                                          d' = fromInteger (denominator r)

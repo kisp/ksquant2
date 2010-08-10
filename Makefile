@@ -35,6 +35,8 @@ check:
 	! grep 'error ""' *.hs
 	rm -f Main *.o *.hi
 	ghc -fglasgow-exts -W -Werror --make Main.hs
+	rm -f test *.o *.hi
+	ghc -fglasgow-exts -W -Werror --make Test.hs -o test
 
 # ----------------------------------------------------------------
 

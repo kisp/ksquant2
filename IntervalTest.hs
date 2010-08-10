@@ -1,8 +1,6 @@
 module IntervalTest where
 import Interval
 import Test.QuickCheck
-import System
-import Text.Printf
 import Data.List (delete,sort,nub)
 
 ivmax = 30::Int
@@ -32,7 +30,7 @@ prop_isPointInInterval iv = any (isPointInInterval iv) domain
 
 prop_intersect :: TestInterval -> TestInterval -> Bool
 prop_intersect a b = intersect a b == safe_intersect a b
-    where safe_intersect a b = any inBoth domain
+    where safe_intersect _ _ = any inBoth domain
           inBoth x = isPointInInterval a x && isPointInInterval b x
 
 prop_isStrictlyAfter :: TestInterval -> TestInterval -> Bool
@@ -67,11 +65,11 @@ instance Arbitrary (AscendingPoints Int) where
 
 prop_groupPointsByIntervalls :: AscendingIntervals TestInterval -> AscendingPoints Int -> Bool
 prop_groupPointsByIntervalls ivs xs = (groupPointsByIntervalls ivs xs) == (safe_groupPointsByIntervalls ivs xs)
-    where safe_groupPointsByIntervalls ivs xs = map grap (get_ascending_intervals ivs)
+    where safe_groupPointsByIntervalls ivs _ = map grap (get_ascending_intervals ivs)
           grap iv = ascending_points (filter (isPointInInterval iv) (get_ascending_points xs))
 
 mt ivs xs = (safe_groupPointsByIntervalls ivs xs)
-    where safe_groupPointsByIntervalls ivs xs = map grap (get_ascending_intervals ivs)
+    where safe_groupPointsByIntervalls ivs _ = map grap (get_ascending_intervals ivs)
           grap iv = ascending_points (filter (isPointInInterval iv) (get_ascending_points xs))
 
 prop_ascending_intervals2points :: AscendingIntervals TestInterval -> Bool
