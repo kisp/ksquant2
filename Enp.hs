@@ -14,12 +14,13 @@ import qualified AbstractScore as A
 
 type Dur = Integer
 type Timesig = (Integer,Integer)
+type Tempo = (Integer,Rational)
 
 type Score = A.Score Measure
 type Part = A.Part Measure
 type Voice = A.Voice Measure
 
-data Measure = Measure Timesig [Elt]
+data Measure = Measure Timesig Tempo [Elt]
            deriving (Show, Eq)
 
 type Tied = Bool
@@ -40,11 +41,11 @@ scaleElt n (Chord d t notes) = (Chord (n * d) t notes)
 scaleElt n (Rest d) = (Rest (n * d))
 scaleElt n (Div d es) = (Div (n * d) es)
 
-makeMeasure :: Timesig -> [Elt] -> Measure
-makeMeasure (n,d) es =
+makeMeasure :: Timesig -> Tempo -> [Elt] -> Measure
+makeMeasure (n,d) t es =
     if not(check (n,d) es) then
         error $ "Enp.makeMeasure " ++ show (n,d) ++ " " ++ show es
-    else Measure (n,d) es
+    else Measure (n,d) t es
     where check (n,_) es = n == sum (map dur es)
 
 score2sexp :: Score -> LispVal
@@ -59,10 +60,12 @@ voice2sexp e =
              fromLispList (parseLisp' ":instrument NIL :staff :treble-staff")
 
 measure2sexp :: Measure -> LispVal
-measure2sexp (Measure (n,d) xs) =
+measure2sexp (Measure (n,d) (tu,t) xs) =
     LispList $ (map elt2sexp xs) ++
                  [LispKeyword "TIME-SIGNATURE",
-                  LispList [LispInteger n,LispInteger d]]
+                  LispList [LispInteger n,LispInteger d],
+                  LispKeyword "METRONOME",
+                  LispList [LispInteger tu,LispInteger $ round t]]
 
 elt2sexp :: Elt -> LispVal
 elt2sexp (Chord d False notes) = LispInteger d `cons` LispList [LispKeyword "NOTES", notes]

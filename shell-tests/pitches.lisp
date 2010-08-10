@@ -9,5 +9,6 @@
     (1 ((1 :NOTES (61))))
     (1 ((1 :NOTES (62 65))))
     (1 ((1 :NOTES (59))))
-    :TIME-SIGNATURE (4 4))
+    :TIME-SIGNATURE (4 4)
+    :METRONOME (4 60))
    :INSTRUMENT NIL :STAFF :TREBLE-STAFF)))

@@ -10,16 +10,16 @@ n60 = readLisp "(60)"
 
 mtoenp1 = TestList
            [
-            Enp.Measure (4,4) [Enp.Div 4 [Enp.Chord 1 False n60]]
+            Enp.Measure (4,4) (4,60) [Enp.Div 4 [Enp.Chord 1 False n60]]
             ~=? let leaf = (L 1 False 0 n60)
                 in m_to_enp
                        [(0,leaf)]
-                       (M (4,4) (60 % 1) leaf)
-           ,Enp.Measure (1,4) [Enp.Div 1 [Enp.Chord 1 False n60]]
+                       (M (4,4) (4,(60 % 1)) leaf)
+           ,Enp.Measure (1,4) (4,60) [Enp.Div 1 [Enp.Chord 1 False n60]]
             ~=? let leaf = (L (1%4) False 0 n60)
                 in m_to_enp
                        [(0,leaf)]
-                       (M (1,4) (60 % 1) leaf)           
+                       (M (1,4) (4,(60 % 1)) leaf)           
            -- ,Enp.Measure (2,4) [Enp.Div 1 [Enp.Chord 1 False],
            --                    Enp.Div 1 [Enp.Chord 1 False,Enp.Chord 1 False]]
            --  ~=? m_to_enp (m (2,4) (60 % 1)

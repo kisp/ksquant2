@@ -74,8 +74,8 @@ quantifyVoice ms v =
 
 buildMeasureFromLisp :: LispVal -> LispVal -> M.M
 buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])
-                         (LispList [LispInteger _,LispInteger t]) =
-                         head (M.measures_with_beats [(n,d)] [fromInteger t])
+                         (LispList [LispInteger tu,LispInteger t]) =
+                         head (M.measures_with_beats [(n,d)] [(tu,fromInteger t)])
 buildMeasureFromLisp _ _ = error "buildMeasureFromLisp"
 
 ensureListOfLists :: LispVal -> LispVal

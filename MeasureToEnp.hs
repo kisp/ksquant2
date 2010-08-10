@@ -34,12 +34,12 @@ adaptForTimesig (n,_) es = let f = n `div` (sum (map E.dur es))
                            in map (E.scaleElt f) es
 
 m_to_enp :: [(M.Label, M.E)] -> M.M -> E.Measure
-m_to_enp assoc (M.M ts _ e) =
+m_to_enp assoc (M.M ts t e) =
     let f = ((denominator (M.dur e))%1)
         list = (unwrap (wrapIfNeeded (e_to_enp assoc f e)))
         list' = map wrapIfNeeded list
         list'' = adaptForTimesig ts list'
-    in (E.makeMeasure ts list'')
+    in (E.makeMeasure ts t list'')
 
 v_to_enp :: M.Voice -> E.Voice
 v_to_enp v = let v' = M.label_voice v
