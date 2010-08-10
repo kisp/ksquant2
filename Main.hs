@@ -9,6 +9,7 @@ import qualified SimpleFormat2 as SF2
 import qualified AbstractScore as A
 import qualified Enp as Enp
 import MeasureToEnp
+import Data.List ((\\))
 
 ----------------
 
@@ -18,7 +19,6 @@ rational_to_time x = fromRational x
 rational_pair_to_time_pair (x,y) = (rational_to_time x, rational_to_time y)
 
 ----------------
-divs = [1..8] :: [Int]
 
 ----------------
 
@@ -47,9 +47,10 @@ nice_show label obj = do
 ---------------------
 
 type MeasureStructure = M.Voice
+type Divs = [Int]
 
-quantifyVoice :: MeasureStructure -> SF2.Voice -> M.Voice
-quantifyVoice ms v =
+quantifyVoice :: MeasureStructure -> Divs -> SF2.Voice -> M.Voice
+quantifyVoice ms divs v =
     let measures = A.voiceItems ms
         input = A.voiceItems v :: [SF2.Event]
         input' = Iv.ascending_intervals input
@@ -84,6 +85,13 @@ ensureListOfLists (LispList xs@(x:_)) | atom x = LispList [LispList xs]
                                       | otherwise = LispList xs
 ensureListOfLists _ = error "ensureListOfLists"
 
+ensureListOfIntegers :: LispVal -> [Int]
+ensureListOfIntegers (LispList xs) =
+    map ensureInt xs
+    where ensureInt (LispInteger x) = fromInteger x
+          ensureInt _ = error "ensureInt"
+ensureListOfIntegers _ = error "ensureListOfIntegers"
+
 stickToLast list = list ++ (repeat (last list))
 
 measureStream :: LispVal -> LispVal -> [M.M]
@@ -97,9 +105,12 @@ processSimpleFormat input =
         sf1 = SF.sexp2simpleFormat s :: SF.Score
         sf2 = SF2.toSimpleFormat2 sf1 :: SF2.Score
         sf2end = SF2.scoreEnd sf2
-        ms = M.measures_until_time (measureStream (getTimeSignatures input) (getMetronomes input)) sf2end
-        measurevoice = A.Voice $ ms 
-        trans = (quantifyVoice measurevoice) :: SF2.Voice -> M.Voice
+        ms = M.measures_until_time
+             (measureStream (getTimeSignatures input) (getMetronomes input))
+             sf2end
+        measurevoice = A.Voice $ ms
+        divs = [1..(getMaxDiv input)] \\ getForbDivs input :: Divs 
+        trans = (quantifyVoice measurevoice divs) :: SF2.Voice -> M.Voice
         mscore = (A.mapVoices trans sf2) :: M.Score
         enp = (A.mapVoices v_to_enp mscore) :: Enp.Score
     in printLisp (Enp.score2sexp enp)
@@ -112,8 +123,14 @@ processSimpleFormat input =
           getMetronomes x = case getf x (LispKeyword "METRONOMES") of
                                   Just s -> ensureListOfLists s
                                   Nothing -> error "Could not find :metronomes"
-                                                                   
-
+          getMaxDiv s =  case getf s (LispKeyword "MAX-DIV") of
+                           Just (LispInteger x) -> fromInteger x
+                           Just _ -> error "incorrect :max-div"
+                           Nothing -> error "Could not find :max-div"
+          getForbDivs s =  case getf s (LispKeyword "FORBIDDEN-DIVS") of
+                           Just xs@(LispList _) -> ensureListOfIntegers xs
+                           Just _ -> error "incorrect :forbidden-divs"
+                           Nothing -> error "Could not find :forbidden-divs"
 main = do
   s <- getContents
   case (parseLisp s) of
