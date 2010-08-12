@@ -4,7 +4,7 @@ import Debug.Trace
 
 neighbours list = zip list (tail list)
 
-isForAllNeighbours pred list = and (map (uncurry pred) (neighbours list))
+isForAllNeighbours p list = and (map (uncurry p) (neighbours list))
 
 intToFloat :: Int -> Float
 intToFloat n = fromInteger (toInteger n)

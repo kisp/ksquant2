@@ -43,10 +43,10 @@ scaleElt n (Div d es) = (Div (n * d) es)
 
 makeMeasure :: Timesig -> Tempo -> [Elt] -> Measure
 makeMeasure (n,d) t es =
-    if not(check (n,d) es) then
+    if not check then
         error $ "Enp.makeMeasure " ++ show (n,d) ++ " " ++ show es
     else Measure (n,d) t es
-    where check (n,_) es = n == sum (map dur es)
+    where check = n == sum (map dur es)
 
 score2sexp :: Score -> LispVal
 score2sexp e = LispList $ map part2sexp (A.scoreParts e)

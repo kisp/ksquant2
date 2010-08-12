@@ -85,7 +85,7 @@ parseRatio =
       sign <- (char '-' >> return (-1)) <|>
               return 1
       numerator <- many1 digit
-      char '/'
+      _ <- char '/'
       denominator <- many1 digit
       numerator' <- return (read numerator)
       denominator' <- return (read denominator)
@@ -94,9 +94,9 @@ parseRatio =
 parseList :: Parser LispVal
 parseList =
     do
-      char '('
+      _ <- char '('
       elts <- sepBy parseVal spaces
-      char ')'
+      _ <- char ')'
       return $ LispList elts
 
 parseVal :: Parser LispVal

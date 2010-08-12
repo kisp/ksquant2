@@ -34,9 +34,11 @@ clean:
 check:
 	! grep 'error ""' *.hs
 	rm -f Main *.o *.hi
-	ghc -fglasgow-exts -W -Werror --make Main.hs
+	ghc -fglasgow-exts -Wall -Werror -fno-warn-missing-signatures \
+		-fno-warn-name-shadowing --make Main.hs
 	rm -f test *.o *.hi
-	ghc -fglasgow-exts -W -Werror --make Test.hs -o test
+	ghc -fglasgow-exts -Wall -Werror -fno-warn-missing-signatures \
+		-fno-warn-name-shadowing -fno-warn-orphans --make Test.hs -o test
 
 # ----------------------------------------------------------------
 

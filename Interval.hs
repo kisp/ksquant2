@@ -82,8 +82,8 @@ ascending_points xs =
 
 get_ascending_points (AscendingPoints xs) = xs
 
--- |For each interval return ascending_points that are all the points
--- from xs contained in the interval
+-- | For each interval return ascending_points that are all the points
+--   from xs contained in the interval
 groupPointsByIntervalls ivs xs = f (get_ascending_intervals ivs) (get_ascending_points xs)
     where f [] _ = []
           f (_:ivs) [] = (ascending_points []) : (f ivs [])
