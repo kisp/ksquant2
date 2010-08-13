@@ -39,6 +39,7 @@ check:
 	rm -f test *.o *.hi
 	ghc -fglasgow-exts -Wall -Werror -fno-warn-missing-signatures \
 		-fno-warn-name-shadowing -fno-warn-orphans --make Test.hs -o test
+	hlint .
 
 # ----------------------------------------------------------------
 
