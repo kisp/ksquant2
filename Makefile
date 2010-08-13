@@ -1,5 +1,5 @@
 all:
-	ghc -fglasgow-exts --make Main.hs	
+	ghc -fglasgow-exts --make Main.hs -o main
 
 .PHONY: test
 test:
@@ -33,9 +33,9 @@ clean:
 .PHONY: check
 check:
 	! grep 'error ""' *.hs
-	rm -f Main *.o *.hi
+	rm -f main Main *.o *.hi
 	ghc -fglasgow-exts -Wall -Werror -fno-warn-missing-signatures \
-		-fno-warn-name-shadowing --make Main.hs
+		-fno-warn-name-shadowing --make Main.hs -o main
 	rm -f test *.o *.hi
 	ghc -fglasgow-exts -Wall -Werror -fno-warn-missing-signatures \
 		-fno-warn-name-shadowing -fno-warn-orphans --make Test.hs -o test
