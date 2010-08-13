@@ -8,44 +8,18 @@ import qualified SimpleFormat as SF
 import qualified SimpleFormat2 as SF2
 import qualified AbstractScore as A
 import qualified Enp as Enp
+import qualified Lily as L
 import MeasureToEnp
+import MeasureToLily
 import Data.List ((\\))
 import Data.Maybe 
-
-----------------
+import System.Environment
 
 rationalToTime :: Rational -> Time
 rationalToTime = fromRational
 
+rationalPairToTimePair :: (Rational, Rational) -> (Time, Time)
 rationalPairToTimePair (x,y) = (rationalToTime x, rationalToTime y)
-
-----------------
-
-----------------
-
--- groups' = Iv.groupPointsByIntervalls quant_grid' points
-
--- make_qevent ivs ((start_i,end_i),e) = QEvent (Iv.start (ivs!!start_i)) (Iv.start (ivs!!end_i)) [e]
-
--- qevents = Iv.ascendingIntervals (map ((make_qevent quant_grid) . (Iv.quantizeIv quant_grid')) input)
-
-----------------
-
-niceShow label obj = do
-  putStrLn "------------"
-  putStrLn (label ++ ":\n" ++ show obj)
-
--- main2 = do
-  -- nice_show "input" input
-  -- nice_show "input'" input'
-  -- nice_show "groups" groups
-  -- nice_show "bestDivs" bestDivs
-  -- nice_show "quant_grid" quant_grid
-  -- nice_show "groups'" groups'
-  -- nice_show "qevents" qevents
-  -- L.exportLily "atest" (map mToLily measures')
-
----------------------
 
 type MeasureStructure = M.Voice
 type Divs = [Int]
@@ -94,14 +68,15 @@ ensureListOfIntegers (LispList xs) =
           ensureInt _ = error "ensureInt"
 ensureListOfIntegers _ = error "ensureListOfIntegers"
 
+stickToLast :: [a] -> [a]
 stickToLast list = list ++ repeat (last list)
 
 measureStream :: LispVal -> LispVal -> [M.M]
 measureStream ts metro = zipWith buildMeasureFromLisp (stickToLast (fromLispList ts))
                          (stickToLast (fromLispList metro))
 
-processSimpleFormat :: Lisp.LispVal -> String
-processSimpleFormat input =
+processSimpleFormat :: (LispVal,[String]) -> String
+processSimpleFormat (input,args) =
     let s = getSimple input     
         sf1 = SF.sexp2simpleFormat s :: SF.Score
         sf2 = SF2.toSimpleFormat2 sf1 :: SF2.Score
@@ -113,8 +88,9 @@ processSimpleFormat input =
         divs = [1..(getMaxDiv input)] \\ getForbDivs input :: Divs 
         trans = quantifyVoice measurevoice divs :: SF2.Voice -> M.Voice
         mscore = A.mapVoices trans sf2 :: M.Score
-        enp = A.mapVoices vToEnp mscore :: Enp.Score
-    in printLisp (Enp.score2sexp enp)
+    in if isLily
+       then L.showLily (A.mapVoices vToLily mscore)
+       else printLisp (Enp.score2sexp (A.mapVoices vToEnp mscore))
     where getSimple x = fromMaybe (error "Could not find :simple") (getf x (LispKeyword "SIMPLE"))
           getTimeSignatures x = case getf x (LispKeyword "TIME-SIGNATURES") of
                                   Just s -> ensureListOfLists s
@@ -131,10 +107,14 @@ processSimpleFormat input =
                            Just (LispSymbol "NIL") -> []
                            Just _ -> error "incorrect :forbidden-divs"
                            Nothing -> error "Could not find :forbidden-divs"
+          isLily = "--lily" `elem` args
+
+main :: IO ()
 main = do
+  args <- getArgs
   s <- getContents
   case (parseLisp s) of
-    Right [s] -> (putStrLn . processSimpleFormat) s
-    Right [s,_] -> (putStrLn . processSimpleFormat) s
+    Right [s] -> (putStrLn . processSimpleFormat) (s,args)
+    Right [s,_] -> (putStrLn . processSimpleFormat) (s,args)
     Right _ -> error "parseLisp of stdin returned an unexpected number of forms"
     Left err -> do { print err ; error "parse error" }
