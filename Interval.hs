@@ -63,6 +63,7 @@ isStrictlyAfter a b = start b >= end a
 data AscendingIntervals a = AscendingIntervals [a]
                             deriving Show
 
+{-# ANN isAscendingIntervals "HLint: ignore Eta reduce" #-}
 isAscendingIntervals xs = isForAllNeighbours isStrictlyAfter xs
 
 ascendingIntervals ivs =
