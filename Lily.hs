@@ -2,7 +2,7 @@ module Lily (exportLily
             ,Dur(..)
             ,Elt(..)
             ,Measure(..)
-            ,power_to_simple_dur
+            ,powerToSimpleDur
             )
 where
 import Data.List
@@ -22,8 +22,8 @@ data SimpleDur = D1 | D2 | D4 | D8 | D16 | D32 | D64 | D128
            deriving (Show,Enum)
 
 -- 1 / 2^n
-power_to_simple_dur :: Int -> SimpleDur
-power_to_simple_dur n = toEnum n
+powerToSimpleDur :: Int -> SimpleDur
+powerToSimpleDur = toEnum
 
 data Dur = Dur SimpleDur Int
            deriving Show
@@ -47,25 +47,25 @@ simpleDurToRatio x =
       D64 -> 1 % 64
       D128 -> 1 % 128
 
-durToRatio (Dur s d) = r ((simpleDurToRatio s) * (1 % 2)) d (simpleDurToRatio s)
+durToRatio (Dur s d) = r (simpleDurToRatio s * (1 % 2)) d (simpleDurToRatio s)
     where r _ 0 acc = acc
           r l d acc = r (l * (1 % 2)) (d - 1) (acc + l)
 
 eltToRatio (Note d _) = durToRatio d
 eltToRatio (Rest d) = durToRatio d
-eltToRatio (Times n d xs) = (n % d) * foldr (+) 0 (map eltToRatio xs)
+eltToRatio (Times n d xs) = (n % d) * foldr ((+) . eltToRatio) 0 xs
 
-isCorrectmeasurelength (Measure n d xs) = (n % d) == foldr (+) 0 (map eltToRatio xs)
+isCorrectmeasurelength (Measure n d xs) = (n % d) == foldr ((+) . eltToRatio) 0 xs
 
-durToLily (Dur x d) = (show . denominator . simpleDurToRatio) x ++ take d (repeat '.')
+durToLily (Dur x d) = (show . denominator . simpleDurToRatio) x ++ replicate d '.'
 
-eltToLily (Note d tie) = "c'" ++ (durToLily d) ++
+eltToLily (Note d tie) = "c'" ++ durToLily d ++
                          if tie then "~" else ""
-eltToLily (Rest d) = "r" ++ (durToLily d)
+eltToLily (Rest d) = 'r' : durToLily d
 eltToLily (Times n d xs) = "\\times " ++ show n ++ "/" ++ show d ++ " { " ++
                            intercalate " " (map eltToLily xs) ++ " }"
 
-measureToLily ((Measure n d xs), change) =
+measureToLily (Measure n d xs, change) =
     (if change then
          "\\time " ++ show n ++ "/" ++ show d ++ " "
      else "")
@@ -74,7 +74,7 @@ measureToLily ((Measure n d xs), change) =
 
 -- return a list of equal length as xs indicating if the corresponing
 -- elt of xs is different from its predecessor
-indicateChanges xs = True : (map (not . (uncurry (==))) (zip (drop 1 xs) xs))
+indicateChanges xs = True : map (not . uncurry (==)) (zip (drop 1 xs) xs)
 
 measureTimeSignature (Measure n d _) = (n,d)
 
@@ -100,13 +100,13 @@ runLily path =
     rawSystem "lilypond" ["--pdf", takeFileName path]
     setCurrentDirectory pwd
 
-validateMeasures xs = and (map isCorrectmeasurelength xs)
+validateMeasures = all isCorrectmeasurelength
 
 exportLily :: FilePath -> Score -> IO ()
 exportLily name score =
-    let xs = A.voiceItems $ (A.partVoices $ (A.scoreParts score)!!0)!!0
+    let xs = A.voiceItems $ head (A.partVoices $ head (A.scoreParts score))
     in if validateMeasures xs then
-           let path = "/tmp" </> (replaceExtension name "ly") in
+           let path = "/tmp" </> replaceExtension name "ly" in
            do
              outh <- openFile path WriteMode
              hPutStr outh (lilyString xs)

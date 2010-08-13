@@ -7,8 +7,8 @@ module SimpleFormat2 (toSimpleFormat2
                      ,sampleVoice
                      ,voiceEnd
                      ,scoreEnd
-                     ,qevent_from_event
-                     ,qevent_notes)
+                     ,qeventFromEvent
+                     ,qeventNotes)
 where
 
 import Utils
@@ -36,11 +36,11 @@ type QEnd = Rational
 data QEvent = QChord QStart QEnd Notes
            deriving Show
 
-qevent_from_event :: (Interval a QStart) => a -> Event -> QEvent
-qevent_from_event quantized_iv (Chord _ _ n) =
-    (QChord (start quantized_iv) (end quantized_iv) n)
+qeventFromEvent :: (Interval a QStart) => a -> Event -> QEvent
+qeventFromEvent quantized_iv (Chord _ _ n) =
+    QChord (start quantized_iv) (end quantized_iv) n
 
-qevent_notes (QChord _ _ notes) = notes
+qeventNotes (QChord _ _ notes) = notes
 
 instance Interval Event Time where
     start (Chord s _ _) = s
@@ -61,7 +61,7 @@ voiceToSimpleFormat2 v =
     let events = A.voiceItems v
         startEndPairs = (neighbours (map SF1.eventStart events))
     in A.Voice $ concatMap trans (zip events startEndPairs)
-    where trans ((SF1.Chord _ notes),(start,end)) = [Chord start end notes]
+    where trans (SF1.Chord _ notes,(start,end)) = [Chord start end notes]
           trans _ = []
 
 voiceEnd :: Voice -> End

@@ -48,4 +48,4 @@ sexp2event xs@(LispList _)
     where foundAndT Nothing = False
           foundAndT (Just (LispSymbol "NIL")) = False
           foundAndT (Just _) = True
-sexp2event x = error $ "sexp2event with " ++ (show x)
+sexp2event x = error $ "sexp2event with " ++ show x

@@ -1,10 +1,10 @@
 module StateTest where
 import Control.Monad.State
 
-data Tree a = Leaf a | Branch [(Tree a)]
+data Tree a = Leaf a | Branch [Tree a]
             deriving Show
 
-labelTree :: (Tree a) -> State Integer (Tree Integer)
+labelTree :: Tree a -> State Integer (Tree Integer)
 labelTree (Leaf x)
     = do n <- get
          put (n+1)
@@ -16,7 +16,7 @@ labelTree (Branch ts)
 
 labelit t = evalState (labelTree t) 0
 
-test2 = let t = Branch [(Leaf 'a'),(Leaf 'b'),(Leaf 'c')]
+test2 = let t = Branch [Leaf 'a',Leaf 'b',Leaf 'c']
                in labelit (Branch [t,t])
 
 -----------------------------------------------------
@@ -46,7 +46,7 @@ numberMTree (Node x t1 t2)
      findIndexInList = findIndexInListHelp 0
      findIndexInListHelp _ _ [] = Nothing
      findIndexInListHelp count f (h:t)
-        = if (f h)
+        = if f h
           then Just count
           else findIndexInListHelp (count+1) f t
 

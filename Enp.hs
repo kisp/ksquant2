@@ -37,9 +37,9 @@ dur (Rest d) = d
 dur (Div d _) = d
 
 scaleElt :: Integer -> Elt -> Elt
-scaleElt n (Chord d t notes) = (Chord (n * d) t notes)
-scaleElt n (Rest d) = (Rest (n * d))
-scaleElt n (Div d es) = (Div (n * d) es)
+scaleElt n (Chord d t notes) = Chord (n * d) t notes
+scaleElt n (Rest d) = Rest (n * d)
+scaleElt n (Div d es) = Div (n * d) es
 
 makeMeasure :: Timesig -> Tempo -> [Elt] -> Measure
 makeMeasure (n,d) t es =
@@ -56,12 +56,12 @@ part2sexp e = LispList $ map voice2sexp (A.partVoices e)
 
 voice2sexp :: Voice -> LispVal
 voice2sexp e = 
-    LispList $ (map measure2sexp (A.voiceItems e)) ++
+    LispList $ map measure2sexp (A.voiceItems e) ++
              fromLispList (parseLisp' ":instrument NIL :staff :treble-staff")
 
 measure2sexp :: Measure -> LispVal
 measure2sexp (Measure (n,d) (tu,t) xs) =
-    LispList $ (map elt2sexp xs) ++
+    LispList $ map elt2sexp xs ++
                  [LispKeyword "TIME-SIGNATURE",
                   LispList [LispInteger n,LispInteger d],
                   LispKeyword "METRONOME",
@@ -70,5 +70,5 @@ measure2sexp (Measure (n,d) (tu,t) xs) =
 elt2sexp :: Elt -> LispVal
 elt2sexp (Chord d False notes) = LispInteger d `cons` LispList [LispKeyword "NOTES", notes]
 elt2sexp (Chord d True  notes) = LispFloat (fromInteger d) `cons` LispList [LispKeyword "NOTES", notes]
-elt2sexp (Rest d) = LispInteger (-d) `cons` (parseLisp' ":notes (60)")
-elt2sexp (Div d xs) = (LispInteger d) `cons` (LispList [(LispList (map elt2sexp xs))])
+elt2sexp (Rest d) = LispInteger (-d) `cons` parseLisp' ":notes (60)"
+elt2sexp (Div d xs) = LispInteger d `cons` LispList [LispList (map elt2sexp xs)]

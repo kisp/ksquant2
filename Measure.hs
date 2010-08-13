@@ -7,20 +7,20 @@ module Measure (m
                ,M(M)
                ,transform_leafs
                ,transform_leafs'
-               ,measures_divide_leafs
-               ,measures_with_beats
-               ,leaf_durs
-               ,leaf_effective_durs
-               ,measures_leaf_intervals
-               ,measures_transform_leafs
+               ,measuresDivideLeafs
+               ,measuresWithBeats
+               ,leafDurs
+               ,leafEffectiveDurs
+               ,measuresLeafIntervals
+               ,measuresTransformLeafs
                ,wrapWithD
                ,Score
                ,Part
                ,Voice
                ,Label
-               ,measures_tie_or_rest
-               ,measures_until_time
-               ,label_voice
+               ,measuresTieOrRest
+               ,measuresUntilTime
+               ,labelVoice
                ,mleaves
                ,vleaves
                ,eid
@@ -34,22 +34,19 @@ import Data.List
 import qualified Lisp as L
 
 isPowerOfTwo 1 = True
-isPowerOfTwo x | x > 1 = if (even x) then
-                             isPowerOfTwo (x `div` 2)
-                         else
-                             False
+isPowerOfTwo x | x > 1 = even x && isPowerOfTwo (x `div` 2)
 isPowerOfTwo _ = error  "isPowerOfTwo"
 
 lowerPowerOfTwo 1 = 1
 lowerPowerOfTwo x | x > 1 = if isPowerOfTwo x then
                                 x
                             else
-                                (lowerPowerOfTwo (x-1))
+                                lowerPowerOfTwo (x-1)
 lowerPowerOfTwo _ = error "lowerPowerOfTwo"
 
 -- e.g. when we divide by 9 the tuplet ratio will be 8 % 9
-div_to_ratio :: Integer -> Rational
-div_to_ratio d = ((lowerPowerOfTwo d) % d)
+divToRatio :: Integer -> Rational
+divToRatio d = lowerPowerOfTwo d % d
 
 notableDur :: Rational -> Bool
 notableDur x = h (numerator x) (denominator x)
@@ -90,19 +87,19 @@ eid (D _ _ _) = error "id not for D"
 eid (R _ x) = x
 eid (L _ _ x _) = x
 
-timesig_dur (n,d) = (n%d)
+timesigDur (n,d) = n%d
 
 m timesig tempo d = if not(check timesig tempo d) then
                         error "m timesig tempo d not valid"
                     else M timesig tempo d
-    where check timesig _ d = (dur d) == (timesig_dur timesig)
+    where check timesig _ d = dur d == timesigDur timesig
 
-l d tie notes = if not(check) then
+l d tie notes = if not check then
               error $ "cannot construct L from " ++ show d ++ " " ++ show tie
           else L d tie 0 notes
     where check = notableDur d
 
-r d = if not(check) then
+r d = if not check then
           error "r d not valid"
       else R d 0
     where check = notableDur d
@@ -121,14 +118,14 @@ smap :: (t -> a -> (b,t)) -> [a] -> t -> ([b],t)
 smap _ [] d   = ([],d)
 smap f (x:xs) d = let (r,newd) = f d x
                   in let (rest,lastd) = (smap f xs newd)                      
-                     in ((r : rest),lastd)
+                     in (r : rest,lastd)
 
 instance Transformable M E where
     transform_leafs fn (M timesig tempo e) =
         m timesig tempo (transform_leafs fn e)
     transform_leafs' fn z (M timesig tempo e) =
         let (r,z') = (transform_leafs' fn z e)
-        in ((m timesig tempo r),z')
+        in (m timesig tempo r,z')
 
 instance Transformable E E where
     transform_leafs fn (D dur r es) =
@@ -136,29 +133,28 @@ instance Transformable E E where
     transform_leafs fn x = fn x
     transform_leafs' fn z (D dur r es) =
         let (res,z') = (smap (transform_leafs' fn) es z)
-        in ((d dur r res),z')
+        in (d dur r res,z')
     transform_leafs' fn z x = fn x z
 
 n60 = L.readLisp "(60)"
 
-measures_divide_leafs ms divs =
-    (fst (smap (transform_leafs' trans) ms divs))
+measuresDivideLeafs ms divs =
+    fst (smap (transform_leafs' trans) ms divs)
         where 
               trans (L dur _ _ _) (n:ds) =
-                  let r = if (notableDur (dur / (n%1))) then 1 else div_to_ratio n
-                  in (d dur r (take (fromInteger n) (repeat (l ((dur/(n%1)/r)) False n60))),
+                  let r = if notableDur (dur / (n%1)) then 1 else divToRatio n
+                  in (d dur r (replicate (fromInteger n) (l (dur / (n % 1) / r) False n60)),
                         ds)
               trans r@(R _ _) ds = (r,ds)
-              trans (D _ _ _) _ = error "measures_divide_leafs: did not expect (D _ _ _)"
-              trans (L _ _ _ _) [] = error "measures_divide_leafs: divs have run out"
+              trans (D _ _ _) _ = error "measuresDivideLeafs: did not expect (D _ _ _)"
+              trans (L _ _ _ _) [] = error "measuresDivideLeafs: divs have run out"
 
-measures_with_beats timesigs tempos =
+measuresWithBeats timesigs tempos =
     let divs = map fst timesigs
-    in measures_divide_leafs (map mes (zip timesigs tempos)) divs
+    in measuresDivideLeafs (map mes (zip timesigs tempos)) divs
     where mes (timesig,tempo) =
               -- use L here, so that we are allowed to have a duration of e.g. 5/4
-              (m timesig tempo (L (timesig_dur timesig) False 0 n60))
-
+              m timesig tempo (L (timesigDur timesig) False 0 n60)
 
 eleaves :: E -> [E]
 eleaves e@(L _ _ _ _) = [e]
@@ -171,91 +167,91 @@ mleaves (M _ _ e) = eleaves e
 vleaves :: Voice -> [E]
 vleaves v = concatMap mleaves (A.voiceItems v)
 
-leaf_durs :: E -> [Rational]
-leaf_durs e = map dur (eleaves e)
+leafDurs :: E -> [Rational]
+leafDurs e = map dur (eleaves e)
 
-leaf_effective_durs :: E -> [Rational]
-leaf_effective_durs x = leaf_effective_durs' 1 x
+leafEffectiveDurs :: E -> [Rational]
+leafEffectiveDurs x = leafEffectiveDurs' 1 x
     where
-      leaf_effective_durs' r (L d _ _ _) = [d * r]
-      leaf_effective_durs' r (R d _) = [d * r]
-      leaf_effective_durs' r (D _ r' es) =
-          concatMap (leaf_effective_durs' (r * r')) es
+      leafEffectiveDurs' r (L d _ _ _) = [d * r]
+      leafEffectiveDurs' r (R d _) = [d * r]
+      leafEffectiveDurs' r (D _ r' es) =
+          concatMap (leafEffectiveDurs' (r * r')) es
 
-tempo_to_beat_dur :: (Integer,Rational) -> Rational
-tempo_to_beat_dur (d,tempo) = 60 / tempo / (d%4)
+tempoToBeatDur :: (Integer,Rational) -> Rational
+tempoToBeatDur (d,tempo) = 60 / tempo / (d%4)
 
-measure_dur (M (n,_) tempo _) = (n%1) * (tempo_to_beat_dur tempo)
+measureDur (M (n,_) tempo _) = (n%1) * tempoToBeatDur tempo
 
 -- foldl            :: (a -> b -> a) -> a -> [b] -> a
 -- foldl f acc []     =  acc
 -- foldl f acc (x:xs) =  foldl f (f acc x) xs
 
-dxs_to_xs dxs = scanl (+) 0 dxs
+dxsToXs = scanl (+) 0
 
-measures_start_times ms = dxs_to_xs (map measure_dur ms)
+measuresStartTimes ms = dxsToXs (map measureDur ms)
 
-measures_until_time :: [M] -> Float -> [M]
-measures_until_time ms time = map fst (takeWhile p (zip ms (measures_start_times ms)))
+measuresUntilTime :: [M] -> Float -> [M]
+measuresUntilTime ms time = map fst (takeWhile p (zip ms (measuresStartTimes ms)))
     where p (_,s) = fromRational s < time
 
 -- measure_leaf_start_times (M (_,d) tempo div) start =
---     (map (+start) (dxs_to_xs_butlast (map trans (leaf_effective_durs div))))
---     where trans dur = (tempo_to_beat_dur tempo) * (dur_to_beat dur)
+--     (map (+start) (dxsToXs_butlast (map trans (leafEffectiveDurs div))))
+--     where trans dur = (tempoToBeatDur tempo) * (dur_to_beat dur)
 --           dur_to_beat dur = dur * (d%1)
 --           butlast xs = reverse (tail (reverse xs))
---           dxs_to_xs_butlast dxs = butlast (dxs_to_xs dxs)
+--           dxsToXs_butlast dxs = butlast (dxsToXs dxs)
 
 
 -- measures_leaf_start_times ms = (concatMap (uncurry measure_leaf_start_times)
---                                               (zip ms (measures_start_times ms)))
+--                                               (zip ms (measuresStartTimes ms)))
 
-measure_leaf_intervals (M (_,d) tempo div) start =
-    (neighbours (map (+start) (dxs_to_xs (map trans (leaf_effective_durs div)))))
-    where trans dur = (tempo_to_beat_dur tempo) * (dur_to_beat dur)
+measureLeafIntervals (M (_,d) tempo div) start =
+    neighbours (map (+start) (dxsToXs (map trans (leafEffectiveDurs div))))
+    where trans dur = tempoToBeatDur tempo * dur_to_beat dur
           dur_to_beat dur = dur * (d%1)
 
-measures_leaf_intervals ms = (concatMap (uncurry measure_leaf_intervals)
-                              (zip ms (measures_start_times ms)))
+measuresLeafIntervals ms = concatMap (uncurry measureLeafIntervals)
+                              (zip ms (measuresStartTimes ms))
 
 -- if leaf start time is not in any iv, then rest. if leaf start time
 -- is in an interval keep it and make it a tie if the end time is not
 -- the same as the end time of the interval
-measures_tie_or_rest :: (Transformable a1 E, Iv.Interval a b, Ord b) =>
+measuresTieOrRest :: (Transformable a1 E, Iv.Interval a b, Ord b) =>
                         [a1] -> [a] -> [(b, b)] -> [a1]
-measures_tie_or_rest ms ivs leaf_times = 
-    (fst (smap (transform_leafs' trans) ms leaf_times))
+measuresTieOrRest ms ivs leaf_times = 
+    fst (smap (transform_leafs' trans) ms leaf_times)
         where 
               trans (L dur _ _ notes) ((s,e):leaf_times) =            
                   case find ivContainsStart ivs of
-                    Nothing -> ((r dur),leaf_times)
+                    Nothing -> (r dur,leaf_times)
                     Just iv -> let tie = e < Iv.end iv
-                               in ((l dur tie notes),leaf_times)
-                  where ivContainsStart = ((flip Iv.isPointInInterval) s)                  
-              trans (L _ _ _ _) [] = error "measures_tie_or_rest: leaf_times have run out"
-              trans (R _ _) _    = error "measures_tie_or_rest: did not expect a rest here"
-              trans (D _ _ _) _ = error "measures_tie_or_rest: did not expect a D"
+                               in (l dur tie notes,leaf_times)
+                  where ivContainsStart = flip Iv.isPointInInterval s
+              trans (L _ _ _ _) [] = error "measuresTieOrRest: leaf_times have run out"
+              trans (R _ _) _    = error "measuresTieOrRest: did not expect a rest here"
+              trans (D _ _ _) _ = error "measuresTieOrRest: did not expect a D"
 
-measures_transform_leafs :: (Transformable a1 E, Iv.Interval a b, Ord b) =>
+measuresTransformLeafs :: (Transformable a1 E, Iv.Interval a b, Ord b) =>
                         (E -> a -> E) -> [a1] -> [a] -> [(b, b)] -> [a1]
-measures_transform_leafs f ms ivs leaf_times =
-    (fst (smap (transform_leafs' trans) ms leaf_times))
+measuresTransformLeafs f ms ivs leaf_times =
+    fst (smap (transform_leafs' trans) ms leaf_times)
         where 
-              trans (D _ _ _) _ = error "measures_tie_or_rest: did not expect a D"
-              trans _ [] = error "measures_transform_leafs: leaf_times have run out"
+              trans (D _ _ _) _ = error "measuresTieOrRest: did not expect a D"
+              trans _ [] = error "measuresTransformLeafs: leaf_times have run out"
               trans elt ((s,_):leaf_times) =
                   case find ivContainsStart ivs of
                     Nothing -> (elt,leaf_times)
                     Just iv -> (f elt iv,leaf_times)
-                  where ivContainsStart = ((flip Iv.isPointInInterval) s)
+                  where ivContainsStart = flip Iv.isPointInInterval s
 
-label_voice voice =
+labelVoice voice =
     A.Voice (fst (smap (transform_leafs' trans) (A.voiceItems voice) [0..]))
         where 
-              trans (L dur tie _ notes) (id:ids) = ((L dur tie id notes),ids)
-              trans (R dur _) (id:ids) = ((R dur id),ids)
-              trans (D _ _ _) _ = error "label_voice: did not expect a D"
-              trans _ [] = error "label_voice: ids have run out? (should never happen)"
+              trans (L dur tie _ notes) (id:ids) = (L dur tie id notes,ids)
+              trans (R dur _) (id:ids) = (R dur id,ids)
+              trans (D _ _ _) _ = error "labelVoice: did not expect a D"
+              trans _ [] = error "labelVoice: ids have run out? (should never happen)"
 
 wrapWithD :: E -> E
 wrapWithD e = d (dur e) 1 [e]
@@ -266,5 +262,5 @@ wrapWithD e = d (dur e) 1 [e]
 --      (D (1 % 1) (1 % 1)
 --       [L (1 % 4) False,L (1 % 4) False,L (1 % 4) False,L (1 % 4) False])
 
--- m2 = (measures_divide_leafs [m1] (repeat 3)) !! 0
--- m3 = (measures_divide_leafs [m2] (repeat 3)) !! 0
+-- m2 = (measuresDivideLeafs [m1] (repeat 3)) !! 0
+-- m3 = (measuresDivideLeafs [m2] (repeat 3)) !! 0

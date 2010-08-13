@@ -10,13 +10,14 @@ import qualified AbstractScore as A
 import qualified Enp as Enp
 import MeasureToEnp
 import Data.List ((\\))
+import Data.Maybe 
 
 ----------------
 
-rational_to_time :: Rational -> Time
-rational_to_time x = fromRational x
+rationalToTime :: Rational -> Time
+rationalToTime = fromRational
 
-rational_pair_to_time_pair (x,y) = (rational_to_time x, rational_to_time y)
+rationalPairToTimePair (x,y) = (rationalToTime x, rationalToTime y)
 
 ----------------
 
@@ -26,23 +27,23 @@ rational_pair_to_time_pair (x,y) = (rational_to_time x, rational_to_time y)
 
 -- make_qevent ivs ((start_i,end_i),e) = QEvent (Iv.start (ivs!!start_i)) (Iv.start (ivs!!end_i)) [e]
 
--- qevents = Iv.ascending_intervals (map ((make_qevent quant_grid) . (Iv.quantize_iv quant_grid')) input)
+-- qevents = Iv.ascendingIntervals (map ((make_qevent quant_grid) . (Iv.quantizeIv quant_grid')) input)
 
 ----------------
 
-nice_show label obj = do
+niceShow label obj = do
   putStrLn "------------"
-  putStrLn $ (label ++ ":\n" ++ (show obj))
+  putStrLn (label ++ ":\n" ++ show obj)
 
 -- main2 = do
   -- nice_show "input" input
   -- nice_show "input'" input'
   -- nice_show "groups" groups
-  -- nice_show "best_divs" best_divs
+  -- nice_show "bestDivs" bestDivs
   -- nice_show "quant_grid" quant_grid
   -- nice_show "groups'" groups'
   -- nice_show "qevents" qevents
-  -- L.exportLily "atest" (map m_to_lily measures')
+  -- L.exportLily "atest" (map mToLily measures')
 
 ---------------------
 
@@ -53,30 +54,31 @@ quantifyVoice :: MeasureStructure -> Divs -> SF2.Voice -> M.Voice
 quantifyVoice ms divs v =
     let measures = A.voiceItems ms
         input = A.voiceItems v :: [SF2.Event]
-        input' = Iv.ascending_intervals input
-        beats_intervals = Iv.ascending_intervals
-                          (map rational_pair_to_time_pair
-                                   (M.measures_leaf_intervals measures))
-        points = Iv.ascending_intervals2points input'
+        input' = Iv.ascendingIntervals input
+        beats_intervals = Iv.ascendingIntervals
+                          (map rationalPairToTimePair
+                                   (M.measuresLeafIntervals measures))
+        points = Iv.ascendingIntervals2points input'
         groups = Iv.groupPointsByIntervalls beats_intervals points
-        best_divs = (map (uncurry (Iv.best_div divs))
-                     (zip (Iv.get_ascending_intervals beats_intervals) groups))
-        measures' = M.measures_divide_leafs measures (map toInteger best_divs)
-        quant_grid = M.measures_leaf_intervals measures'
-        quant_grid' = Iv.ascending_intervals (map rational_pair_to_time_pair quant_grid)
-        quant_grid_asc = (Iv.ascending_intervals quant_grid)
-        qevents = map (Iv.quantize_iv SF2.qevent_from_event quant_grid_asc quant_grid') input :: [SF2.QEvent]
-        measures'' = M.measures_tie_or_rest measures' qevents quant_grid
-        getNotes (M.L dur tie label _) qevent = (M.L dur tie label (SF2.qevent_notes qevent))
+        bestDivs = (zipWith (Iv.bestDiv divs)
+                     (Iv.getAscendingIntervals beats_intervals)
+                     groups)
+        measures' = M.measuresDivideLeafs measures (map toInteger bestDivs)
+        quant_grid = M.measuresLeafIntervals measures'
+        quant_grid' = Iv.ascendingIntervals (map rationalPairToTimePair quant_grid)
+        quant_grid_asc = (Iv.ascendingIntervals quant_grid)
+        qevents = map (Iv.quantizeIv SF2.qeventFromEvent quant_grid_asc quant_grid') input :: [SF2.QEvent]
+        measures'' = M.measuresTieOrRest measures' qevents quant_grid
+        getNotes (M.L dur tie label _) qevent = (M.L dur tie label (SF2.qeventNotes qevent))
         getNotes (M.R _ _) _ = error "getNotes: R"
         getNotes (M.D _  _ _) _ = error "getNotes: D"
-        measures''' = M.measures_transform_leafs getNotes measures'' qevents quant_grid
+        measures''' = M.measuresTransformLeafs getNotes measures'' qevents quant_grid
     in A.Voice measures'''
 
 buildMeasureFromLisp :: LispVal -> LispVal -> M.M
 buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])
                          (LispList [LispInteger tu,LispInteger t]) =
-                         head (M.measures_with_beats [(n,d)] [(tu,fromInteger t)])
+                         head (M.measuresWithBeats [(n,d)] [(tu,fromInteger t)])
 buildMeasureFromLisp _ _ = error "buildMeasureFromLisp"
 
 ensureListOfLists :: LispVal -> LispVal
@@ -92,12 +94,11 @@ ensureListOfIntegers (LispList xs) =
           ensureInt _ = error "ensureInt"
 ensureListOfIntegers _ = error "ensureListOfIntegers"
 
-stickToLast list = list ++ (repeat (last list))
+stickToLast list = list ++ repeat (last list)
 
 measureStream :: LispVal -> LispVal -> [M.M]
-measureStream ts metro = (map (uncurry buildMeasureFromLisp)
-                                  (zip (stickToLast (fromLispList ts))
-                                           (stickToLast (fromLispList metro))))
+measureStream ts metro = zipWith buildMeasureFromLisp (stickToLast (fromLispList ts))
+                         (stickToLast (fromLispList metro))
 
 processSimpleFormat :: Lisp.LispVal -> String
 processSimpleFormat input =
@@ -105,18 +106,16 @@ processSimpleFormat input =
         sf1 = SF.sexp2simpleFormat s :: SF.Score
         sf2 = SF2.toSimpleFormat2 sf1 :: SF2.Score
         sf2end = SF2.scoreEnd sf2
-        ms = M.measures_until_time
+        ms = M.measuresUntilTime
              (measureStream (getTimeSignatures input) (getMetronomes input))
              sf2end
-        measurevoice = A.Voice $ ms
+        measurevoice = A.Voice ms
         divs = [1..(getMaxDiv input)] \\ getForbDivs input :: Divs 
-        trans = (quantifyVoice measurevoice divs) :: SF2.Voice -> M.Voice
-        mscore = (A.mapVoices trans sf2) :: M.Score
-        enp = (A.mapVoices v_to_enp mscore) :: Enp.Score
+        trans = quantifyVoice measurevoice divs :: SF2.Voice -> M.Voice
+        mscore = A.mapVoices trans sf2 :: M.Score
+        enp = A.mapVoices vToEnp mscore :: Enp.Score
     in printLisp (Enp.score2sexp enp)
-    where getSimple x = case getf x (LispKeyword "SIMPLE") of
-                          Just s -> s
-                          Nothing -> error "Could not find :simple"
+    where getSimple x = fromMaybe (error "Could not find :simple") (getf x (LispKeyword "SIMPLE"))
           getTimeSignatures x = case getf x (LispKeyword "TIME-SIGNATURES") of
                                   Just s -> ensureListOfLists s
                                   Nothing -> error "Could not find :time-signatures"

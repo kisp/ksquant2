@@ -35,44 +35,44 @@ prop_intersect a b = intersect a b == safe_intersect a b
 
 prop_isStrictlyAfter :: TestInterval -> TestInterval -> Bool
 prop_isStrictlyAfter a b = isStrictlyAfter a b == safeisStrictlyAfter a b
-    where safeisStrictlyAfter a b = not (intersect a b) && start b >= end a
+    where safeisStrictlyAfter a b = not (a `intersect` b) && start b >= end a
 
 filteredDomain2Intervalls [] = []
 filteredDomain2Intervalls (x:xs) = map TestInterval (r xs x x)
     where r [] start last = [(start,last+1)]
-          r (x:xs) start last | (x == last + 1) = r xs start x
-                                | otherwise = (start,last+1) : (r xs x x)
+          r (x:xs) start last | x == last + 1 = r xs start x
+                              | otherwise = (start,last+1) : r xs x x
 
-delete_random list = do
-  pos <- choose (0, (length list) - 1)
+deleteRandom list = do
+  pos <- choose (0, length list - 1)
   return (delete (list !! pos) list)
 
-monad_repeat :: (Monad m) => Int -> m a -> (a -> m a) -> m a
-monad_repeat 0 x _ = x
-monad_repeat n x fn = monad_repeat (n-1) (x >>= fn) fn
+monadRepeat :: (Monad m) => Int -> m a -> (a -> m a) -> m a
+monadRepeat 0 x _ = x
+monadRepeat n x fn = monadRepeat (n-1) (x >>= fn) fn
 
 instance Arbitrary (AscendingIntervals TestInterval) where
     arbitrary     = do
       n <- choose(0,ivmax)
-      list <- monad_repeat n (return domain) delete_random
-      return (ascending_intervals (filteredDomain2Intervalls list))
+      list <- monadRepeat n (return domain) deleteRandom
+      return (ascendingIntervals (filteredDomain2Intervalls list))
 
 instance Arbitrary (AscendingPoints Int) where
     arbitrary     = do
       n <- choose(0,ivmax)
-      list <- monad_repeat n (return domain) delete_random
-      return (ascending_points list)
+      list <- monadRepeat n (return domain) deleteRandom
+      return (ascendingPoints list)
 
 prop_groupPointsByIntervalls :: AscendingIntervals TestInterval -> AscendingPoints Int -> Bool
-prop_groupPointsByIntervalls ivs xs = (groupPointsByIntervalls ivs xs) == (safe_groupPointsByIntervalls ivs xs)
-    where safe_groupPointsByIntervalls ivs _ = map grap (get_ascending_intervals ivs)
-          grap iv = ascending_points (filter (isPointInInterval iv) (get_ascending_points xs))
+prop_groupPointsByIntervalls ivs xs = groupPointsByIntervalls ivs xs == safe_groupPointsByIntervalls ivs xs
+    where safe_groupPointsByIntervalls ivs _ = map grap (getAscendingIntervals ivs)
+          grap iv = ascendingPoints (filter (isPointInInterval iv) (getAscendingPoints xs))
 
-mt ivs xs = (safe_groupPointsByIntervalls ivs xs)
-    where safe_groupPointsByIntervalls ivs _ = map grap (get_ascending_intervals ivs)
-          grap iv = ascending_points (filter (isPointInInterval iv) (get_ascending_points xs))
+mt ivs xs = safe_groupPointsByIntervalls ivs xs
+    where safe_groupPointsByIntervalls ivs _ = map grap (getAscendingIntervals ivs)
+          grap iv = ascendingPoints (filter (isPointInInterval iv) (getAscendingPoints xs))
 
-prop_ascending_intervals2points :: AscendingIntervals TestInterval -> Bool
-prop_ascending_intervals2points ivs = (ascending_intervals2points ivs) == (safe_ascending_intervals2points ivs)
-    where safe_ascending_intervals2points ivs = let ivs' = get_ascending_intervals ivs
-                                                in (ascending_points . sort . nub) ((map start ivs') ++ (map end ivs'))
+prop_ascendingIntervals2points :: AscendingIntervals TestInterval -> Bool
+prop_ascendingIntervals2points ivs = ascendingIntervals2points ivs == safe_ascendingIntervals2points ivs
+    where safe_ascendingIntervals2points ivs = let ivs' = getAscendingIntervals ivs
+                                                in (ascendingPoints . sort . nub) (map start ivs' ++ map end ivs')

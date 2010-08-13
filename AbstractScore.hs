@@ -15,8 +15,8 @@ data Voice a = Voice { voiceItems :: [a] }
            deriving Show
 
 class AbstractScore c a where
-    completeToScore :: (c a) -> Score a
-    mapVoices :: (Voice a -> Voice b) -> (c a) -> (c b)
+    completeToScore :: c a -> Score a
+    mapVoices :: (Voice a -> Voice b) -> c a -> c b
 
 instance AbstractScore Score a where
     completeToScore = id
@@ -28,7 +28,7 @@ instance AbstractScore Part a where
 
 instance AbstractScore Voice a where
     completeToScore x = completeToScore (Part [x])
-    mapVoices f x = f x
+    mapVoices f = f
 
 -- Functor
 instance Functor Score where

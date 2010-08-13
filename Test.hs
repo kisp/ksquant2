@@ -30,7 +30,7 @@ tests = [-- ("helloWorld value", TestRunnerTest hunitTest),
          ,("prop_intersect", runWithQuickCheck prop_intersect)
          ,("prop_isStrictlyAfter", runWithQuickCheck prop_isStrictlyAfter)
          ,("prop_groupPointsByIntervalls", runWithQuickCheck prop_groupPointsByIntervalls)
-         ,("prop_ascending_intervals2points", runWithQuickCheck prop_ascending_intervals2points)
+         ,("prop_ascendingIntervals2points", runWithQuickCheck prop_ascendingIntervals2points)
          -- LispTest
          ,("lisp1", TestRunnerTest lisp1)
          ,("lisp2", TestRunnerTest lisp2)
