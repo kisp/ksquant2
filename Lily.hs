@@ -5,6 +5,9 @@ module Lily (showLily
             ,Dur(..)
             ,Elt(..)
             ,Measure(..)
+            ,Name(..)
+            ,Accidental(..)
+            ,Pitch(..)
             ,powerToSimpleDur
             )
 where
@@ -27,7 +30,20 @@ powerToSimpleDur = toEnum
 data Dur = Dur SimpleDur Int
            deriving Show
 
-data Elt = Note Dur Bool
+type Tied = Bool
+
+type Octave = Int
+
+data Name = A | B | C | D | E | F | G
+          deriving Show
+
+data Accidental = Natural | Sharp | Flat
+                deriving Show
+
+data Pitch = Pitch Name Accidental Octave
+           deriving Show
+
+data Elt = Chord Dur [Pitch] Tied
          | Rest Dur
          | Times Int Int [Elt]
            deriving Show
@@ -47,9 +63,17 @@ simpleDurToRatio x =
       D64 -> 1 % 64
       D128 -> 1 % 128
 
+pitchToLily (Pitch B Natural 3) = "b"
+pitchToLily (Pitch C Natural 4) = "c'"
+pitchToLily (Pitch C Sharp 4) = "cis'"
+pitchToLily (Pitch D Natural 4) = "d'"
+pitchToLily (Pitch F Natural 4) = "f'"
+pitchToLily p = error $ "pitchToLily not implemented: " ++ show p
+
 durToLily (Dur x d) = (show . denominator . simpleDurToRatio) x ++ replicate d '.'
 
-eltToLily (Note d tie) = "c'" ++ durToLily d ++ if tie then "~" else ""
+eltToLily (Chord d ps tie) = "<" ++ ps' ++ ">" ++ durToLily d ++ if tie then "~" else ""
+  where ps' = intercalate " " (map pitchToLily ps)
 eltToLily (Rest d) = 'r' : durToLily d
 eltToLily (Times n d xs) = "\\times " ++ show n ++ "/" ++ show d ++ " { " ++
                            intercalate " " (map eltToLily xs) ++ " }"
