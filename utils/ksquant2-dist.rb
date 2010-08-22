@@ -19,7 +19,7 @@ puts version.inspect
 # safe_system "git tag -a #{version}"
 safe_system "make clean"
 safe_system "make"
-safe_system "sh osx-utils/link.sh"
+safe_system "sh utils/link.sh"
 safe_system "otool -L Main > otool.out"
 safe_system "! grep libgmp <otool.out"
 safe_system "rm otool.out"
