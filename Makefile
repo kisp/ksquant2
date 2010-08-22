@@ -35,10 +35,12 @@ check:
 	! grep 'error ""' *.hs
 	rm -f main Main *.o *.hi
 	ghc -fglasgow-exts -Wall -Werror -fno-warn-missing-signatures \
-		-fno-warn-name-shadowing --make Main.hs -o main
+		-fno-warn-name-shadowing -fno-warn-unrecognised-pragmas \
+		--make Main.hs -o main
 	rm -f test *.o *.hi
 	ghc -fglasgow-exts -Wall -Werror -fno-warn-missing-signatures \
-		-fno-warn-name-shadowing -fno-warn-orphans --make Test.hs -o test
+		-fno-warn-name-shadowing -fno-warn-orphans -fno-warn-unrecognised-pragmas \
+		--make Test.hs -o test
 	hlint .
 
 # ----------------------------------------------------------------
