@@ -8,7 +8,8 @@ module SimpleFormat2 (toSimpleFormat2
                      ,voiceEnd
                      ,scoreEnd
                      ,qeventFromEvent
-                     ,qeventNotes)
+                     ,qeventNotes
+                     ,qeventExpressions)
 where
 
 import Utils
@@ -26,29 +27,31 @@ type Part = A.Part Event
 type Voice = A.Voice Event
 
 type Notes = L.LispVal
+type Expressions = L.LispVal
 
-data Event = Chord Start End Notes
+data Event = Chord Start End Notes Expressions
            deriving Show
 
 type QStart = Rational
 type QEnd = Rational
 
-data QEvent = QChord QStart QEnd Notes
+data QEvent = QChord QStart QEnd Notes Expressions
            deriving Show
 
 qeventFromEvent :: (Interval a QStart) => a -> Event -> QEvent
-qeventFromEvent quantized_iv (Chord _ _ n) =
-    QChord (start quantized_iv) (end quantized_iv) n
+qeventFromEvent quantized_iv (Chord _ _ n e) =
+    QChord (start quantized_iv) (end quantized_iv) n e
 
-qeventNotes (QChord _ _ notes) = notes
+qeventNotes (QChord _ _ notes _) = notes
+qeventExpressions (QChord _ _ _ expressions) = expressions
 
 instance Interval Event Time where
-    start (Chord s _ _) = s
-    end (Chord _ e _) = e
+    start (Chord s _ _ _) = s
+    end (Chord _ e _ _) = e
 
 instance Interval QEvent Rational where
-    start (QChord s _ _) = s
-    end (QChord _ e _) = e
+    start (QChord s _ _ _) = s
+    end (QChord _ e _ _) = e
 
 toSimpleFormat2 :: SF1.Score -> Score
 toSimpleFormat2 s = A.Score (map partToSimpleFormat2 (A.scoreParts s))
@@ -61,7 +64,7 @@ voiceToSimpleFormat2 v =
     let events = A.voiceItems v
         startEndPairs = (neighbours (map SF1.eventStart events))
     in A.Voice $ concatMap trans (zip events startEndPairs)
-    where trans (SF1.Chord _ notes,(start,end)) = [Chord start end notes]
+    where trans (SF1.Chord _ notes expressions,(start,end)) = [Chord start end notes expressions]
           trans _ = []
 
 voiceEnd :: Voice -> End

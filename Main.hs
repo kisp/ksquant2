@@ -43,7 +43,8 @@ quantifyVoice ms divs v =
         quant_grid_asc = (Iv.ascendingIntervals quant_grid)
         qevents = map (Iv.quantizeIv SF2.qeventFromEvent quant_grid_asc quant_grid') input :: [SF2.QEvent]
         measures'' = M.measuresTieOrRest measures' qevents quant_grid
-        getNotes (M.L dur tie label _) qevent = (M.L dur tie label (SF2.qeventNotes qevent))
+        getNotes (M.L dur tie label _ _) qevent =
+            (M.L dur tie label (SF2.qeventNotes qevent) (SF2.qeventExpressions qevent))
         getNotes (M.R _ _) _ = error "getNotes: R"
         getNotes (M.D _  _ _) _ = error "getNotes: D"
         measures''' = M.measuresTransformLeafs getNotes measures'' qevents quant_grid

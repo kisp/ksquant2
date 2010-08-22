@@ -12,17 +12,18 @@ import qualified AbstractScore as A
 
 type Time = Float
 type Notes = LispVal
+type Expressions = LispVal
 
 type Score = A.Score Event
 type Part = A.Part Event
 type Voice = A.Voice Event
 
-data Event = Chord Time Notes
+data Event = Chord Time Notes Expressions
            | Rest Time
            deriving Show
 
 -- TODO can we use point from Interval?
-eventStart (Chord x _) = x
+eventStart (Chord x _ _) = x
 eventStart (Rest x) = x
 
 sexp2simpleFormat :: LispVal -> Score
@@ -36,15 +37,17 @@ n60 = readLisp "(60)"
 
 sexp2event (LispInteger x) = sexp2event (LispFloat (fromInteger x))
 sexp2event (LispFloat x) | x < 0 = Rest (abs x)
-                         | otherwise = Chord x n60
+                         | otherwise = Chord x n60 (readLisp "()")
 sexp2event xs@(LispList _)
     = if foundAndT $ getf (cdr xs) (readLisp ":restp")
       then sexp2event (minus (car xs))
       else case sexp2event (car xs) of
-             Rest d -> Rest d
-             Chord d notes -> case getf (cdr xs) (readLisp ":notes") of
-                                Nothing -> Chord d notes
-                                Just notes' -> Chord d notes'
+             Rest d ->
+                 Rest d
+             Chord d notes expressions ->
+                 Chord d notes' expressions'
+                     where notes' = getf' (cdr xs) (readLisp ":notes") notes
+                           expressions' = getf' (cdr xs) (readLisp ":expressions") expressions
     where foundAndT Nothing = False
           foundAndT (Just (LispSymbol "NIL")) = False
           foundAndT (Just _) = True

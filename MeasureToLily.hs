@@ -35,7 +35,7 @@ ensureListOfIntegers (LispList xs) =
 ensureListOfIntegers _ = error "ensureListOfIntegers"
 
 eToLily :: M.E -> [L.Elt]
-eToLily (M.L d tie _ notes) = [L.Chord (durToLily d) midis tie]
+eToLily (M.L d tie _ notes _) = [L.Chord (durToLily d) midis tie]
   where midis = map midiToLily (ensureListOfIntegers notes)
 eToLily (M.R d _) = [L.Rest (durToLily d)]
 eToLily (M.D _ r es) | r == 1 = concatMap eToLily es

@@ -25,19 +25,20 @@ data Measure = Measure Timesig Tempo [Elt]
 
 type Tied = Bool
 type Notes = LispVal
+type Expressions = LispVal
 
 -- |Tied here has ENP semantics, which is a tie "going to the left".
-data Elt = Chord Dur Tied Notes
+data Elt = Chord Dur Tied Notes Expressions
            | Rest Dur
            | Div Dur [Elt]
            deriving (Show, Eq)
 
-dur (Chord d _ _) = d
+dur (Chord d _ _ _) = d
 dur (Rest d) = d
 dur (Div d _) = d
 
 scaleElt :: Integer -> Elt -> Elt
-scaleElt n (Chord d t notes) = Chord (n * d) t notes
+scaleElt n (Chord d t notes expressions) = Chord (n * d) t notes expressions
 scaleElt n (Rest d) = Rest (n * d)
 scaleElt n (Div d es) = Div (n * d) es
 
@@ -68,7 +69,12 @@ measure2sexp (Measure (n,d) (tu,t) xs) =
                   LispList [LispInteger tu,LispInteger $ round t]]
 
 elt2sexp :: Elt -> LispVal
-elt2sexp (Chord d False notes) = LispInteger d `cons` LispList [LispKeyword "NOTES", notes]
-elt2sexp (Chord d True  notes) = LispFloat (fromInteger d) `cons` LispList [LispKeyword "NOTES", notes]
+elt2sexp (Chord d False notes expressions) =
+    LispInteger d `cons` LispList ([LispKeyword "NOTES", notes] ++ expressionsOrEmpty expressions)
+elt2sexp (Chord d True  notes expressions) =
+    LispFloat (fromInteger d) `cons` LispList ([LispKeyword "NOTES", notes] ++ expressionsOrEmpty expressions)
 elt2sexp (Rest d) = LispInteger (-d) `cons` parseLisp' ":notes (60)"
 elt2sexp (Div d xs) = LispInteger d `cons` LispList [LispList (map elt2sexp xs)]
+
+expressionsOrEmpty expressions = if clNull expressions then []
+                                 else [LispKeyword "EXPRESSIONS", expressions]

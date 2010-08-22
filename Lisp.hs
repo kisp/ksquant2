@@ -11,16 +11,19 @@ module Lisp (LispVal(..)
             ,cdr
             ,propertyListP
             ,getf
+            ,getf'
             ,Sexp
             ,toSexp
             ,fromSexp
             ,listp
             ,atom
+            ,clNull
             ,minus)
 where
 import Text.ParserCombinators.Parsec
 import Data.Char (toUpper)
 import Data.List (intercalate,elemIndex)
+import Data.Maybe
 
 data LispVal = LispInteger Integer
              | LispKeyword String
@@ -135,6 +138,10 @@ listp _ = False
 
 atom = not . listp
 
+clNull (LispSymbol "NIL") = True
+clNull (LispList []) = True
+clNull _ = False
+
 cons :: LispVal -> LispVal -> LispVal
 cons x (LispList ys) = LispList (x:ys)
 cons x y             =
@@ -184,6 +191,10 @@ getf xs@(LispList _) field | propertyListP xs =
                                  return (xs'!!(index+1))
 getf x y =
     error ("getf `" ++ show x ++ "' to `" ++ show y ++ "'")
+
+-- | getf with default value
+getf' :: LispVal -> LispVal -> LispVal -> LispVal
+getf' list field def = fromMaybe def (getf list field)
 
 minus (LispInteger x) = LispInteger (-x)
 minus (LispFloat x) = LispFloat (-x)

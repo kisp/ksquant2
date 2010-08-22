@@ -7,16 +7,17 @@ import Data.Ratio
 import Lisp (readLisp)
 
 n60 = readLisp "(60)"
+nil = readLisp "()"
 
 mtoenp1 = TestList
            [
-            Enp.Measure (4,4) (4,60) [Enp.Div 4 [Enp.Chord 1 False n60]]
-            ~=? let leaf = (L 1 False 0 n60)
+            Enp.Measure (4,4) (4,60) [Enp.Div 4 [Enp.Chord 1 False n60 nil]]
+            ~=? let leaf = (L 1 False 0 n60 nil)
                 in mToEnp
                        [(0,leaf)]
                        (M (4,4) (4,60 % 1) leaf)
-           ,Enp.Measure (1,4) (4,60) [Enp.Div 1 [Enp.Chord 1 False n60]]
-            ~=? let leaf = (L (1%4) False 0 n60)
+           ,Enp.Measure (1,4) (4,60) [Enp.Div 1 [Enp.Chord 1 False n60 nil]]
+            ~=? let leaf = (L (1%4) False 0 n60 nil)
                 in mToEnp
                        [(0,leaf)]
                        (M (1,4) (4,60 % 1) leaf)           
