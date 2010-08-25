@@ -6,6 +6,7 @@ import IntervalTest
 import LispTest
 import MeasureTest
 import MeasureToEnpTest
+import SimpleFormatTest
 
 -- -- use HUnit to assert that helloWorld produces "hello world"
 -- hunitTest :: Test
@@ -38,6 +39,8 @@ tests = [-- ("helloWorld value", TestRunnerTest hunitTest),
          -- Measure Test
          ,("measure1", TestRunnerTest measure1)
          ,("mtoenp1", TestRunnerTest mtoenp1)
+         -- SimpleFormatTest
+         ,("sexp2event1", TestRunnerTest sexp2event1)
          ]
 main :: IO ()
 main = testRunnerMain tests
