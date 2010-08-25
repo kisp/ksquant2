@@ -42,7 +42,7 @@ sexp2event' (LispInteger x) r = sexp2event' (LispFloat (fromInteger x)) r
 sexp2event' (LispFloat x) r | x < 0 || r = Rest (abs x)
                             | otherwise = Chord x n60 (readLisp "()")
 
-sexp2event' xs@(LispList _) r
+sexp2event' xs@(LispList _) _
     = if foundAndT $ getf (cdr xs) (readLisp ":rest")
       then sexp2event' (car xs) True
       else case sexp2event' (car xs) False of
