@@ -2,3 +2,7 @@ I recommend downloading the pre-compiled version for OSX:
 http://sprotte.org/ksquant2-0.1.8.tgz
 
 Then it can be installed as a normal PWGL user-library in $HOME/PWGL-User/User-library.
+
+* changes in 0.1.9 relative to 0.1.8:
+** bugfix: the correct way to indicate a rest is e.g. (6.875 :REST T)
+   	   the keyword is :REST, not :RESTP
