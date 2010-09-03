@@ -27,7 +27,7 @@ type Divs = [Int]
 quantifyVoice :: MeasureStructure -> Divs -> SF2.Voice -> M.Voice
 quantifyVoice ms divs v =
     let measures = A.voiceItems ms
-        input = A.voiceItems v :: [SF2.Event]
+        input = SF2.voiceChords v :: [SF2.Event]
         input' = Iv.ascendingIntervals input
         beats_intervals = Iv.ascendingIntervals
                           (map rationalPairToTimePair
