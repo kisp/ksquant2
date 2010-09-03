@@ -21,7 +21,7 @@
   (multiple-value-bind (data expected)
       (read-input-file path)
     (let ((success (run-test data expected)))
-      (format t "~A~40T~A~%" (file-namestring path) success)
+      (format t "~A~50T~A~%" (file-namestring path) success)
       success)))
 
 (let ((success (every #'identity (mapcar 'report-on-file (input-files)))))
