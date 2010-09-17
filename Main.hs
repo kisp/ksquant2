@@ -13,7 +13,7 @@ import MeasureToEnp
 import MeasureToLily
 import Data.List ((\\))
 import Data.Maybe 
-import System.Environment
+-- import System.Environment
 
 rationalToTime :: Rational -> Time
 rationalToTime = fromRational
@@ -76,8 +76,8 @@ measureStream :: LispVal -> LispVal -> [M.M]
 measureStream ts metro = zipWith buildMeasureFromLisp (stickToLast (fromLispList ts))
                          (stickToLast (fromLispList metro))
 
-processSimpleFormat :: (LispVal,[String]) -> String
-processSimpleFormat (input,args) =
+processSimpleFormat :: LispVal -> String
+processSimpleFormat (input) =
     let s = getSimple input     
         sf1 = SF.sexp2simpleFormat s :: SF.Score
         sf2 = SF2.toSimpleFormat2 sf1 :: SF2.Score
@@ -108,14 +108,17 @@ processSimpleFormat (input,args) =
                            Just (LispSymbol "NIL") -> []
                            Just _ -> error "incorrect :forbidden-divs"
                            Nothing -> error "Could not find :forbidden-divs"
-          isLily = "--lily" `elem` args
+          isLily = False
+
+processParsedInput :: [LispVal] -> String
+processParsedInput [s] = processSimpleFormat s
+processParsedInput [s,_] = processSimpleFormat s
+processParsedInput _ = error "processParsedInput called on an unexpected number of forms"
+
+processInput :: String -> String
+processInput input = case (parseLisp input) of
+  Right parsedInput -> processParsedInput parsedInput
+  Left err -> error $ "parse error " ++ show err
 
 main :: IO ()
-main = do
-  args <- getArgs
-  s <- getContents
-  case (parseLisp s) of
-    Right [s] -> (putStrLn . processSimpleFormat) (s,args)
-    Right [s,_] -> (putStrLn . processSimpleFormat) (s,args)
-    Right _ -> error "parseLisp of stdin returned an unexpected number of forms"
-    Left err -> do { print err ; error "parse error" }
+main = putStrLn . processInput =<< getContents
