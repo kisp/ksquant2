@@ -12,12 +12,42 @@
 (defun tmp-dir ()
   (hcl:get-temp-directory))
 
+(defun kernel-path ()
+  (namestring (merge-pathnames #+win32 "kernel.exe" #-win32 "kernel")))
+
+#+win32
+(defun call-kernel (err-path kernel-path sf-path enp-path)
+  (let (c)
+    (with-open-file (*standard-output* err-path :direction :output)
+      (setq c
+	    (sys:call-system-showing-output
+	     (list (namestring kernel-path)
+		   (namestring sf-path)
+		   (namestring enp-path))
+	     :show-cmd nil
+	     :prefix "")))
+    c))
+
+#-win32
+(defun call-kernel (err-path kernel-path sf-path enp-path)
+  (sys:call-system
+   (format nil "'~A' ~A >~A 2>~A"
+	   kernel-path sf-path enp-path err-path)))
+
 (defun format-time-stamp (&optional (utime (get-universal-time)))
   (multiple-value-bind (sc mn hr d m y day) (decode-universal-time utime)
     (declare (ignore day))
     (format nil "~2,'0D~2,'0D~2,'0D_~2,'0D~2,'0D~2,'0D"
 	    (mod y 100) m d hr mn sc)))
 
+#+win32
+(defun report-bug (&rest args)
+  (declare (ignore args))
+  (capi:display-message "Sorry, bug report generation is not (yet) supported ~
+			 under windows. Please send in the patch itself to report ~
+			 a bug."))
+
+#-win32
 (defun report-bug (code sf-path enp-path err-path)
   (macrolet ((form (form)
 	       `(progn
@@ -92,7 +122,7 @@
 	   (sf-path (make-tmp-path (format nil "ksquant2-~A" (getpid))))
 	   (enp-path (make-tmp-path (format nil "ksquant2-out-~A" (getpid))))
 	   (err-path (make-tmp-path (format nil "ksquant2-err-~A" (getpid))))
-	   (kernel-path (namestring (merge-pathnames "kernel")))
+	   (kernel-path (kernel-path))
 	   (simple (ksquant::simple-change-type* :score simple)))
       (unless (probe-file kernel-path)
 	(error "Cannot find ksquant2 kernel! Have you installed ~
@@ -110,9 +140,7 @@
       (unwind-protect
 	   (progn
 	     (let ((code (ccl::with-message-dialog "KSQuant2: kernel..."
-			   (sys:call-system
-			    (format nil "'~A' ~A >~A 2>~A"
-				    kernel-path sf-path enp-path err-path)))))
+			   (call-kernel err-path kernel-path sf-path enp-path))))
 	       (unless (zerop code)
 		 (let ((err-message (or (ignore-errors
 					  (with-open-file (in err-path)
