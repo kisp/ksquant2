@@ -13,7 +13,7 @@ import MeasureToEnp
 import MeasureToLily
 import Data.List ((\\))
 import Data.Maybe 
--- import System.Environment
+import System.Environment
 
 rationalToTime :: Rational -> Time
 rationalToTime = fromRational
@@ -89,9 +89,10 @@ processSimpleFormat (input) =
         divs = [1..(getMaxDiv input)] \\ getForbDivs input :: Divs 
         trans = quantifyVoice measurevoice divs :: SF2.Voice -> M.Voice
         mscore = A.mapVoices trans sf2 :: M.Score
-    in if isLily
-       then L.showLily (A.mapVoices vToLily mscore)
-       else printLisp (Enp.score2sexp (A.mapVoices vToEnp mscore))
+        output = if isLily
+                 then L.showLily (A.mapVoices vToLily mscore)
+                 else printLisp (Enp.score2sexp (A.mapVoices vToEnp mscore))
+    in output ++ "\n"
     where getSimple x = fromMaybe (error "Could not find :simple") (getf x (LispKeyword "SIMPLE"))
           getTimeSignatures x = case getf x (LispKeyword "TIME-SIGNATURES") of
                                   Just s -> ensureListOfLists s
@@ -121,4 +122,14 @@ processInput input = case (parseLisp input) of
   Left err -> error $ "parse error " ++ show err
 
 main :: IO ()
-main = putStrLn . processInput =<< getContents
+main = do
+  args <- getArgs
+  putOutput args . processInput =<< getInput args
+  where getInput [] = getContents
+        getInput [i] = readFile i
+        getInput [i,_] = readFile i
+        getInput args = error $ "getInput with args " ++ show args ++ "?"
+        putOutput [] s = putStrLn s
+        putOutput [_,o] s = writeFile o s
+        putOutput args _ = error $ "putOutput with args " ++ show args ++ "?"
+  
