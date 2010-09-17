@@ -130,6 +130,7 @@ main = do
         getInput [i,_] = readFile i
         getInput args = error $ "getInput with args " ++ show args ++ "?"
         putOutput [] s = putStrLn s
+        putOutput [_] s = putStrLn s
         putOutput [_,o] s = writeFile o s
         putOutput args _ = error $ "putOutput with args " ++ show args ++ "?"
   
