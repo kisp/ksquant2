@@ -5,6 +5,10 @@
 (define-menu ksquant2 :print-name "**KSQuant2")
 (in-menu ksquant2)
 
+(defun getpid ()
+  #+win32 (win32::get-current-process-id)
+  #-win32 (sys::getpid))
+
 (defun format-time-stamp (&optional (utime (get-universal-time)))
   (multiple-value-bind (sc mn hr d m y day) (decode-universal-time utime)
     (declare (ignore day))
@@ -57,9 +61,9 @@
 			  (forbidden-divs (7)))
   :non-generic t
   (let* ((*default-pathname-defaults* (asdf:component-pathname (asdf:find-system :ksquant2)))
-	 (sf-path (format nil "/tmp/ksquant2-~A" (sys::getpid)))
-	 (enp-path (format nil "/tmp/ksquant2-out-~A" (sys::getpid)))
-	 (err-path (format nil "/tmp/ksquant2-err-~A" (sys::getpid)))
+	 (sf-path (format nil "/tmp/ksquant2-~A" (getpid)))
+	 (enp-path (format nil "/tmp/ksquant2-out-~A" (getpid)))
+	 (err-path (format nil "/tmp/ksquant2-err-~A" (getpid)))
 	 (kernel-path (namestring (merge-pathnames "kernel")))
 	 (simple (ksquant::simple-change-type* :score simple)))
     (unless (probe-file kernel-path)
