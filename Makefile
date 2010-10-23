@@ -20,7 +20,7 @@ all:
 
 .PHONY: test
 test:
-	ghc -fglasgow-exts -fhpc --make Test.hs -o test
+	ghc -fglasgow-exts -hide-package QuickCheck-2.3.0.2 -fhpc --make Test.hs -o test
 	./test 2>/dev/null >test.log
 	cat test.log
 	tail -n 1 <test.log | grep 'tests passed'
@@ -57,7 +57,7 @@ check:
 	rm -f test *.o *.hi
 	ghc -fglasgow-exts -Wall -Werror -fno-warn-missing-signatures \
 		-fno-warn-name-shadowing -fno-warn-orphans -fno-warn-unrecognised-pragmas \
-		--make Test.hs -o test
+		-hide-package QuickCheck-2.3.0.2 --make Test.hs -o test
 	hlint .
 
 # ----------------------------------------------------------------
