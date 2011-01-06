@@ -1,6 +1,6 @@
 ;;; This file is part of KSQuant2.
 
-;;; Copyright (c) 2010, Kilian Sprotte. All rights reserved.
+;;; Copyright (c) 2010 - 2011, Kilian Sprotte. All rights reserved.
 
 ;;; This program is free software: you can redistribute it and/or modify
 ;;; it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 (:SIMPLE ((((0.0 :REST T) (1.0 :NOTES (60)) (2.0 :NOTES (60)) (3.0 :NOTES (60)) 4.0))) :TIME-SIGNATURES (4 4) :METRONOMES (4 60) :SCALE 1/4 :MAX-DIV 8 :FORBIDDEN-DIVS (7))
 
 (((((1 ((-1 :NOTES (60))))
