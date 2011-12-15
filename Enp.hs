@@ -26,7 +26,7 @@ module Enp (score2sexp
            ,dur
            ,Dur)
 where
-
+import Data.Either.Unwrap
 import Lisp
 import qualified AbstractScore as A
 
@@ -77,7 +77,7 @@ part2sexp e = LispList $ map voice2sexp (A.partVoices e)
 voice2sexp :: Voice -> LispVal
 voice2sexp e =
     LispList $ map measure2sexp (A.voiceItems e) ++
-             fromLispList (parseLisp' ":instrument NIL :staff :treble-staff")
+    (fromRight . parseLisp) ":instrument NIL :staff :treble-staff"
 
 measure2sexp :: Measure -> LispVal
 measure2sexp (Measure (n,d) (tu,t) xs) =
@@ -92,7 +92,7 @@ elt2sexp (Chord d False notes expressions) =
     LispInteger d `cons` LispList ([LispKeyword "NOTES", notes] ++ expressionsOrEmpty expressions)
 elt2sexp (Chord d True  notes expressions) =
     LispFloat (fromInteger d) `cons` LispList ([LispKeyword "NOTES", notes] ++ expressionsOrEmpty expressions)
-elt2sexp (Rest d) = LispInteger (-d) `cons` parseLisp' ":notes (60)"
+elt2sexp (Rest d) = LispInteger (-d) `cons` LispList ((fromRight . parseLisp) ":notes (60)")
 elt2sexp (Div d xs) = LispInteger d `cons` LispList [LispList (map elt2sexp xs)]
 
 expressionsOrEmpty :: LispVal -> [LispVal]

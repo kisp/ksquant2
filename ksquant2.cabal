@@ -27,7 +27,7 @@ Cabal-Version:       >=1.2
 
 Executable ksquant2
   Main-is:           Main.hs
-  Build-Depends:     base, filepath, directory, process, parsec
+  Build-Depends:     base, filepath, directory, process, parsec, either-unwrap
   ghc-options:       -Wall -Werror
 
 test-suite tests
@@ -35,6 +35,6 @@ test-suite tests
   main-is:        Test.hs
 
   ghc-options:
-    -Wall -Werror -threaded -rtsopts
+    -Wall -Werror -fhpc
 
   Build-Depends:  HUnit, QuickCheck, testrunner

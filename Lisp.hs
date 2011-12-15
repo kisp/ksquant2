@@ -15,27 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Lisp (LispVal(..)
-            ,printLisp
-            ,parseLisp
-            ,parseLisp'
-            ,readLisp
-            ,fromLispList
-            ,mapcar
-            ,mapcar'
-            ,cons
-            ,car
-            ,cdr
-            ,propertyListP
-            ,getf
-            ,getf'
-            ,Sexp
-            ,toSexp
-            ,fromSexp
-            ,listp
-            ,atom
-            ,clNull
-            ,minus)
+module Lisp (Sexp, toSexp, fromSexp, LispVal(..), mapcar', readLisp, readLisp', cons,
+             clNull, car, cdr, getf, getf', atom, fromLispList, parseLisp, printLisp, propertyListP)
 where
 import Text.ParserCombinators.Parsec
 import Data.Char (toUpper)
@@ -140,16 +121,17 @@ parseValsAndEof = do
 parseLisp :: String -> Either ParseError [LispVal]
 parseLisp = parse parseValsAndEof ""
 
-parseLisp' :: String -> LispVal
-parseLisp' s = case parseLisp s of
-                 Right xs -> LispList xs
-                 Left _ -> error $ "parseLisp': cannot parse '" ++ s ++ "'"
-
-readLisp :: String -> LispVal
+readLisp :: String -> Either String LispVal
 readLisp s = case parseLisp s of
-                 Right [x] -> x
-                 Right _   -> error "readLisp: expecting only a single form"
-                 Left _    -> error $ "readLisp: cannot parse '" ++ s ++ "'"
+                 Right [x] -> Right x
+                 Right _   -> Left "readLisp: expecting only a single form"
+                 Left _    -> Left $ "readLisp: cannot parse '" ++ s ++ "'"
+
+
+readLisp' :: String -> LispVal
+readLisp' s = case readLisp s of
+  Right x -> x
+  Left x -> error x
 
 ----------------------------------------------
 
@@ -182,12 +164,12 @@ fromLispList :: LispVal -> [LispVal]
 fromLispList (LispList xs) = xs
 fromLispList _ = error "fromLispList: not a list"
 
-mapcar :: (LispVal -> LispVal) -> LispVal -> LispVal
-mapcar _ (LispList []) = LispList []
-mapcar f xs@(LispList _) = f a `cons` mapcar f b
-    where a = car xs
-          b = cdr xs
-mapcar _ _ = error "mapcar: not a list"
+-- mapcar :: (LispVal -> LispVal) -> LispVal -> LispVal
+-- mapcar _ (LispList []) = LispList []
+-- mapcar f xs@(LispList _) = f a `cons` mapcar f b
+--     where a = car xs
+--           b = cdr xs
+-- mapcar _ _ = error "mapcar: not a list"
 
 mapcar' :: (LispVal -> a) -> LispVal -> [a]
 mapcar' _ (LispList []) = []
@@ -222,10 +204,10 @@ getf x y =
 getf' :: LispVal -> LispVal -> LispVal -> LispVal
 getf' list field def = fromMaybe def (getf list field)
 
-minus :: LispVal -> LispVal
-minus (LispInteger x) = LispInteger (-x)
-minus (LispFloat x) = LispFloat (-x)
-minus _ = error "minus"
+-- minus :: LispVal -> LispVal
+-- minus (LispInteger x) = LispInteger (-x)
+-- minus (LispFloat x) = LispFloat (-x)
+-- minus _ = error "minus"
 
 ----------------------------------------------------
 

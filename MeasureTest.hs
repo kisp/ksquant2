@@ -22,9 +22,9 @@ import Data.Ratio
 import Lisp
 
 n60 :: LispVal
-n60 = readLisp "(60)"
+n60 = readLisp' "(60)"
 nil :: LispVal
-nil = readLisp "()"
+nil = readLisp' "()"
 
 measure1 :: Test
 measure1 = TestList

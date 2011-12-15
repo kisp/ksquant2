@@ -56,7 +56,7 @@ sexp2voice :: LispVal -> A.Voice Event
 sexp2voice s = A.Voice (mapcar' sexp2event s)
 
 n60 :: LispVal
-n60 = readLisp "(60)"
+n60 = readLisp' "(60)"
 
 sexp2event :: LispVal -> Event
 sexp2event s = sexp2event' s False
@@ -64,18 +64,18 @@ sexp2event s = sexp2event' s False
 sexp2event' :: LispVal -> Bool -> Event
 sexp2event' (LispInteger x) r = sexp2event' (LispFloat (fromInteger x)) r
 sexp2event' (LispFloat x) r | x < 0 || r = Rest (abs x)
-                            | otherwise = Chord x n60 (readLisp "()")
+                            | otherwise = Chord x n60 (readLisp' "()")
 
 sexp2event' xs@(LispList _) _
-    = if foundAndT $ getf (cdr xs) (readLisp ":rest")
+    = if foundAndT $ getf (cdr xs) (readLisp' ":rest")
       then sexp2event' (car xs) True
       else case sexp2event' (car xs) False of
              Rest d ->
                  Rest d
              Chord d notes expressions ->
                  Chord d notes' expressions'
-                     where notes' = getf' (cdr xs) (readLisp ":notes") notes
-                           expressions' = getf' (cdr xs) (readLisp ":expressions") expressions
+                     where notes' = getf' (cdr xs) (readLisp' ":notes") notes
+                           expressions' = getf' (cdr xs) (readLisp' ":expressions") expressions
     where foundAndT Nothing = False
           foundAndT (Just (LispSymbol "NIL")) = False
           foundAndT (Just _) = True

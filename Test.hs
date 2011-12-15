@@ -50,6 +50,8 @@ tests = [-- ("helloWorld value", TestRunnerTest hunitTest),
          ,("prop_groupPointsByIntervalls", runWithQuickCheck prop_groupPointsByIntervalls)
          ,("prop_ascendingIntervals2points", runWithQuickCheck prop_ascendingIntervals2points)
          -- LispTest
+         ,("readLisp1", TestRunnerTest readLisp1)
+         ,("prop_mapcar'", runWithQuickCheck prop_mapcar')
          ,("lisp1", TestRunnerTest lisp1)
          ,("lisp2", TestRunnerTest lisp2)
          ,("lisp3", TestRunnerTest lisp3)

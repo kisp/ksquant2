@@ -19,11 +19,26 @@ module LispTest where
 import Lisp
 import Test.HUnit
 import Data.Maybe
+import Data.Either.Unwrap
 
 rightOrError :: Either t t1 -> t1
 rightOrError x = case x of
                    Right y -> y
                    Left _ -> error "rightOrError"
+
+readLisp1 :: Test
+readLisp1 = TestList
+            [
+              Right (LispInteger 1) ~=? readLisp "1"
+            , "readLisp: expecting only a single form" ~=? fromLeft (readLisp "1 2")
+            , "readLisp: cannot parse '('" ~=? fromLeft (readLisp "(")
+            ]
+
+prop_mapcar' :: [Integer] -> Bool
+prop_mapcar' xs = mapcar' f (LispList (map toSexp xs)) == map g xs
+  where f (LispInteger x) = LispInteger $ x+1
+        f _ = error "prop_mapcar'"
+        g = toSexp . (+1)
 
 lisp1 :: Test
 lisp1 = TestList
@@ -61,6 +76,8 @@ lisp2 = TestList
          rightOrError (parseLisp "-123.12")
         ,[LispInteger 1] ~=?
          rightOrError (parseLisp "1 ")
+        ,[LispInteger 1] ~=?
+         rightOrError (parseLisp "+1 ")
         ,[LispFloat 0.5] ~=?
          rightOrError (parseLisp "1/2")
         ,[LispFloat (-0.1)] ~=?

@@ -168,9 +168,9 @@ instance Transformable E E where
     transform_leafs' fn z x = fn x z
 
 n60 :: L.LispVal
-n60 = L.readLisp "(60)"
+n60 = L.readLisp' "(60)"
 nil :: L.LispVal
-nil = L.readLisp "()"
+nil = L.readLisp' "()"
 
 measuresDivideLeafs :: Transformable b E => [b] -> [Integer] -> [b]
 measuresDivideLeafs ms divs =
