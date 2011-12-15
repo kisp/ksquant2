@@ -20,22 +20,25 @@ import Lisp
 import Test.HUnit
 import Data.Maybe
 
+rightOrError :: Either t t1 -> t1
 rightOrError x = case x of
                    Right y -> y
                    Left _ -> error "rightOrError"
 
+lisp1 :: Test
 lisp1 = TestList
         [LispInteger 1     ~=? LispInteger 1
         ,"123"               ~=? printLisp (LispInteger 123)
         ,[LispInteger 123] ~=? rightOrError (parseLisp "123")
         ,[LispInteger 123] ~=? rightOrError (parseLisp " 123")
-        ,"left"              ~=? case (parseLisp "123(") of
+        ,"left"              ~=? case parseLisp "123(" of
                                    Left  _ -> "left"
                                    Right _ -> "right"
         ,[LispInteger 1,
           LispInteger 2]   ~=? rightOrError (parseLisp "1 2")
         ]
 
+lisp2 :: Test
 lisp2 = TestList
         [
          [LispFloat 123.12] ~=? rightOrError (parseLisp "123.12")
@@ -66,6 +69,7 @@ lisp2 = TestList
          rightOrError (parseLisp "t")
         ]
 
+lisp3 :: Test
 lisp3 = TestList
         [
          "(:FDS 1 2.3)" ~=?

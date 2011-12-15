@@ -20,6 +20,7 @@ import SimpleFormat
 import Lisp (readLisp)
 import Test.HUnit
 
+sexp2event1 :: Test
 sexp2event1 = TestList
               [
                Rest 1.0 ~=? sexp2event (readLisp "(1.0 :REST T)")

@@ -23,7 +23,8 @@ module Enp (score2sexp
            ,Elt(..)
            ,makeMeasure
            ,scaleElt
-           ,dur)
+           ,dur
+           ,Dur)
 where
 
 import Lisp
@@ -50,6 +51,7 @@ data Elt = Chord Dur Tied Notes Expressions
            | Div Dur [Elt]
            deriving (Show, Eq)
 
+dur :: Elt -> Dur
 dur (Chord d _ _ _) = d
 dur (Rest d) = d
 dur (Div d _) = d
@@ -73,7 +75,7 @@ part2sexp :: Part -> LispVal
 part2sexp e = LispList $ map voice2sexp (A.partVoices e)
 
 voice2sexp :: Voice -> LispVal
-voice2sexp e = 
+voice2sexp e =
     LispList $ map measure2sexp (A.voiceItems e) ++
              fromLispList (parseLisp' ":instrument NIL :staff :treble-staff")
 
@@ -93,5 +95,6 @@ elt2sexp (Chord d True  notes expressions) =
 elt2sexp (Rest d) = LispInteger (-d) `cons` parseLisp' ":notes (60)"
 elt2sexp (Div d xs) = LispInteger d `cons` LispList [LispList (map elt2sexp xs)]
 
+expressionsOrEmpty :: LispVal -> [LispVal]
 expressionsOrEmpty expressions = if clNull expressions then []
                                  else [LispKeyword "EXPRESSIONS", expressions]

@@ -16,13 +16,16 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
+{-# OPTIONS_GHC -fno-warn-name-shadowing -fno-warn-orphans #-}
 
 module IntervalTest where
 import Interval
 import Test.QuickCheck
 import Data.List (delete,sort,nub)
 
+ivmax :: Int
 ivmax = 30::Int
+domain :: [Int]
 domain = [0..ivmax]
 
 data TestInterval = TestInterval (Int,Int)
@@ -31,9 +34,6 @@ data TestInterval = TestInterval (Int,Int)
 instance Interval TestInterval Int where
     start (TestInterval x) = start x
     end (TestInterval x) = end x
-
-instance Point Int Int where
-    point x = x
 
 instance Arbitrary TestInterval where
     arbitrary     = do
@@ -56,12 +56,14 @@ prop_isStrictlyAfter :: TestInterval -> TestInterval -> Bool
 prop_isStrictlyAfter a b = isStrictlyAfter a b == safeisStrictlyAfter a b
     where safeisStrictlyAfter a b = not (a `intersect` b) && start b >= end a
 
+filteredDomain2Intervalls :: [Int] -> [TestInterval]
 filteredDomain2Intervalls [] = []
 filteredDomain2Intervalls (x:xs) = map TestInterval (r xs x x)
     where r [] start last = [(start,last+1)]
           r (x:xs) start last | x == last + 1 = r xs start x
                               | otherwise = (start,last+1) : r xs x x
 
+deleteRandom :: Eq a => [a] -> Gen [a]
 deleteRandom list = do
   pos <- choose (0, length list - 1)
   return (delete (list !! pos) list)
@@ -87,6 +89,7 @@ prop_groupPointsByIntervalls ivs xs = groupPointsByIntervalls ivs xs == safe_gro
     where safe_groupPointsByIntervalls ivs _ = map grap (getAscendingIntervals ivs)
           grap iv = ascendingPoints (filter (isPointInInterval iv) (getAscendingPoints xs))
 
+mt :: (Interval a1 a, Ord a) => AscendingIntervals a1 -> AscendingPoints a -> [AscendingPoints a]
 mt ivs xs = safe_groupPointsByIntervalls ivs xs
     where safe_groupPointsByIntervalls ivs _ = map grap (getAscendingIntervals ivs)
           grap iv = ascendingPoints (filter (isPointInInterval iv) (getAscendingPoints xs))

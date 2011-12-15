@@ -15,6 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
+
 module MeasureToLily
        (mToLily,vToLily) where
 import qualified Measure as M
@@ -23,10 +25,12 @@ import qualified AbstractScore as A
 import Data.Ratio
 import Lisp
 
+log2 :: (Num a, Integral a1) => a1 -> a
 log2 1 = 0
 log2 n | even n = 1 + log2 (div n 2)
 log2 _ = error "log2"
 
+midiToLily :: Num a => a -> L.Pitch
 midiToLily 59 = L.Pitch L.B L.Natural 3
 midiToLily 60 = L.Pitch L.C L.Natural 4
 midiToLily 61 = L.Pitch L.C L.Sharp 4
@@ -36,14 +40,14 @@ midiToLily x = error $ "midiToLily not implemented: " ++ show x
 
 durToLily :: Rational -> L.Dur
 durToLily d = L.Dur (base d) (dots d)
-    where dots d = case (numerator d) of
+    where dots d = case numerator d of
                      1 -> 0
                      3 -> 1
                      7 -> 2
                      15 -> 3
                      _ -> error "durToLily"
           base d = L.powerToSimpleDur (log2 (denominator d) - dots d)
-          
+
 ensureListOfIntegers :: LispVal -> [Int]
 ensureListOfIntegers (LispList xs) =
     map ensureInt xs

@@ -20,8 +20,8 @@ import Data.List (find)
 
 allIndexPairs n = r 0 n
     where r x y | x >= n = []
-		| x == y = r (x + 1) n
-		| otherwise = (x,y) : r x (y - 1)
+                | x == y = r (x + 1) n
+                | otherwise = (x,y) : r x (y - 1)
 
 type Pred a = (a -> Bool)
 type LispPred a = ([a] -> Bool)
@@ -32,7 +32,7 @@ groupFinder :: LispPred a -> GroupFinder a
 groupFinder p xs = let explode (a,b) = (take l (drop a xs),(take a xs, drop l (drop a xs)))
                          where l = b - a
                    in find (p . fst) (map explode (allIndexPairs (length xs)))
-           
+
 allFinder :: GroupFinder a -> AllFinder a
 allFinder finder xs = let r [] = ([],[])
                           r xs = case finder xs of

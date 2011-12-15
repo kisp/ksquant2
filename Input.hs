@@ -29,8 +29,8 @@ instance Iv.Interval Event Time where
     start (Event start _     ) = start
     end   (Event _     end   ) = end
 
-instance Iv.Point Time Time where
-    point x = x
+-- instance Iv.Point Time Time where
+--     point x = x
 
 -----------------------------
 

@@ -56,7 +56,7 @@ numberMTree (Node x t1 t2)
              return newPos
      nNode::  (Eq a) => a -> Table a -> (Table a, Int)
      nNode x table
-        = case (findIndexInList (== x) table) of
+        = case findIndexInList (== x) table of
           Nothing -> (table ++ [x], length table)
           Just i  -> (table, i)
      findIndexInList :: (a -> Bool) -> [a] -> Maybe Int

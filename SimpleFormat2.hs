@@ -16,6 +16,7 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 {-# LANGUAGE TypeSynonymInstances, MultiParamTypeClasses, FlexibleContexts #-}
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module SimpleFormat2 (toSimpleFormat2
                      ,Score
@@ -64,7 +65,9 @@ qeventFromEvent quantized_iv (Chord _ _ n e) =
     QChord (start quantized_iv) (end quantized_iv) n e
 qeventFromEvent _ (EndMarker _) = error "qeventFromEvent _ (EndMarker _)"
 
+qeventNotes :: QEvent -> Notes
 qeventNotes (QChord _ _ notes _) = notes
+qeventExpressions :: QEvent -> Expressions
 qeventExpressions (QChord _ _ _ expressions) = expressions
 
 instance Interval Event Time where
@@ -95,6 +98,7 @@ voiceToSimpleFormat2 v =
 voiceEnd :: Voice -> End
 voiceEnd v = (start . last) $ A.voiceItems v
 
+voiceChords :: A.Voice a -> [a]
 voiceChords v = init $ A.voiceItems v
 
 scoreEnd :: Score -> End

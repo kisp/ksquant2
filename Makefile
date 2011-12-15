@@ -16,6 +16,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 all:
+	cabal clean
+	cabal configure --enable-tests
+	cabal build
+	dist/build/tests/tests
+	hlint *.hs
+
+all-old:
 	ghc -fglasgow-exts --make Main.hs -o main
 
 .PHONY: test

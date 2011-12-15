@@ -16,6 +16,7 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 {-# LANGUAGE MultiParamTypeClasses, FlexibleContexts #-}
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Measure (m
                ,l
@@ -52,10 +53,12 @@ import qualified Interval as Iv
 import Data.List
 import qualified Lisp as L
 
+isPowerOfTwo :: Integral a => a -> Bool
 isPowerOfTwo 1 = True
 isPowerOfTwo x | x > 1 = even x && isPowerOfTwo (x `div` 2)
 isPowerOfTwo _ = error  "isPowerOfTwo"
 
+lowerPowerOfTwo :: Integral a => a -> a
 lowerPowerOfTwo 1 = 1
 lowerPowerOfTwo x | x > 1 = if isPowerOfTwo x then
                                 x
@@ -99,32 +102,39 @@ data E =
        | R Rational Label
          deriving (Show,Eq)
 
+dur :: E -> Rational
 dur (D d _ _) = d
 dur (L d _ _ _ _)   = d
 dur (R d _)     = d
 
+eid :: E -> Label
 eid (D _ _ _) = error "id not for D"
 eid (R _ x) = x
 eid (L _ _ x _ _) = x
 
+timesigDur :: Integral a => (a, a) -> Ratio a
 timesigDur (n,d) = n%d
 
+m :: (Integer, Integer) -> Tempo -> E -> M
 m timesig tempo d = if not(check timesig tempo d) then
                         error "m timesig tempo d not valid"
                     else M timesig tempo d
     where check timesig _ d = dur d == timesigDur timesig
 
+l :: Rational -> Bool -> Notes -> Expressions -> E
 l d tie notes expressions =
     if not check then
         error $ "cannot construct L from " ++ show d ++ " " ++ show tie
     else L d tie 0 notes expressions
     where check = notableDur d
 
+r :: Rational -> E
 r d = if not check then
           error "r d not valid"
       else R d 0
     where check = notableDur d
 
+d :: Rational -> Rational -> [E] -> E
 d d r es = if not(check d r es) then
           error "d d r es not valid"
       else D d r es
@@ -138,7 +148,7 @@ class Transformable a b where
 smap :: (t -> a -> (b,t)) -> [a] -> t -> ([b],t)
 smap _ [] d   = ([],d)
 smap f (x:xs) d = let (r,newd) = f d x
-                  in let (rest,lastd) = (smap f xs newd)                      
+                  in let (rest,lastd) = (smap f xs newd)
                      in (r : rest,lastd)
 
 instance Transformable M E where
@@ -157,12 +167,15 @@ instance Transformable E E where
         in (d dur r res,z')
     transform_leafs' fn z x = fn x z
 
+n60 :: L.LispVal
 n60 = L.readLisp "(60)"
+nil :: L.LispVal
 nil = L.readLisp "()"
 
+measuresDivideLeafs :: Transformable b E => [b] -> [Integer] -> [b]
 measuresDivideLeafs ms divs =
     fst (smap (transform_leafs' trans) ms divs)
-        where 
+        where
               trans (L dur _ _ _ _) (n:ds) =
                   let r = if notableDur (dur / (n%1)) then 1 else divToRatio n
                   in (d dur r (replicate (fromInteger n) (l (dur / (n % 1) / r) False n60 nil)),
@@ -171,9 +184,10 @@ measuresDivideLeafs ms divs =
               trans (D _ _ _) _ = error "measuresDivideLeafs: did not expect (D _ _ _)"
               trans (L _ _ _ _ _) [] = error "measuresDivideLeafs: divs have run out"
 
+measuresWithBeats :: [(Integer, Integer)] -> [Tempo] -> [M]
 measuresWithBeats timesigs tempos =
     let divs = map fst timesigs
-    in measuresDivideLeafs (map mes (zip timesigs tempos)) divs
+    in measuresDivideLeafs (zipWith (curry mes) timesigs tempos) divs
     where mes (timesig,tempo) =
               -- use L here, so that we are allowed to have a duration of e.g. 5/4
               m timesig tempo (L (timesigDur timesig) False 0 n60 nil)
@@ -193,7 +207,7 @@ leafDurs :: E -> [Rational]
 leafDurs e = map dur (eleaves e)
 
 leafEffectiveDurs :: E -> [Rational]
-leafEffectiveDurs x = leafEffectiveDurs' 1 x
+leafEffectiveDurs = leafEffectiveDurs' 1
     where
       leafEffectiveDurs' r (L d _ _ _ _) = [d * r]
       leafEffectiveDurs' r (R d _) = [d * r]
@@ -203,14 +217,17 @@ leafEffectiveDurs x = leafEffectiveDurs' 1 x
 tempoToBeatDur :: (Integer,Rational) -> Rational
 tempoToBeatDur (d,tempo) = 60 / tempo / (d%4)
 
+measureDur :: M -> Ratio Integer
 measureDur (M (n,_) tempo _) = (n%1) * tempoToBeatDur tempo
 
 -- foldl            :: (a -> b -> a) -> a -> [b] -> a
 -- foldl f acc []     =  acc
 -- foldl f acc (x:xs) =  foldl f (f acc x) xs
 
+dxsToXs :: [Ratio Integer] -> [Ratio Integer]
 dxsToXs = scanl (+) 0
 
+measuresStartTimes :: [M] -> [Ratio Integer]
 measuresStartTimes ms = dxsToXs (map measureDur ms)
 
 measuresUntilTime :: [M] -> Float -> [M]
@@ -228,11 +245,13 @@ measuresUntilTime ms time = map fst (takeWhile p (zip ms (measuresStartTimes ms)
 -- measures_leaf_start_times ms = (concatMap (uncurry measure_leaf_start_times)
 --                                               (zip ms (measuresStartTimes ms)))
 
+measureLeafIntervals :: M -> Ratio Integer -> [(Ratio Integer, Ratio Integer)]
 measureLeafIntervals (M (_,d) tempo div) start =
     neighbours (map (+start) (dxsToXs (map trans (leafEffectiveDurs div))))
     where trans dur = tempoToBeatDur tempo * dur_to_beat dur
           dur_to_beat dur = dur * (d%1)
 
+measuresLeafIntervals :: [M] -> [(Ratio Integer, Ratio Integer)]
 measuresLeafIntervals ms = concatMap (uncurry measureLeafIntervals)
                               (zip ms (measuresStartTimes ms))
 
@@ -241,10 +260,10 @@ measuresLeafIntervals ms = concatMap (uncurry measureLeafIntervals)
 -- the same as the end time of the interval
 measuresTieOrRest :: (Transformable a1 E, Iv.Interval a b, Ord b) =>
                         [a1] -> [a] -> [(b, b)] -> [a1]
-measuresTieOrRest ms ivs leaf_times = 
+measuresTieOrRest ms ivs leaf_times =
     fst (smap (transform_leafs' trans) ms leaf_times)
-        where 
-              trans (L dur _ _ notes expressions) ((s,e):leaf_times) =            
+        where
+              trans (L dur _ _ notes expressions) ((s,e):leaf_times) =
                   case find ivContainsStart ivs of
                     Nothing -> (r dur,leaf_times)
                     Just iv -> let tie = e < Iv.end iv
@@ -258,7 +277,7 @@ measuresTransformLeafs :: (Transformable a1 E, Iv.Interval a b, Ord b) =>
                         (E -> a -> E) -> [a1] -> [a] -> [(b, b)] -> [a1]
 measuresTransformLeafs f ms ivs leaf_times =
     fst (smap (transform_leafs' trans) ms leaf_times)
-        where 
+        where
               trans (D _ _ _) _ = error "measuresTieOrRest: did not expect a D"
               trans _ [] = error "measuresTransformLeafs: leaf_times have run out"
               trans elt ((s,_):leaf_times) =
@@ -267,9 +286,10 @@ measuresTransformLeafs f ms ivs leaf_times =
                     Just iv -> (f elt iv,leaf_times)
                   where ivContainsStart = flip Iv.isPointInInterval s
 
+labelVoice :: Transformable a E => A.Voice a -> A.Voice a
 labelVoice voice =
     A.Voice (fst (smap (transform_leafs' trans) (A.voiceItems voice) [0..]))
-        where 
+        where
               trans (L dur tie _ notes expressions) (id:ids) = (L dur tie id notes expressions,ids)
               trans (R dur _) (id:ids) = (R dur id,ids)
               trans (D _ _ _) _ = error "labelVoice: did not expect a D"

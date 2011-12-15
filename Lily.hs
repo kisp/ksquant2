@@ -80,6 +80,7 @@ simpleDurToRatio x =
       D64 -> 1 % 64
       D128 -> 1 % 128
 
+pitchToLily :: Pitch -> String
 pitchToLily (Pitch B Natural 3) = "b"
 pitchToLily (Pitch C Natural 4) = "c'"
 pitchToLily (Pitch C Sharp 4) = "cis'"
@@ -87,33 +88,42 @@ pitchToLily (Pitch D Natural 4) = "d'"
 pitchToLily (Pitch F Natural 4) = "f'"
 pitchToLily p = error $ "pitchToLily not implemented: " ++ show p
 
+durToLily :: Dur -> String
 durToLily (Dur x d) = (show . denominator . simpleDurToRatio) x ++ replicate d '.'
 
+eltToLily :: Elt -> String
 eltToLily (Chord d ps tie) = "<" ++ ps' ++ ">" ++ durToLily d ++ if tie then "~" else ""
-  where ps' = intercalate " " (map pitchToLily ps)
+  where ps' = unwords (map pitchToLily ps)
 eltToLily (Rest d) = 'r' : durToLily d
 eltToLily (Times n d xs) = "\\times " ++ show n ++ "/" ++ show d ++ " { " ++
-                           intercalate " " (map eltToLily xs) ++ " }"
+                           unwords (map eltToLily xs) ++ " }"
 
+measureToLily :: (Measure, Bool) -> String
 measureToLily (Measure n d xs, change) =
     (if change then
          "\\time " ++ show n ++ "/" ++ show d ++ " "
      else "")
     ++
-    intercalate " " (map eltToLily xs) ++ " |"
+    unwords (map eltToLily xs) ++ " |"
 
 -- | Return a list of equal length as xs indicating if the corresponing
 --   elt of xs is different from its predecessor.
+indicateChanges :: Eq b => [b] -> [Bool]
 indicateChanges xs = True : map (not . uncurry (==)) (zip (drop 1 xs) xs)
 
+measureTimeSignature :: Measure -> (Int, Int)
 measureTimeSignature (Measure n d _) = (n,d)
 
+measureChanges :: [Measure] -> [Bool]
 measureChanges xs = indicateChanges (map measureTimeSignature xs)
 
-measuresToLily xs = intercalate "\n      " (map measureToLily (zip xs (measureChanges xs)))
+measuresToLily :: [Measure] -> String
+measuresToLily xs = intercalate "\n      " $ zipWith (curry measureToLily) xs (measureChanges xs)
 
+voiceToLily :: A.Voice Measure -> String
 voiceToLily v = "{ " ++ measuresToLily (A.voiceItems v) ++ " }"
 
+wrap :: String -> String
 wrap content =
   "\\version \"2.12.3\"\n" ++
   "\\header { }\n" ++

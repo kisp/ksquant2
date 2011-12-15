@@ -41,20 +41,27 @@ data Event = Chord Time Notes Expressions
            deriving (Eq,Show)
 
 -- TODO can we use point from Interval?
+eventStart :: Event -> Time
 eventStart (Chord x _ _) = x
 eventStart (Rest x) = x
 
 sexp2simpleFormat :: LispVal -> Score
 sexp2simpleFormat = sexp2score
 
+sexp2score :: LispVal -> A.Score Event
 sexp2score s = A.Score (mapcar' sexp2part s)
+sexp2part :: LispVal -> A.Part Event
 sexp2part s = A.Part (mapcar' sexp2voice s)
+sexp2voice :: LispVal -> A.Voice Event
 sexp2voice s = A.Voice (mapcar' sexp2event s)
 
+n60 :: LispVal
 n60 = readLisp "(60)"
 
+sexp2event :: LispVal -> Event
 sexp2event s = sexp2event' s False
 
+sexp2event' :: LispVal -> Bool -> Event
 sexp2event' (LispInteger x) r = sexp2event' (LispFloat (fromInteger x)) r
 sexp2event' (LispFloat x) r | x < 0 || r = Rest (abs x)
                             | otherwise = Chord x n60 (readLisp "()")

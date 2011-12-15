@@ -21,9 +21,12 @@ import Test.HUnit
 import Data.Ratio
 import Lisp
 
+n60 :: LispVal
 n60 = readLisp "(60)"
+nil :: LispVal
 nil = readLisp "()"
 
+measure1 :: Test
 measure1 = TestList
            [[M (4,4) (4,60 % 1)
              (D (1 % 1) (1 % 1)

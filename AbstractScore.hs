@@ -25,7 +25,7 @@ module AbstractScore
     ,mapVoices)
 where
 import Lisp
-      
+
 data Score a = Score { scoreParts :: [Part a] }
            deriving Show
 data Part a = Part { partVoices :: [Voice a] }

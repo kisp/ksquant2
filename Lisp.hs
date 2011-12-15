@@ -39,7 +39,7 @@ module Lisp (LispVal(..)
 where
 import Text.ParserCombinators.Parsec
 import Data.Char (toUpper)
-import Data.List (intercalate,elemIndex)
+import Data.List (elemIndex)
 import Data.Maybe
 
 data LispVal = LispInteger Integer
@@ -59,8 +59,9 @@ printLisp (LispFloat x) = show x
 printLisp (LispKeyword x) = ':' : x
 printLisp (LispSymbol x) = x
 printLisp (LispList xs) =
-    "(" ++ intercalate " " (map printLisp xs) ++ ")"
+    "(" ++ unwords (map printLisp xs) ++ ")"
 
+symbol :: Parser Char
 symbol = oneOf "/!$%-"
 
 parseKeyword :: Parser LispVal
@@ -107,8 +108,8 @@ parseRatio =
       numerator <- many1 digit
       _ <- char '/'
       denominator <- many1 digit
-      let numerator' = (read numerator)
-      let denominator' = (read denominator)
+      let numerator' = read numerator
+      let denominator' = read denominator
       return $ (LispFloat . (*sign)) (numerator' / denominator')
 
 parseList :: Parser LispVal
@@ -127,6 +128,7 @@ parseVal = parseKeyword <|>
            parseInteger <|>
            parseSymbol
 
+parseValsAndEof :: Parser [LispVal]
 parseValsAndEof = do
   skipMany space
   xs <- endBy1 parseVal spaces
@@ -138,10 +140,12 @@ parseValsAndEof = do
 parseLisp :: String -> Either ParseError [LispVal]
 parseLisp = parse parseValsAndEof ""
 
+parseLisp' :: String -> LispVal
 parseLisp' s = case parseLisp s of
                  Right xs -> LispList xs
                  Left _ -> error $ "parseLisp': cannot parse '" ++ s ++ "'"
 
+readLisp :: String -> LispVal
 readLisp s = case parseLisp s of
                  Right [x] -> x
                  Right _   -> error "readLisp: expecting only a single form"
@@ -153,8 +157,10 @@ listp :: LispVal -> Bool
 listp (LispList _) = True
 listp _ = False
 
+atom :: LispVal -> Bool
 atom = not . listp
 
+clNull :: LispVal -> Bool
 clNull (LispSymbol "NIL") = True
 clNull (LispList []) = True
 clNull _ = False
@@ -172,6 +178,7 @@ cdr :: LispVal -> LispVal
 cdr (LispList (_:xs)) = LispList xs
 cdr x                = error $ "cdr on '" ++ show x ++ "'"
 
+fromLispList :: LispVal -> [LispVal]
 fromLispList (LispList xs) = xs
 fromLispList _ = error "fromLispList: not a list"
 
@@ -189,9 +196,11 @@ mapcar' f xs@(LispList _) = f a : mapcar' f b
           b = cdr xs
 mapcar' _ _ = error "mapcar': not a list"
 
+keywordp :: LispVal -> Bool
 keywordp (LispKeyword _) = True
 keywordp _ = False
 
+propertyListP :: LispVal -> Bool
 propertyListP (LispList xs) = (even . length) xs &&
                               all keywordp (everySecond xs)
     where everySecond [] = []
@@ -213,6 +222,7 @@ getf x y =
 getf' :: LispVal -> LispVal -> LispVal -> LispVal
 getf' list field def = fromMaybe def (getf list field)
 
+minus :: LispVal -> LispVal
 minus (LispInteger x) = LispInteger (-x)
 minus (LispFloat x) = LispFloat (-x)
 minus _ = error "minus"

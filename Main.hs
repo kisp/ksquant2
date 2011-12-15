@@ -24,12 +24,12 @@ import Lisp
 import qualified SimpleFormat as SF
 import qualified SimpleFormat2 as SF2
 import qualified AbstractScore as A
-import qualified Enp as Enp
+import qualified Enp
 import qualified Lily as L
 import MeasureToEnp
 import MeasureToLily
 import Data.List ((\\))
-import Data.Maybe 
+import Data.Maybe
 import System.Environment
 
 rationalToTime :: Rational -> Time
@@ -95,7 +95,7 @@ measureStream ts metro = zipWith buildMeasureFromLisp (stickToLast (fromLispList
 
 processSimpleFormat :: LispVal -> String
 processSimpleFormat (input) =
-    let s = getSimple input     
+    let s = getSimple input
         sf1 = SF.sexp2simpleFormat s :: SF.Score
         sf2 = SF2.toSimpleFormat2 sf1 :: SF2.Score
         sf2end = SF2.scoreEnd sf2
@@ -103,7 +103,7 @@ processSimpleFormat (input) =
              (measureStream (getTimeSignatures input) (getMetronomes input))
              sf2end
         measurevoice = A.Voice ms
-        divs = [1..(getMaxDiv input)] \\ getForbDivs input :: Divs 
+        divs = [1..(getMaxDiv input)] \\ getForbDivs input :: Divs
         trans = quantifyVoice measurevoice divs :: SF2.Voice -> M.Voice
         mscore = A.mapVoices trans sf2 :: M.Score
         output = if isLily
@@ -134,7 +134,7 @@ processParsedInput [s,_] = processSimpleFormat s
 processParsedInput _ = error "processParsedInput called on an unexpected number of forms"
 
 processInput :: String -> String
-processInput input = case (parseLisp input) of
+processInput input = case parseLisp input of
   Right parsedInput -> processParsedInput parsedInput
   Left err -> error $ "parse error " ++ show err
 
@@ -150,4 +150,3 @@ main = do
         putOutput [_] s = putStrLn s
         putOutput [_,o] s = writeFile o s
         putOutput args _ = error $ "putOutput with args " ++ show args ++ "?"
-  

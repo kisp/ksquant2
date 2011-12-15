@@ -19,11 +19,15 @@ module MeasureToEnp where
 import qualified Measure as M
 import qualified Enp as E
 import Data.Ratio
+import Prelude hiding (id)
 
+durs2factor :: Integral a => [Ratio a] -> Ratio a
 durs2factor xs = foldl1 lcm (map denominator xs) % 1
+ratio2integer :: Integral a => Ratio a -> a
 ratio2integer r | denominator r == 1 = numerator r
                 | otherwise = error "ratio2integer: not an integer"
 
+tiedOverFromLast :: Num a => [(a, M.E)] -> a -> Bool
 tiedOverFromLast _ 0 = False
 tiedOverFromLast assoc id =
     case lookup (id-1) assoc of
@@ -42,12 +46,15 @@ eToEnp assoc f (M.D d _ es) =
     in E.Div (ratio2integer (d * f))
            (map (eToEnp assoc f') es)
 
+unwrap :: E.Elt -> [E.Elt]
 unwrap (E.Div _ e) = e
 unwrap _ = error "unwrap: not a Div"
 
+wrapIfNeeded :: E.Elt -> E.Elt
 wrapIfNeeded e@(E.Div _ _) = e
 wrapIfNeeded x = E.Div 1 [x]
 
+adaptForTimesig :: (E.Dur, t) -> [E.Elt] -> [E.Elt]
 adaptForTimesig (n,_) es = let f = n `div` sum (map E.dur es)
                            in map (E.scaleElt f) es
 
