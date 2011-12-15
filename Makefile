@@ -22,9 +22,6 @@ all:
 	dist/build/tests/tests
 	hlint *.hs
 
-all-old:
-	ghc -fglasgow-exts --make Main.hs -o main
-
 .PHONY: test
 test:
 	ghc -fglasgow-exts -hide-package QuickCheck-2.3.0.2 -fhpc --make Test.hs -o test
@@ -41,7 +38,8 @@ itest:
 	./test
 
 .PHONY: shell-tests
-shell-tests: all
+shell-tests:
+	ghc -fhpc --make Main.hs -o main
 	clisp -norc lisp/test-runner.lisp
 
 runmain:
