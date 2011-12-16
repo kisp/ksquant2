@@ -20,11 +20,13 @@ module AbstractScore
     ,Part(..)
     ,Voice(..))
 where
+import Lisp
 
 data Score a = Score { scoreParts :: [Part a] }
 data Part a = Part { partVoices :: [Voice a] }
 data Voice a = Voice { voiceItems :: a }
 
+-- Functor
 instance Functor Score where
     fmap f x = Score $ map (fmap f) (scoreParts x)
 
@@ -33,3 +35,16 @@ instance Functor Part where
 
 instance Functor Voice where
     fmap f x = Voice . f . voiceItems $ x
+
+-- Sexp
+instance (Sexp a) => Sexp (Score a) where
+    toSexp s = LispList $ map toSexp (scoreParts s)
+    fromSexp = Score . mapcar' fromSexp
+
+instance (Sexp a) => Sexp (Part a) where
+    toSexp s = LispList $ map toSexp (partVoices s)
+    fromSexp = Part . mapcar' fromSexp
+
+instance (Sexp a) => Sexp (Voice a) where
+    toSexp = toSexp . voiceItems
+    fromSexp = Voice . fromSexp

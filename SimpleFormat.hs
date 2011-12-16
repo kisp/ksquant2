@@ -20,6 +20,7 @@ module SimpleFormat (sexp2simpleFormat
                     ,Part
                     ,Voice
                     ,Event(..)
+                    ,Events
                     ,eventStart
                     ,sexp2event)
 where

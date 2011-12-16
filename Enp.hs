@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Enp (score2sexp
+module Enp (voice2sexp
            ,Score
            ,Part
            ,Voice
@@ -71,15 +71,9 @@ makeMeasure (n,d) t es =
     else Measure (n,d) t es
     where check = n == sum (map dur es)
 
-score2sexp :: Score -> LispVal
-score2sexp e = LispList $ map part2sexp (A.scoreParts e)
-
-part2sexp :: Part -> LispVal
-part2sexp e = LispList $ map voice2sexp (A.partVoices e)
-
-voice2sexp :: Voice -> LispVal
+voice2sexp :: Measures -> LispVal
 voice2sexp e =
-    LispList $ map measure2sexp (A.voiceItems e) ++
+    LispList $ map measure2sexp e ++
     (fromRight . parseLisp) ":instrument NIL :staff :treble-staff"
 
 measure2sexp :: Measure -> LispVal

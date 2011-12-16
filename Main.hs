@@ -97,7 +97,7 @@ processSimpleFormat :: LispVal -> String
 processSimpleFormat (input) =
     let s = getSimple input
         sf1 = SF.sexp2simpleFormat s
-        sf2 = SF2.toSimpleFormat2 sf1
+        sf2 = fmap SF2.voiceToSimpleFormat2 sf1
         sf2end = SF2.scoreEnd sf2
         ms = M.measuresUntilTime
              (measureStream (getTimeSignatures input) (getMetronomes input))
@@ -108,7 +108,7 @@ processSimpleFormat (input) =
         mscore = fmap trans sf2 :: M.Score
         output = if isLily
                  then L.showLily (fmap vToLily mscore)
-                 else printLisp (Enp.score2sexp (fmap vToEnp mscore))
+                 else printSexp (fmap (Enp.voice2sexp . vToEnp) mscore)
     in output ++ "\n"
     where getSimple x = fromMaybe (error "Could not find :simple") (getf x (LispKeyword "SIMPLE"))
           getTimeSignatures x = case getf x (LispKeyword "TIME-SIGNATURES") of

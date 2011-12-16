@@ -18,7 +18,7 @@
 {-# LANGUAGE TypeSynonymInstances, MultiParamTypeClasses, FlexibleContexts #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
-module SimpleFormat2 (toSimpleFormat2
+module SimpleFormat2 (voiceToSimpleFormat2
                      ,Score
                      ,Part
                      ,Voice
@@ -83,20 +83,14 @@ instance Interval QEvent Rational where
     start (QChord s _ _ _) = s
     end (QChord _ e _ _) = e
 
-toSimpleFormat2 :: SF1.Score -> Score
-toSimpleFormat2 s = A.Score (map partToSimpleFormat2 (A.scoreParts s))
-
-partToSimpleFormat2 :: SF1.Part -> Part
-partToSimpleFormat2 s = A.Part (map voiceToSimpleFormat2 (A.partVoices s))
-
-voiceToSimpleFormat2 :: SF1.Voice -> Voice
+voiceToSimpleFormat2 :: SF1.Events -> Events
 voiceToSimpleFormat2 v =
-    let events = A.voiceItems v
+    let events = v
         startEndPairs = (neighbours (map SF1.eventStart events))
         trans (SF1.Chord _ notes expressions,(start,end)) = [Chord start end notes expressions]
         trans _ = []
-    in A.Voice (concatMap trans (zip events startEndPairs) ++
-                [EndMarker $ SF1.eventStart (last events)])
+    in (concatMap trans (zip events startEndPairs) ++
+        [EndMarker $ SF1.eventStart (last events)])
 
 voiceEnd :: Voice -> End
 voiceEnd v = (start . last) $ A.voiceItems v

@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Lisp (Sexp, toSexp, fromSexp, LispVal(..), mapcar', mapcarUpToPlist, readLisp, readLisp', cons,
+module Lisp (Sexp, toSexp, fromSexp, printSexp, LispVal(..), mapcar', mapcarUpToPlist, readLisp, readLisp', cons,
              clNull, car, cdr, getf, getf', atom, fromLispList, parseLisp, printLisp, propertyListP,
              lispEscapeString)
 where
@@ -243,8 +243,14 @@ getf' list field def = fromMaybe def (getf list field)
 class Sexp a where
     toSexp :: a -> LispVal
     fromSexp :: LispVal -> a
+    printSexp :: a -> String
+    printSexp = printLisp . toSexp
+
+instance Sexp LispVal where
+  toSexp = id
+  fromSexp = id
 
 instance Sexp Integer where
-    toSexp = LispInteger
-    fromSexp (LispInteger x) = x
-    fromSexp _ = error "fromSexp: not (LispInteger x)"
+  toSexp = LispInteger
+  fromSexp (LispInteger x) = x
+  fromSexp _ = error "fromSexp: not (LispInteger x)"
