@@ -41,7 +41,7 @@ rationalPairToTimePair (x,y) = (rationalToTime x, rationalToTime y)
 type MeasureStructure = M.Voice
 type Divs = [Int]
 
-quantifyVoice :: A.Voice [M.M] -> [Int] -> [SF2.Event] -> [M.M]
+quantifyVoice :: M.Voice -> [Int] -> SF2.Events -> [M.M]
 quantifyVoice ms divs v =
     let measures = A.voiceItems ms
         input = SF2.voiceChords v

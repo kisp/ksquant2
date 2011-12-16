@@ -187,7 +187,7 @@ measuresDivideLeafs ms divs =
               trans (D _ _ _) _ = error "measuresDivideLeafs: did not expect (D _ _ _)"
               trans (L _ _ _ _ _) [] = error "measuresDivideLeafs: divs have run out"
 
-measuresWithBeats :: [(Integer, Integer)] -> [Tempo] -> [M]
+measuresWithBeats :: [(Integer, Integer)] -> [Tempo] -> Ms
 measuresWithBeats timesigs tempos =
     let divs = map fst timesigs
     in measuresDivideLeafs (zipWith (curry mes) timesigs tempos) divs
@@ -203,7 +203,7 @@ eleaves (D _ _ es) = concatMap eleaves es
 mleaves :: M -> [E]
 mleaves (M _ _ e) = eleaves e
 
-vleaves :: [M] -> [E]
+vleaves :: Ms -> [E]
 vleaves = concatMap mleaves
 
 leafDurs :: E -> [Rational]
@@ -230,10 +230,10 @@ measureDur (M (n,_) tempo _) = (n%1) * tempoToBeatDur tempo
 dxsToXs :: [Ratio Integer] -> [Ratio Integer]
 dxsToXs = scanl (+) 0
 
-measuresStartTimes :: [M] -> [Ratio Integer]
+measuresStartTimes :: Ms -> [Ratio Integer]
 measuresStartTimes ms = dxsToXs (map measureDur ms)
 
-measuresUntilTime :: [M] -> Float -> [M]
+measuresUntilTime :: Ms -> Float -> Ms
 measuresUntilTime ms time = map fst (takeWhile p (zip ms (measuresStartTimes ms)))
     where p (_,s) = fromRational s < time
 
@@ -254,7 +254,7 @@ measureLeafIntervals (M (_,d) tempo div) start =
     where trans dur = tempoToBeatDur tempo * dur_to_beat dur
           dur_to_beat dur = dur * (d%1)
 
-measuresLeafIntervals :: [M] -> [(Ratio Integer, Ratio Integer)]
+measuresLeafIntervals :: Ms -> [(Ratio Integer, Ratio Integer)]
 measuresLeafIntervals ms = concatMap (uncurry measureLeafIntervals)
                               (zip ms (measuresStartTimes ms))
 

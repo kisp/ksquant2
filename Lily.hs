@@ -117,10 +117,10 @@ indicateChanges xs = True : map (not . uncurry (==)) (zip (drop 1 xs) xs)
 measureTimeSignature :: Measure -> (Int, Int)
 measureTimeSignature (Measure n d _) = (n,d)
 
-measureChanges :: [Measure] -> [Bool]
+measureChanges :: Measures -> [Bool]
 measureChanges xs = indicateChanges (map measureTimeSignature xs)
 
-measuresToLily :: [Measure] -> String
+measuresToLily :: Measures -> String
 measuresToLily xs = intercalate "\n      " $ zipWith (curry measureToLily) xs (measureChanges xs)
 
 
