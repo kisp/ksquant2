@@ -51,7 +51,7 @@ sexp2simpleFormat = sexp2score
 sexp2score :: LispVal -> A.Score Event
 sexp2score s = A.Score (mapcar' sexp2part s)
 sexp2part :: LispVal -> A.Part Event
-sexp2part s = A.Part (mapcar' sexp2voice s)
+sexp2part s = A.Part $ fst (mapcarUpToPlist sexp2voice s)
 sexp2voice :: LispVal -> A.Voice Event
 sexp2voice s = A.Voice (mapcar' sexp2event s)
 

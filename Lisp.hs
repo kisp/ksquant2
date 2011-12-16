@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Lisp (Sexp, toSexp, fromSexp, LispVal(..), mapcar', readLisp, readLisp', cons,
+module Lisp (Sexp, toSexp, fromSexp, LispVal(..), mapcar', mapcarUpToPlist, readLisp, readLisp', cons,
              clNull, car, cdr, getf, getf', atom, fromLispList, parseLisp, printLisp, propertyListP,
              lispEscapeString)
 where
@@ -197,6 +197,15 @@ mapcar' f xs@(LispList _) = f a : mapcar' f b
     where a = car xs
           b = cdr xs
 mapcar' _ _ = error "mapcar': not a list"
+
+mapcarUpToPlist :: (LispVal -> a) -> LispVal -> ([a], LispVal)
+mapcarUpToPlist _ (LispList []) = ([], LispList [])
+mapcarUpToPlist _ xs@(LispList _) | propertyListP xs = ([], xs)
+mapcarUpToPlist f xs@(LispList _) = (f a : ys, plist)
+    where a = car xs
+          b = cdr xs
+          (ys,plist) = mapcarUpToPlist f b
+mapcarUpToPlist _ _ = error "mapcarUpToPlist: not a list"
 
 keywordp :: LispVal -> Bool
 keywordp (LispKeyword _) = True
