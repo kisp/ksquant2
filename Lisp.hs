@@ -16,7 +16,8 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module Lisp (Sexp, toSexp, fromSexp, LispVal(..), mapcar', readLisp, readLisp', cons,
-             clNull, car, cdr, getf, getf', atom, fromLispList, parseLisp, printLisp, propertyListP)
+             clNull, car, cdr, getf, getf', atom, fromLispList, parseLisp, printLisp, propertyListP,
+             lispEscapeString)
 where
 import Text.ParserCombinators.Parsec
 import Data.Char (toUpper)
@@ -26,6 +27,7 @@ import Data.Maybe
 data LispVal = LispInteger Integer
              | LispKeyword String
              | LispSymbol String
+             | LispString String
              | LispFloat Float
              | LispList [LispVal]
              deriving (Eq)
@@ -33,12 +35,21 @@ data LispVal = LispInteger Integer
 instance Show LispVal where
     show x = "readLisp \"" ++ printLisp x ++ "\""
 
+lispEscapeString :: String -> String
+lispEscapeString s = "\"" ++ rec s ++ "\""
+  where
+    rec [] = []
+    rec (x:xs) | x == '\"' = "\\\"" ++ rec xs
+               | x == '\\' = "\\\\" ++ rec xs
+               | otherwise = x : rec xs
+
 -- |Print a LispVal to String.
 printLisp :: LispVal -> String
 printLisp (LispInteger x) = show x
 printLisp (LispFloat x) = show x
 printLisp (LispKeyword x) = ':' : x
 printLisp (LispSymbol x) = x
+printLisp (LispString x) = lispEscapeString x
 printLisp (LispList xs) =
     "(" ++ unwords (map printLisp xs) ++ ")"
 
@@ -57,6 +68,14 @@ parseSymbol =
     do
       s <- many1 (letter <|> symbol <|> digit)
       return (LispSymbol (map toUpper s))
+
+parseString :: Parser LispVal
+parseString =
+    do
+      _ <- char '\"'
+      s <- many ((char '\\' >> anyToken) <|> noneOf "\"")
+      _ <- char '\"'
+      return (LispString s)
 
 parseSign :: (Num a) => Parser a
 parseSign = (char '-' >> return (-1)) <|>
@@ -104,6 +123,7 @@ parseList =
 parseVal :: Parser LispVal
 parseVal = parseKeyword <|>
            parseList <|>
+           parseString <|>
            try parseFloat <|>
            try parseRatio <|>
            parseInteger <|>

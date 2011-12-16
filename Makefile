@@ -20,12 +20,14 @@ all:
 	cabal clean
 	cabal configure --enable-tests
 	cabal build
+	rm -f tests.tix
 	dist/build/tests/tests
 	hlint *.hs
 
 .PHONY: shell-tests
 shell-tests:
 	ghc -fhpc --make Main.hs -o main
+	rm -f main.tix
 	clisp -norc lisp/test-runner.lisp
 
 .PHONY: coverage

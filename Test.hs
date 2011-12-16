@@ -52,6 +52,7 @@ tests = [-- ("helloWorld value", TestRunnerTest hunitTest),
          -- LispTest
          ,("readLisp1", TestRunnerTest readLisp1)
          ,("prop_mapcar'", runWithQuickCheck prop_mapcar')
+         ,("prop_string_roundTrip", runWithQuickCheck prop_string_roundTrip)
          ,("lisp1", TestRunnerTest lisp1)
          ,("lisp2", TestRunnerTest lisp2)
          ,("lisp3", TestRunnerTest lisp3)

@@ -40,6 +40,10 @@ prop_mapcar' xs = mapcar' f (LispList (map toSexp xs)) == map g xs
         f _ = error "prop_mapcar'"
         g = toSexp . (+1)
 
+prop_string_roundTrip :: String -> Bool
+prop_string_roundTrip s = (printLisp . (!!0) . fromRight . parseLisp . p) s == p s
+  where p = lispEscapeString
+
 lisp1 :: Test
 lisp1 = TestList
         [LispInteger 1     ~=? LispInteger 1
