@@ -105,10 +105,10 @@ processSimpleFormat (input) =
         measurevoice = A.Voice ms
         divs = [1..(getMaxDiv input)] \\ getForbDivs input        
         trans = quantifyVoice measurevoice divs :: SF2.Events -> M.Ms
-        mscore = A.mapVoices trans sf2 :: M.Score
+        mscore = fmap trans sf2 :: M.Score
         output = if isLily
-                 then L.showLily (A.mapVoices vToLily mscore)
-                 else printLisp (Enp.score2sexp (A.mapVoices vToEnp mscore))
+                 then L.showLily (fmap vToLily mscore)
+                 else printLisp (Enp.score2sexp (fmap vToEnp mscore))
     in output ++ "\n"
     where getSimple x = fromMaybe (error "Could not find :simple") (getf x (LispKeyword "SIMPLE"))
           getTimeSignatures x = case getf x (LispKeyword "TIME-SIGNATURES") of

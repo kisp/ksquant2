@@ -15,23 +15,16 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
-
 module AbstractScore
     (Score(..)
     ,Part(..)
-    ,Voice(..)
-    ,mapVoices)
+    ,Voice(..))
 where
 
 data Score a = Score { scoreParts :: [Part a] }
 data Part a = Part { partVoices :: [Voice a] }
 data Voice a = Voice { voiceItems :: a }
 
-mapVoices :: Functor f => (a -> b) -> f a -> f b
-mapVoices = fmap
-
--- Functor
 instance Functor Score where
     fmap f x = Score $ map (fmap f) (scoreParts x)
 
