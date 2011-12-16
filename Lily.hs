@@ -32,9 +32,11 @@ import Data.List
 import Data.Ratio
 import qualified AbstractScore as A
 
-type Score = A.Score Measure
-type Part = A.Part Measure
-type Voice = A.Voice Measure
+type Score = A.Score Measures
+type Part = A.Part Measures
+type Voice = A.Voice Measures
+
+type Measures = [Measure]
 
 -- | This represents durations without dot.
 data SimpleDur = D1 | D2 | D4 | D8 | D16 | D32 | D64 | D128
@@ -120,7 +122,8 @@ measureChanges xs = indicateChanges (map measureTimeSignature xs)
 measuresToLily :: [Measure] -> String
 measuresToLily xs = intercalate "\n      " $ zipWith (curry measureToLily) xs (measureChanges xs)
 
-voiceToLily :: A.Voice Measure -> String
+
+voiceToLily :: Voice -> String
 voiceToLily v = "{ " ++ measuresToLily (A.voiceItems v) ++ " }"
 
 wrap :: String -> String

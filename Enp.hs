@@ -34,9 +34,11 @@ type Dur = Integer
 type Timesig = (Integer,Integer)
 type Tempo = (Integer,Rational)
 
-type Score = A.Score Measure
-type Part = A.Part Measure
-type Voice = A.Voice Measure
+type Score = A.Score Measures
+type Part = A.Part Measures
+type Voice = A.Voice Measures
+
+type Measures = [Measure]
 
 data Measure = Measure Timesig Tempo [Elt]
            deriving (Show, Eq)

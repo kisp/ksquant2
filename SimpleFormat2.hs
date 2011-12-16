@@ -43,9 +43,11 @@ type Time = Float
 type Start = Time
 type End = Time
 
-type Score = A.Score Event
-type Part = A.Part Event
-type Voice = A.Voice Event
+type Score = A.Score Events
+type Part = A.Part Events
+type Voice = A.Voice Events
+
+type Events = [Event]
 
 type Notes = L.LispVal
 type Expressions = L.LispVal
@@ -98,7 +100,8 @@ voiceToSimpleFormat2 v =
 voiceEnd :: Voice -> End
 voiceEnd v = (start . last) $ A.voiceItems v
 
-voiceChords :: A.Voice a -> [a]
+
+voiceChords :: A.Voice [a] -> [a]
 voiceChords v = init $ A.voiceItems v
 
 scoreEnd :: Score -> End

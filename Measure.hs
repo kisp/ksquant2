@@ -82,9 +82,11 @@ notableDur x = h (numerator x) (denominator x)
 type Timesig = (Integer,Integer)
 type Tempo = (Integer,Rational)
 
-type Score = A.Score M
-type Part = A.Part M
-type Voice = A.Voice M
+type Score = A.Score Ms
+type Part = A.Part Ms
+type Voice = A.Voice Ms
+
+type Ms = [M]
 
 data M = M Timesig Tempo E
        deriving (Show,Eq)
@@ -286,7 +288,7 @@ measuresTransformLeafs f ms ivs leaf_times =
                     Just iv -> (f elt iv,leaf_times)
                   where ivContainsStart = flip Iv.isPointInInterval s
 
-labelVoice :: Transformable a E => A.Voice a -> A.Voice a
+labelVoice :: Transformable a E => A.Voice [a] -> A.Voice [a]
 labelVoice voice =
     A.Voice (fst (smap (transform_leafs' trans) (A.voiceItems voice) [0..]))
         where

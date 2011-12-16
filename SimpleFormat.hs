@@ -32,9 +32,11 @@ type Time = Float
 type Notes = LispVal
 type Expressions = LispVal
 
-type Score = A.Score Event
-type Part = A.Part Event
-type Voice = A.Voice Event
+type Score = A.Score Events
+type Part = A.Part Events
+type Voice = A.Voice Events
+
+type Events = [Event]
 
 data Event = Chord Time Notes Expressions
            | Rest Time
@@ -45,14 +47,18 @@ eventStart :: Event -> Time
 eventStart (Chord x _ _) = x
 eventStart (Rest x) = x
 
+
 sexp2simpleFormat :: LispVal -> Score
 sexp2simpleFormat = sexp2score
 
-sexp2score :: LispVal -> A.Score Event
+
+sexp2score :: LispVal -> Score
 sexp2score s = A.Score (mapcar' sexp2part s)
-sexp2part :: LispVal -> A.Part Event
+
+sexp2part :: LispVal -> Part
 sexp2part s = A.Part $ fst (mapcarUpToPlist sexp2voice s)
-sexp2voice :: LispVal -> A.Voice Event
+
+sexp2voice :: LispVal -> Voice
 sexp2voice s = A.Voice (mapcar' sexp2event s)
 
 n60 :: LispVal
