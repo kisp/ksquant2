@@ -93,40 +93,41 @@ measureStream :: LispVal -> LispVal -> M.Ms
 measureStream ts metro = zipWith buildMeasureFromLisp (stickToLast (fromLispList ts))
                          (stickToLast (fromLispList metro))
 
+
+mkTrans :: LispVal -> SF2.Score -> SF2.Events -> M.Ms
+mkTrans input sf2 =
+  let sf2end = SF2.scoreEnd sf2
+      ms = M.measuresUntilTime
+           (measureStream (getTimeSignatures input) (getMetronomes input))
+           sf2end
+      measurevoice = A.Voice ms
+      divs = [1..(getMaxDiv input)] \\ getForbDivs input
+      getTimeSignatures x = case getf x (LispKeyword "TIME-SIGNATURES") of
+        Just s -> ensureListOfLists s
+        Nothing -> error "Could not find :time-signatures"
+      getMetronomes x = case getf x (LispKeyword "METRONOMES") of
+        Just s -> ensureListOfLists s
+        Nothing -> error "Could not find :metronomes"
+      getMaxDiv s =  case getf s (LispKeyword "MAX-DIV") of
+        Just (LispInteger x) -> fromInteger x
+        Just _ -> error "incorrect :max-div"
+        Nothing -> error "Could not find :max-div"
+      getForbDivs s =  case getf s (LispKeyword "FORBIDDEN-DIVS") of
+        Just xs@(LispList _) -> ensureListOfIntegers xs
+        Just (LispSymbol "NIL") -> []
+        Just _ -> error "incorrect :forbidden-divs"
+        Nothing -> error "Could not find :forbidden-divs"
+  in quantifyVoice measurevoice divs
+
 processSimpleFormat :: LispVal -> String
 processSimpleFormat (input) =
-    let s = getSimple input
-        sf1 = SF.sexp2simpleFormat s
-        sf2 = fmap SF2.voiceToSimpleFormat2 sf1
-        sf2end = SF2.scoreEnd sf2
-        ms = M.measuresUntilTime
-             (measureStream (getTimeSignatures input) (getMetronomes input))
-             sf2end
-        measurevoice = A.Voice ms
-        divs = [1..(getMaxDiv input)] \\ getForbDivs input        
-        trans = quantifyVoice measurevoice divs :: SF2.Events -> M.Ms
-        mscore = fmap trans sf2 :: M.Score
-        output = if isLily
-                 then L.showLily (fmap vToLily mscore)
-                 else printSexp (fmap (Enp.voice2sexp . vToEnp) mscore)
-    in output ++ "\n"
-    where getSimple x = fromMaybe (error "Could not find :simple") (getf x (LispKeyword "SIMPLE"))
-          getTimeSignatures x = case getf x (LispKeyword "TIME-SIGNATURES") of
-                                  Just s -> ensureListOfLists s
-                                  Nothing -> error "Could not find :time-signatures"
-          getMetronomes x = case getf x (LispKeyword "METRONOMES") of
-                                  Just s -> ensureListOfLists s
-                                  Nothing -> error "Could not find :metronomes"
-          getMaxDiv s =  case getf s (LispKeyword "MAX-DIV") of
-                           Just (LispInteger x) -> fromInteger x
-                           Just _ -> error "incorrect :max-div"
-                           Nothing -> error "Could not find :max-div"
-          getForbDivs s =  case getf s (LispKeyword "FORBIDDEN-DIVS") of
-                           Just xs@(LispList _) -> ensureListOfIntegers xs
-                           Just (LispSymbol "NIL") -> []
-                           Just _ -> error "incorrect :forbidden-divs"
-                           Nothing -> error "Could not find :forbidden-divs"
-          isLily = False
+    let isLily = False
+        getSimple x = fromMaybe (error "Could not find :simple") (getf x (LispKeyword "SIMPLE"))
+        sf2 = fmap (SF2.voiceToSimpleFormat2 . mapcar' SF.sexp2event) . fromSexp . getSimple $ input
+        mscore = fmap (mkTrans input sf2) sf2
+    in if isLily
+       then L.showLily (fmap vToLily mscore) ++ "\n"
+       else printSexp (fmap (Enp.voice2sexp . vToEnp) mscore) ++ "\n"
 
 processParsedInput :: [LispVal] -> String
 processParsedInput [s] = processSimpleFormat s

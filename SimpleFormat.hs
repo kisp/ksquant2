@@ -15,18 +15,17 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module SimpleFormat (sexp2simpleFormat
-                    ,Score
-                    ,Part
-                    ,Voice
-                    ,Event(..)
-                    ,Events
-                    ,eventStart
-                    ,sexp2event)
+module SimpleFormat (
+  Score
+  ,Part
+  ,Voice
+  ,Event(..)
+  ,Events
+  ,eventStart
+  ,sexp2event)
 where
 
 import Lisp
-
 import qualified AbstractScore as A
 
 type Time = Float
@@ -47,20 +46,6 @@ data Event = Chord Time Notes Expressions
 eventStart :: Event -> Time
 eventStart (Chord x _ _) = x
 eventStart (Rest x) = x
-
-
-sexp2simpleFormat :: LispVal -> Score
-sexp2simpleFormat = sexp2score
-
-
-sexp2score :: LispVal -> Score
-sexp2score s = A.Score (mapcar' sexp2part s)
-
-sexp2part :: LispVal -> Part
-sexp2part s = A.Part $ fst (mapcarUpToPlist sexp2voice s)
-
-sexp2voice :: LispVal -> Voice
-sexp2voice s = A.Voice (mapcar' sexp2event s)
 
 n60 :: LispVal
 n60 = readLisp' "(60)"
