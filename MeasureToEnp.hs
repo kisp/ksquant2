@@ -16,6 +16,7 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module MeasureToEnp where
+import qualified AbstractScore as A
 import qualified Measure as M
 import qualified Enp as E
 import Data.Ratio
@@ -70,4 +71,5 @@ vToEnp :: M.Voice -> E.Voice
 vToEnp v = let v' = M.labelVoice v
                ls = M.vleaves v'
                assoc = zip (map M.eid ls) ls
-           in fmap (mToEnp assoc) v'
+           in fm (mToEnp assoc) v'
+             where fm f x = A.Voice $ map f (A.voiceItems x)
