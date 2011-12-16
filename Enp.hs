@@ -20,6 +20,7 @@ module Enp (score2sexp
            ,Part
            ,Voice
            ,Measure(..)
+           ,Measures
            ,Elt(..)
            ,makeMeasure
            ,scaleElt

@@ -21,7 +21,6 @@ module MeasureToLily
        (mToLily,vToLily) where
 import qualified Measure as M
 import qualified Lily as L
-import qualified AbstractScore as A
 import Data.Ratio
 import Lisp
 
@@ -67,5 +66,5 @@ eToLily (M.D _ r es) | r == 1 = concatMap eToLily es
 mToLily :: M.M -> L.Measure
 mToLily (M.M (n,d) _ e) = L.Measure (fromInteger n) (fromInteger d) (eToLily e)
 
-vToLily :: M.Voice -> L.Voice
-vToLily v = A.Voice $ map mToLily (A.voiceItems v)
+vToLily :: M.Ms -> L.Measures
+vToLily = map mToLily

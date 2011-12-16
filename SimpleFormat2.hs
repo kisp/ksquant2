@@ -23,6 +23,7 @@ module SimpleFormat2 (toSimpleFormat2
                      ,Part
                      ,Voice
                      ,Event
+                     ,Events
                      ,QEvent
                      ,sampleVoice
                      ,voiceEnd
@@ -101,8 +102,8 @@ voiceEnd :: Voice -> End
 voiceEnd v = (start . last) $ A.voiceItems v
 
 
-voiceChords :: A.Voice [a] -> [a]
-voiceChords v = init $ A.voiceItems v
+voiceChords :: [a] -> [a]
+voiceChords = init
 
 scoreEnd :: Score -> End
 scoreEnd s = maximum (map voiceEnd (concatMap A.partVoices (A.scoreParts s)))

@@ -22,6 +22,7 @@ module Lily (showLily
             ,Dur(..)
             ,Elt(..)
             ,Measure(..)
+            ,Measures
             ,Name(..)
             ,Accidental(..)
             ,Pitch(..)

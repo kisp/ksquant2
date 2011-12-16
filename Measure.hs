@@ -25,6 +25,7 @@ module Measure (m
                ,dur
                ,E(L,D,R)
                ,M(M)
+               ,Ms
                ,transform_leafs
                ,transform_leafs'
                ,measuresDivideLeafs
@@ -202,8 +203,8 @@ eleaves (D _ _ es) = concatMap eleaves es
 mleaves :: M -> [E]
 mleaves (M _ _ e) = eleaves e
 
-vleaves :: Voice -> [E]
-vleaves v = concatMap mleaves (A.voiceItems v)
+vleaves :: [M] -> [E]
+vleaves = concatMap mleaves
 
 leafDurs :: E -> [Rational]
 leafDurs e = map dur (eleaves e)
@@ -288,9 +289,9 @@ measuresTransformLeafs f ms ivs leaf_times =
                     Just iv -> (f elt iv,leaf_times)
                   where ivContainsStart = flip Iv.isPointInInterval s
 
-labelVoice :: Transformable a E => A.Voice [a] -> A.Voice [a]
+labelVoice :: Transformable a E => [a] -> [a]
 labelVoice voice =
-    A.Voice (fst (smap (transform_leafs' trans) (A.voiceItems voice) [0..]))
+    fst (smap (transform_leafs' trans) voice [0..])
         where
               trans (L dur tie _ notes expressions) (id:ids) = (L dur tie id notes expressions,ids)
               trans (R dur _) (id:ids) = (R dur id,ids)

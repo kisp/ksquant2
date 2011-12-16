@@ -29,7 +29,7 @@ data Part a = Part { partVoices :: [Voice a] }
 data Voice a = Voice { voiceItems :: a }
 
 class AbstractScore c a where
-    mapVoices :: (Voice a -> Voice b) -> c a -> c b
+    mapVoices :: (a -> b) -> c a -> c b
 
 instance AbstractScore Score a where
     mapVoices f x = Score $ map (mapVoices f) (scoreParts x)
@@ -38,7 +38,7 @@ instance AbstractScore Part a where
     mapVoices f x = Part $ map (mapVoices f) (partVoices x)
 
 instance AbstractScore Voice a where
-    mapVoices f = f
+    mapVoices f x = Voice (f (voiceItems x))
 
 -- mapVoices :: Functor f => (a -> b) -> f a -> f b
 -- mapVoices = fmap

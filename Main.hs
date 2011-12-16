@@ -41,10 +41,10 @@ rationalPairToTimePair (x,y) = (rationalToTime x, rationalToTime y)
 type MeasureStructure = M.Voice
 type Divs = [Int]
 
-quantifyVoice :: MeasureStructure -> Divs -> SF2.Voice -> M.Voice
+quantifyVoice :: A.Voice [M.M] -> [Int] -> [SF2.Event] -> [M.M]
 quantifyVoice ms divs v =
     let measures = A.voiceItems ms
-        input = SF2.voiceChords v :: [SF2.Event]
+        input = SF2.voiceChords v
         input' = Iv.ascendingIntervals input
         beats_intervals = Iv.ascendingIntervals
                           (map rationalPairToTimePair
@@ -58,14 +58,14 @@ quantifyVoice ms divs v =
         quant_grid = M.measuresLeafIntervals measures'
         quant_grid' = Iv.ascendingIntervals (map rationalPairToTimePair quant_grid)
         quant_grid_asc = (Iv.ascendingIntervals quant_grid)
-        qevents = map (Iv.quantizeIv SF2.qeventFromEvent quant_grid_asc quant_grid') input :: [SF2.QEvent]
+        qevents = map (Iv.quantizeIv SF2.qeventFromEvent quant_grid_asc quant_grid') input
         measures'' = M.measuresTieOrRest measures' qevents quant_grid
         getNotes (M.L dur tie label _ _) qevent =
             (M.L dur tie label (SF2.qeventNotes qevent) (SF2.qeventExpressions qevent))
         getNotes (M.R _ _) _ = error "getNotes: R"
         getNotes (M.D _  _ _) _ = error "getNotes: D"
         measures''' = M.measuresTransformLeafs getNotes measures'' qevents quant_grid
-    in A.Voice measures'''
+    in measures'''
 
 buildMeasureFromLisp :: LispVal -> LispVal -> M.M
 buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])
@@ -79,7 +79,7 @@ ensureListOfLists (LispList xs@(x:_)) | atom x = LispList [LispList xs]
                                       | otherwise = LispList xs
 ensureListOfLists _ = error "ensureListOfLists"
 
-ensureListOfIntegers :: LispVal -> [Int]
+ensureListOfIntegers :: Num b => LispVal -> [b]
 ensureListOfIntegers (LispList xs) =
     map ensureInt xs
     where ensureInt (LispInteger x) = fromInteger x
@@ -89,22 +89,22 @@ ensureListOfIntegers _ = error "ensureListOfIntegers"
 stickToLast :: [a] -> [a]
 stickToLast list = list ++ repeat (last list)
 
-measureStream :: LispVal -> LispVal -> [M.M]
+measureStream :: LispVal -> LispVal -> M.Ms
 measureStream ts metro = zipWith buildMeasureFromLisp (stickToLast (fromLispList ts))
                          (stickToLast (fromLispList metro))
 
 processSimpleFormat :: LispVal -> String
 processSimpleFormat (input) =
     let s = getSimple input
-        sf1 = SF.sexp2simpleFormat s :: SF.Score
-        sf2 = SF2.toSimpleFormat2 sf1 :: SF2.Score
+        sf1 = SF.sexp2simpleFormat s
+        sf2 = SF2.toSimpleFormat2 sf1
         sf2end = SF2.scoreEnd sf2
         ms = M.measuresUntilTime
              (measureStream (getTimeSignatures input) (getMetronomes input))
              sf2end
         measurevoice = A.Voice ms
-        divs = [1..(getMaxDiv input)] \\ getForbDivs input :: Divs
-        trans = quantifyVoice measurevoice divs :: SF2.Voice -> M.Voice
+        divs = [1..(getMaxDiv input)] \\ getForbDivs input        
+        trans = quantifyVoice measurevoice divs :: SF2.Events -> M.Ms
         mscore = A.mapVoices trans sf2 :: M.Score
         output = if isLily
                  then L.showLily (A.mapVoices vToLily mscore)

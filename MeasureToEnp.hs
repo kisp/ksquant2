@@ -16,7 +16,6 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module MeasureToEnp where
-import qualified AbstractScore as A
 import qualified Measure as M
 import qualified Enp as E
 import Data.Ratio
@@ -67,9 +66,8 @@ mToEnp assoc (M.M ts t e) =
         list'' = adaptForTimesig ts list'
     in (E.makeMeasure ts t list'')
 
-vToEnp :: M.Voice -> E.Voice
+vToEnp :: M.Ms -> E.Measures
 vToEnp v = let v' = M.labelVoice v
                ls = M.vleaves v'
                assoc = zip (map M.eid ls) ls
-           in fm (mToEnp assoc) v'
-             where fm f x = A.Voice $ map f (A.voiceItems x)
+           in map (mToEnp assoc) v'
