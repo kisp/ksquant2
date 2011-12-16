@@ -30,6 +30,8 @@ import MeasureToEnp
 import MeasureToLily
 import Data.List ((\\))
 import Data.Maybe
+import Data.Either.Unwrap
+import Control.Monad
 import System.Environment
 
 rationalToTime :: Rational -> Time
@@ -41,7 +43,7 @@ rationalPairToTimePair (x,y) = (rationalToTime x, rationalToTime y)
 type MeasureStructure = M.Voice
 type Divs = [Int]
 
-quantifyVoice :: M.Voice -> [Int] -> SF2.Events -> [M.M]
+quantifyVoice :: M.Voice -> [Int] -> SF2.Events -> Either String [M.M]
 quantifyVoice ms divs v =
     let measures = A.voiceItems ms
         input = SF2.voiceChords v
@@ -65,7 +67,7 @@ quantifyVoice ms divs v =
         getNotes (M.R _ _) _ = error "getNotes: R"
         getNotes (M.D _  _ _) _ = error "getNotes: D"
         measures''' = M.measuresTransformLeafs getNotes measures'' qevents quant_grid
-    in measures'''
+    in Right measures'''
 
 buildMeasureFromLisp :: LispVal -> LispVal -> M.M
 buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])
@@ -73,71 +75,89 @@ buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])
                          head (M.measuresWithBeats [(n,d)] [(tu,fromInteger t)])
 buildMeasureFromLisp _ _ = error "buildMeasureFromLisp"
 
-ensureListOfLists :: LispVal -> LispVal
-ensureListOfLists (LispList []) = error "ensureListOfLists: empty list"
-ensureListOfLists (LispList xs@(x:_)) | atom x = LispList [LispList xs]
-                                      | otherwise = LispList xs
-ensureListOfLists _ = error "ensureListOfLists"
+ensureListOfLists :: LispVal -> Either String LispVal
+ensureListOfLists (LispList []) = Left "ensureListOfLists: empty list"
+ensureListOfLists (LispList xs@(x:_)) | atom x = Right $ LispList [LispList xs]
+                                      | otherwise = Right $ LispList xs
+ensureListOfLists _ = Left "ensureListOfLists"
 
-ensureListOfIntegers :: Num b => LispVal -> [b]
+ensureListOfIntegers :: Num b => LispVal -> Either String [b]
 ensureListOfIntegers (LispList xs) =
-    map ensureInt xs
-    where ensureInt (LispInteger x) = fromInteger x
-          ensureInt _ = error "ensureInt"
-ensureListOfIntegers _ = error "ensureListOfIntegers"
+    mapM ensureInt xs
+    where ensureInt (LispInteger x) = Right $ fromInteger x
+          ensureInt _ = Left "ensureInt"
+ensureListOfIntegers _ = Left "ensureListOfIntegers"
 
 stickToLast :: [a] -> [a]
 stickToLast list = list ++ repeat (last list)
 
-measureStream :: LispVal -> LispVal -> M.Ms
-measureStream ts metro = zipWith buildMeasureFromLisp (stickToLast (fromLispList ts))
-                         (stickToLast (fromLispList metro))
+measureStream' :: (LispVal, LispVal) -> M.Ms
+measureStream' (ts, metro) = zipWith buildMeasureFromLisp
+                               (stickToLast (fromLispList ts))
+                               (stickToLast (fromLispList metro))
 
+getTimeSignatures :: LispVal -> Either String LispVal
+getTimeSignatures x = case getf x (LispKeyword "TIME-SIGNATURES") of
+  Just s -> ensureListOfLists s
+  Nothing -> Left "Could not find :time-signatures"
 
-mkTrans :: LispVal -> SF2.Score -> SF2.Events -> M.Ms
-mkTrans input sf2 =
+getMetronomes :: LispVal -> Either String LispVal
+getMetronomes x = case getf x (LispKeyword "METRONOMES") of
+  Just s -> ensureListOfLists s
+  Nothing -> Left "Could not find :metronomes"
+
+getMaxDiv :: Num a => LispVal -> Either String a
+getMaxDiv s =  case getf s (LispKeyword "MAX-DIV") of
+  Just (LispInteger x) -> Right $ fromInteger x
+  Just _ -> Left "incorrect :max-div"
+  Nothing -> Left "Could not find :max-div"
+
+getForbDivs :: Num b => LispVal -> Either String [b]
+getForbDivs s =  case getf s (LispKeyword "FORBIDDEN-DIVS") of
+  Just xs@(LispList _) -> ensureListOfIntegers xs
+  Just (LispSymbol "NIL") -> Right []
+  Just _ -> Left "incorrect :forbidden-divs"
+  Nothing -> Left "Could not find :forbidden-divs"
+
+measuresUntilTime :: Float -> M.Ms -> Either String M.Ms
+measuresUntilTime a b = Right $ M.measuresUntilTime b a
+
+mkTrans :: LispVal -> SF2.Score -> Either String (SF2.Events -> Either String M.Ms)
+mkTrans input sf2 = do
   let sf2end = SF2.scoreEnd sf2
-      ms = M.measuresUntilTime
-           (measureStream (getTimeSignatures input) (getMetronomes input))
-           sf2end
-      measurevoice = A.Voice ms
-      divs = [1..(getMaxDiv input)] \\ getForbDivs input
-      getTimeSignatures x = case getf x (LispKeyword "TIME-SIGNATURES") of
-        Just s -> ensureListOfLists s
-        Nothing -> error "Could not find :time-signatures"
-      getMetronomes x = case getf x (LispKeyword "METRONOMES") of
-        Just s -> ensureListOfLists s
-        Nothing -> error "Could not find :metronomes"
-      getMaxDiv s =  case getf s (LispKeyword "MAX-DIV") of
-        Just (LispInteger x) -> fromInteger x
-        Just _ -> error "incorrect :max-div"
-        Nothing -> error "Could not find :max-div"
-      getForbDivs s =  case getf s (LispKeyword "FORBIDDEN-DIVS") of
-        Just xs@(LispList _) -> ensureListOfIntegers xs
-        Just (LispSymbol "NIL") -> []
-        Just _ -> error "incorrect :forbidden-divs"
-        Nothing -> error "Could not find :forbidden-divs"
-  in quantifyVoice measurevoice divs
+  tsmetro <- liftM2 (,) (getTimeSignatures input) (getMetronomes input)
+  ms <- measuresUntilTime sf2end (measureStream' tsmetro)
+  let measurevoice = A.Voice ms
+  maxdiv <- getMaxDiv input
+  forbid <- getForbDivs input
+  let divs = [1..maxdiv] \\ forbid
+  return $ quantifyVoice measurevoice divs
 
-processSimpleFormat :: LispVal -> String
-processSimpleFormat (input) =
-    let isLily = False
-        getSimple x = fromMaybe (error "Could not find :simple") (getf x (LispKeyword "SIMPLE"))
-        sf2 = fmap (SF2.voiceToSimpleFormat2 . mapcar' SF.sexp2event) . fromSexp . getSimple $ input
-        mscore = fmap (mkTrans input sf2) sf2
-    in if isLily
-       then L.showLily (fmap vToLily mscore) ++ "\n"
-       else printSexp (fmap (Enp.voice2sexp . vToEnp) mscore) ++ "\n"
+getSimple :: LispVal -> Either String LispVal
+getSimple x = fromMaybe (Left "Could not find :simple") (liftM Right (getf x (LispKeyword "SIMPLE")))
 
-processParsedInput :: [LispVal] -> String
-processParsedInput [s] = processSimpleFormat s
-processParsedInput [s,_] = processSimpleFormat s
-processParsedInput _ = error "processParsedInput called on an unexpected number of forms"
+unwrapLeft :: A.Score (Either String M.Ms) -> Either String M.Score
+unwrapLeft = Right . fmap fromRight
 
-processInput :: String -> String
-processInput input = case parseLisp input of
-  Right parsedInput -> processParsedInput parsedInput
-  Left err -> error $ "parse error " ++ show err
+processSimpleFormat ::  Bool -> LispVal -> Either String String
+processSimpleFormat isLily input = do
+  sf2 <- liftM (fmap (SF2.voiceToSimpleFormat2 . mapcar' SF.sexp2event) . fromSexp) . getSimple $ input
+  trans <- mkTrans input sf2
+  mscore <- liftM (fmap trans) (Right sf2)
+  if isLily
+    then liftM (L.showLily . fmap vToLily) $ unwrapLeft mscore
+    else liftM (printSexp . fmap (Enp.voice2sexp . vToEnp)) $ unwrapLeft mscore
+
+appendNewline :: String -> Either String String
+appendNewline s = Right $ s ++ "\n"
+
+processParsedInput :: [LispVal] -> Either String String
+processParsedInput [s] = processSimpleFormat False s >>= appendNewline
+processParsedInput [s,_] = processSimpleFormat False s >>= appendNewline
+processParsedInput _ = Left "processParsedInput called on an unexpected number of forms"
+
+processInput :: String -> Either String String
+processInput input = parseLisp input >>= processParsedInput
 
 main :: IO ()
 main = do
@@ -147,7 +167,8 @@ main = do
         getInput [i] = readFile i
         getInput [i,_] = readFile i
         getInput args = error $ "getInput with args " ++ show args ++ "?"
-        putOutput [] s = putStrLn s
-        putOutput [_] s = putStrLn s
-        putOutput [_,o] s = writeFile o s
-        putOutput args _ = error $ "putOutput with args " ++ show args ++ "?"
+        putOutput [] (Right s) = putStrLn s
+        putOutput [_] (Right s) = putStrLn s
+        putOutput [_,o] (Right s) = writeFile o s
+        putOutput args (Right _) = error $ "putOutput with args " ++ show args ++ "?"
+        putOutput _ (Left err) = error err

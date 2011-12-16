@@ -138,8 +138,10 @@ parseValsAndEof = do
 
 -- |Parse a String to either a list of LispVals (the string can
 -- |contain more than one form), or to ParseError.
-parseLisp :: String -> Either ParseError [LispVal]
-parseLisp = parse parseValsAndEof ""
+parseLisp :: String -> Either String [LispVal]
+parseLisp s = case parse parseValsAndEof "" s of
+  Right x -> Right x
+  Left err -> Left $ "parse error " ++ show err
 
 readLisp :: String -> Either String LispVal
 readLisp s = case parseLisp s of
