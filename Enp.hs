@@ -72,9 +72,7 @@ makeMeasure (n,d) t es =
     where check = n == sum (map dur es)
 
 voice2sexp :: Measures -> LispVal
-voice2sexp e =
-    LispList $ map measure2sexp e ++
-    (fromRight . parseLisp) ":instrument NIL :staff :treble-staff"
+voice2sexp e = LispList $ map measure2sexp e
 
 measure2sexp :: Measure -> LispVal
 measure2sexp (Measure (n,d) (tu,t) xs) =

@@ -15,20 +15,22 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(:SIMPLE ((((0.0 :NOTES (60))
-            (1.0 :NOTES (60))
-            3.0)
-           :INSTRUMENT :FRENCH-HORN))
-         :TIME-SIGNATURES (4 4)
-         :METRONOMES (4 60)
-         :MAX-DIV 8
-         :FORBIDDEN-DIVS (7))
+(:SIMPLE
+
+ ((((0.0 :NOTES (60))
+    (1.0 :NOTES (60))
+    3.0)
+   :INSTRUMENT :FRENCH-HORN))
+
+ :TIME-SIGNATURES (4 4)
+ :METRONOMES (4 60)
+ :MAX-DIV 8
+ :FORBIDDEN-DIVS (7))
 
 (((((1 ((1 :NOTES (60))))
     (1 ((1 :NOTES (60))))
     (1 ((1.0 :NOTES (60))))
     (1 ((-1 :NOTES (60))))
     :TIME-SIGNATURE (4 4)
-    :METRONOME (4 60))
-   :INSTRUMENT :FRENCH-HORN
-   :STAFF :TREBLE-STAFF)))
+    :METRONOME (4 60)))
+  :INSTRUMENT :FRENCH-HORN))

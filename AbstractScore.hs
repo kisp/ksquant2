@@ -23,7 +23,7 @@ where
 import Lisp
 
 data Score a = Score { scoreParts :: [Part a] }
-data Part a = Part { partVoices :: [Voice a] }
+data Part a = Part { partVoices :: [Voice a], partAttributes :: LispVal }
 data Voice a = Voice { voiceItems :: a }
 
 -- Functor
@@ -31,10 +31,10 @@ instance Functor Score where
     fmap f x = Score $ map (fmap f) (scoreParts x)
 
 instance Functor Part where
-    fmap f x = Part $ map (fmap f) (partVoices x)
+    fmap f x = x { partVoices = map (fmap f) (partVoices x) }
 
 instance Functor Voice where
-    fmap f x = Voice . f . voiceItems $ x
+    fmap f x = x { voiceItems = f . voiceItems $ x }
 
 -- Sexp
 instance (Sexp a) => Sexp (Score a) where
@@ -42,8 +42,8 @@ instance (Sexp a) => Sexp (Score a) where
     fromSexp = Score . mapcar' fromSexp
 
 instance (Sexp a) => Sexp (Part a) where
-    toSexp s = LispList $ map toSexp (partVoices s)
-    fromSexp = Part . mapcar' fromSexp
+    toSexp s = LispList $ map toSexp (partVoices s) ++ fromLispList (partAttributes s)
+    fromSexp = uncurry Part . mapcarUpToPlist fromSexp
 
 instance (Sexp a) => Sexp (Voice a) where
     toSexp = toSexp . voiceItems

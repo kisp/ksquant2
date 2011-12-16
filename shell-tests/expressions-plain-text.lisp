@@ -37,6 +37,4 @@
              :PRINT-SYMBOL "hard mallets")
             :ACCENT))))
     :TIME-SIGNATURE (4 4)
-    :METRONOME (4 60))
-   :INSTRUMENT NIL
-   :STAFF :TREBLE-STAFF)))
+    :METRONOME (4 60)))))
