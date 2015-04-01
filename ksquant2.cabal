@@ -35,6 +35,6 @@ test-suite tests
   main-is:        Test.hs
 
   ghc-options:
-    -Wall -Werror -fhpc -main-is Test
+    -Wall -Werror -main-is Test
 
   Build-Depends:  HUnit, QuickCheck >= 2.1 && < 2.5, testrunner
