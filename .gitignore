@@ -20,3 +20,5 @@ out
 tmp
 main-coverage
 *.html
+.cabal-sandbox
+cabal.sandbox.config
