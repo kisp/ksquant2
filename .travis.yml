@@ -4,3 +4,11 @@ ghc:
   - 7.6
   - 7.4
   - 7.0
+
+install:
+  -  cabal install --only-dependencies
+  - apt-get install clisp
+  
+script:
+  - cabal configure
+  
