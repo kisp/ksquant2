@@ -63,4 +63,6 @@ tests = [-- ("helloWorld value", TestRunnerTest hunitTest),
          ,("sexp2event1", TestRunnerTest sexp2event1)
          ]
 main :: IO ()
-main = testRunnerMain tests
+main = do
+  (Result _ []) <- runTests tests
+  putStrLn "done running tests"
