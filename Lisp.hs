@@ -115,8 +115,8 @@ parseRatio =
 parseList :: Parser LispVal
 parseList =
     do
-      _ <- char '('
-      elts <- sepBy parseVal spaces
+      char '(' >> spaces
+      elts <- endBy parseVal spaces
       _ <- char ')'
       return $ LispList elts
 
