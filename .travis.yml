@@ -14,4 +14,7 @@ install:
   - cabal install --only-dependencies
 
 script:
-  - cabal configure
+  - cabal configure --enable-tests
+  - cabal build
+  - cabal test
+  - clisp -norc lisp/test-runner.lisp

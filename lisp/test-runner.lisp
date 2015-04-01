@@ -29,7 +29,7 @@
     ;; (with-standard-io-syntax
     ;;   (write data :stream out))
     (prin1 data out))
-  (and (not (run-shell-command "./main <tmp >out"))
+  (and (not (run-shell-command "./dist/build/ksquant2/ksquant2 <tmp >out"))
        (equal expected (with-open-file (in "out") (read in)))))
 
 (defun report-on-file (path)
