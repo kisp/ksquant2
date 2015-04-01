@@ -39,3 +39,7 @@ coverage: all shell-tests
 .PHONY: clean
 clean:
 	git clean -f -x -d
+
+.PHONY: whitespace-clean
+whitespace-clean:
+	git ls-files | xargs file | grep text | awk '{print $1}' | tr ':' ' ' | xargs ./tools/whitespace-cleanup.el
