@@ -68,6 +68,8 @@ lisp2 = TestList
         ,[LispKeyword "F/123"] ~=? rightOrError (parseLisp ":f/123")
         ,[LispList [LispInteger 1]] ~=?
          rightOrError (parseLisp "(1)")
+        ,[LispList [LispInteger 1]] ~=?
+         rightOrError (parseLisp "( 1)")
         ,[LispList [LispInteger 1, LispInteger 2]] ~=?
          rightOrError (parseLisp "(1 2)")
         ,[LispList []] ~=?
