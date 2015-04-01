@@ -38,4 +38,4 @@ coverage: all shell-tests
 
 .PHONY: clean
 clean:
-	git clean -f -x -d 
+	git clean -f -x -d
