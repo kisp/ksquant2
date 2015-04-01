@@ -168,7 +168,7 @@ bestDiv :: Interval a1 Float => [Int] -> a1 -> AscendingPoints Float -> Int
 bestDiv divs iv xs = round (fst (head (rankedDivs iv xs (map intToFloat divs)))) :: Int
 
 -- TODO implement this as a binary search
-locatePoint :: (Interval t a1, Show t, Ord a1, Num a, Eq t) => AscendingIntervals t -> a1 -> (t, (a, a))
+locatePoint :: (Interval t a1, Show t, Ord a1, Num a, Eq t, Show a, Show a1) => AscendingIntervals t -> a1 -> (t, (a, a))
 locatePoint ivs x = r (getAscendingIntervals ivs) (point x) 0
     where r (iv:ivs) x index
               | isPointInInterval iv x ||
@@ -176,7 +176,7 @@ locatePoint ivs x = r (getAscendingIntervals ivs) (point x) 0
               | otherwise = r ivs x (index+1)
           r a b c = error $ "locatePoint " ++ show a ++ " " ++ show b ++ " " ++ show c
 
-quantizeIv :: (Interval a1 t1, Interval a a2, Ord a2) =>
+quantizeIv :: (Interval a1 t1, Interval a a2, Ord a2, Show a2) =>
               ((t1, t1) -> a -> t) -> AscendingIntervals a1 -> AscendingIntervals (a2, a2) -> a -> t
 quantizeIv f rational_ivs ivs iv =
     let rivs = getAscendingIntervals rational_ivs

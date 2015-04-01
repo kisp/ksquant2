@@ -27,7 +27,7 @@ ratio2integer :: Integral a => Ratio a -> a
 ratio2integer r | denominator r == 1 = numerator r
                 | otherwise = error "ratio2integer: not an integer"
 
-tiedOverFromLast :: Num a => [(a, M.E)] -> a -> Bool
+tiedOverFromLast :: (Num a, Eq a) => [(a, M.E)] -> a -> Bool
 tiedOverFromLast _ 0 = False
 tiedOverFromLast assoc id =
     case lookup (id-1) assoc of

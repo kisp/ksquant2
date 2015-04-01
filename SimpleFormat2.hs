@@ -15,7 +15,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-{-# LANGUAGE TypeSynonymInstances, MultiParamTypeClasses, FlexibleContexts #-}
+{-# LANGUAGE TypeSynonymInstances, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module SimpleFormat2 (voiceToSimpleFormat2

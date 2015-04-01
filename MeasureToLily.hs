@@ -29,7 +29,7 @@ log2 1 = 0
 log2 n | even n = 1 + log2 (div n 2)
 log2 _ = error "log2"
 
-midiToLily :: Num a => a -> L.Pitch
+midiToLily :: (Num a, Eq a, Show a) => a -> L.Pitch
 midiToLily 59 = L.Pitch L.B L.Natural 3
 midiToLily 60 = L.Pitch L.C L.Natural 4
 midiToLily 61 = L.Pitch L.C L.Sharp 4
