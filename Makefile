@@ -42,4 +42,4 @@ clean:
 
 .PHONY: whitespace-clean
 whitespace-clean:
-	git ls-files | xargs file | grep text | awk '{print $1}' | tr ':' ' ' | xargs ./tools/whitespace-cleanup.el
+	git ls-files | xargs file | grep text | sed 's/^\(.*\):.*/\1/g' | xargs ./tools/whitespace-cleanup.el
