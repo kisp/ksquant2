@@ -1,3 +1,4 @@
+# -*- indent-tabs:t -*-
 # This file is part of KSQuant2.
 
 # Copyright (c) 2010 - 2011, Kilian Sprotte. All rights reserved.
