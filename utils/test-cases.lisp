@@ -19,10 +19,10 @@
 
 (defun input (simple)
   `(:SIMPLE ,simple
-	    :TIME-SIGNATURES (4 4)
-	    :METRONOMES (4 60)
-	    :MAX-DIV ,(1+ (random 15))
-	    :FORBIDDEN-DIVS nil))
+            :TIME-SIGNATURES (4 4)
+            :METRONOMES (4 60)
+            :MAX-DIV ,(1+ (random 15))
+            :FORBIDDEN-DIVS nil))
 
 (defun voice->score (voice)
   (list (list voice)))
@@ -31,16 +31,16 @@
   (voice->score
    (delete-duplicates
     (cons (float 0)
-	  (sort
-	   (loop
-	      with rests = (random 2)
-	      repeat (+ 10 (random 300))
-	      collect (* (if (zerop rests)
-			     (if (zerop (random 2)) 1 -1)
-			     1)
-			 (float (/ (random 1000) 100))))
-	   #'<
-	   :key #'abs))
+          (sort
+           (loop
+              with rests = (random 2)
+              repeat (+ 10 (random 300))
+              collect (* (if (zerop rests)
+                             (if (zerop (random 2)) 1 -1)
+                             1)
+                         (float (/ (random 1000) 100))))
+           #'<
+           :key #'abs))
     :test #'=
     :key #'abs)))
 
