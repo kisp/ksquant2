@@ -29,14 +29,23 @@
     ;; (with-standard-io-syntax
     ;;   (write data :stream out))
     (prin1 data out))
-  (and (not (run-shell-command "./dist/build/ksquant2/ksquant2 <tmp >out"))
-       (equal expected (with-open-file (in "out") (read in)))))
+  (let ((process
+          (run-shell-command "./dist/build/ksquant2/ksquant2 <tmp >out"))
+        (result
+          (with-open-file (in "out") (read in))))
+    (values
+     (and (not process)
+          (equal expected result))
+     result)))
 
 (defun report-on-file (path)
   (multiple-value-bind (data expected)
       (read-input-file path)
-    (let ((success (run-test data expected)))
+    (multiple-value-bind (success result)
+        (run-test data expected)
       (format t "~A~50T~A~%" (file-namestring path) success)
+      (unless success
+        (format t "expected: ~S~%but got ~S~%" expected result))
       success)))
 
 (let ((success (every #'identity (mapcar 'report-on-file (input-files)))))
