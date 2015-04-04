@@ -154,7 +154,7 @@ appendNewline s = Right $ s ++ "\n"
 processParsedInput :: [LispVal] -> Either String String
 processParsedInput [s] = processSimpleFormat False s >>= appendNewline
 processParsedInput [s,_] = processSimpleFormat False s >>= appendNewline
-processParsedInput _ = Left "processParsedInput called on an unexpected number of forms"
+processParsedInput _ = Left "processParsedInput called on an unexpected number of forms "
 
 processInput :: String -> Either String String
 processInput input = parseLisp input >>= processParsedInput
