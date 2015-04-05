@@ -24,6 +24,7 @@ import LispTest
 import MeasureTest
 import MeasureToEnpTest
 import SimpleFormatTest
+import AdjoinTiesTest
 
 -- -- use HUnit to assert that helloWorld produces "hello world"
 -- hunitTest :: Test
@@ -61,6 +62,8 @@ tests = [-- ("helloWorld value", TestRunnerTest hunitTest),
          ,("mtoenp1", TestRunnerTest mtoenp1)
          -- SimpleFormatTest
          ,("sexp2event1", TestRunnerTest sexp2event1)
+         -- AdjoinTiesTest
+         ,("adjoin1", TestRunnerTest adjoin1)
          ]
 main :: IO ()
 main = do

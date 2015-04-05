@@ -26,6 +26,7 @@ import qualified SimpleFormat2 as SF2
 import qualified AbstractScore as A
 import qualified Enp
 import qualified Lily as L
+import AdjoinTies
 import MeasureToEnp
 import MeasureToLily
 import Data.List ((\\))
@@ -67,7 +68,8 @@ quantifyVoice ms divs v =
         getNotes (M.R _ _) _ = error "getNotes: R"
         getNotes (M.D _  _ _) _ = error "getNotes: D"
         measures''' = M.measuresTransformLeafs getNotes measures'' qevents quant_grid
-    in Right measures'''
+        measures'''' = map adjoinTies measures'''
+    in Right measures''''
 
 buildMeasureFromLisp :: LispVal -> LispVal -> M.M
 buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])
