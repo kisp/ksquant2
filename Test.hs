@@ -17,7 +17,10 @@
 
 module Test where
 
-import Test.Runner
+import System.Environment
+import Test.Framework
+import Test.Framework.Providers.HUnit
+import Test.Framework.Providers.QuickCheck2
 
 import IntervalTest
 import LispTest
@@ -26,46 +29,66 @@ import MeasureToEnpTest
 import SimpleFormatTest
 import AdjoinTiesTest
 
--- -- use HUnit to assert that helloWorld produces "hello world"
--- hunitTest :: Test
--- hunitTest = TestCase $ do
---     assertEqual "hello world" "hello world" helloWorld
+intervalTests :: Test
+intervalTests = testGroup "intervalTests"
+                [
+                  testProperty "prop_good_iv" prop_good_iv
+                , testProperty "prop_isPointInInterval" prop_isPointInInterval
+                , testProperty "prop_intersect" prop_intersect
+                , testProperty "prop_isStrictlyAfter" prop_isStrictlyAfter
+                , testProperty "prop_groupPointsByIntervalls" prop_groupPointsByIntervalls
+                , testProperty "prop_ascendingIntervals2points" prop_ascendingIntervals2points
+                ]
 
--- -- use QuickCheck to check the length of hello's result
--- helloLength :: String -> Bool
--- helloLength s = length (hello s) == length "hello " + length s
+lispTests :: Test
+lispTests = testGroup "lispTests"
+            [
+              testCase "readLisp1" readLisp1
+            , testCase "readLisp2" readLisp2
+            , testCase "readLisp3" readLisp3
+            , testProperty "prop_mapcar'" prop_mapcar'
+            , testProperty "prop_string_roundTrip" prop_string_roundTrip
+            , testGroup "lisp1" $ hUnitTestToTests lisp1
+            , testGroup "lisp2" $ hUnitTestToTests lisp2
+            , testGroup "lisp3" $ hUnitTestToTests lisp3
+            ]
 
--- -- A simple boolean expression that states that hello of an empty string is
--- -- "hello"
--- helloEmpty :: Bool
--- helloEmpty = hello "" == "hello "
+measureTests :: Test
+measureTests = testGroup "measureTests"
+               [
+                 testGroup "measure1" $ hUnitTestToTests measure1
+               ]
 
-tests :: [(String, TestRunnerTest)]
-tests = [-- ("helloWorld value", TestRunnerTest hunitTest),
-         -- ("hello length", runWithQuickCheck helloLength),
-         -- ("value of hello applied to empty string", TestRunnerTest helloEmpty)
-         ("prop_good_iv", runWithQuickCheck prop_good_iv)
-         ,("prop_isPointInInterval", runWithQuickCheck prop_isPointInInterval)
-         ,("prop_intersect", runWithQuickCheck prop_intersect)
-         ,("prop_isStrictlyAfter", runWithQuickCheck prop_isStrictlyAfter)
-         ,("prop_groupPointsByIntervalls", runWithQuickCheck prop_groupPointsByIntervalls)
-         ,("prop_ascendingIntervals2points", runWithQuickCheck prop_ascendingIntervals2points)
-         -- LispTest
-         ,("readLisp1", TestRunnerTest readLisp1)
-         ,("prop_mapcar'", runWithQuickCheck prop_mapcar')
-         ,("prop_string_roundTrip", runWithQuickCheck prop_string_roundTrip)
-         ,("lisp1", TestRunnerTest lisp1)
-         ,("lisp2", TestRunnerTest lisp2)
-         ,("lisp3", TestRunnerTest lisp3)
-         -- Measure Test
-         ,("measure1", TestRunnerTest measure1)
-         ,("mtoenp1", TestRunnerTest mtoenp1)
-         -- SimpleFormatTest
-         ,("sexp2event1", TestRunnerTest sexp2event1)
-         -- AdjoinTiesTest
-         ,("adjoin1", TestRunnerTest adjoin1)
-         ]
+measureToEnpTests :: Test
+measureToEnpTests = testGroup "measureToEnpTests"
+               [
+                 testGroup "mtoenp1" $ hUnitTestToTests mtoenp1
+               ]
+
+simpleFormatTests :: Test
+simpleFormatTests = testGroup "simpleFormatTests"
+               [
+                 testGroup "sexp2event1" $ hUnitTestToTests sexp2event1
+               ]
+
+adjoinTiesTests :: Test
+adjoinTiesTests = testGroup "adjoinTiesTests"
+                  [
+                    testCase "adjoin1" adjoin1
+                  ]
+
+tests :: [Test]
+tests = [
+         intervalTests
+       , lispTests
+       , measureTests
+       , measureToEnpTests
+       , simpleFormatTests
+       , adjoinTiesTests
+       ]
+
 main :: IO ()
 main = do
-  (Result _ []) <- runTests tests
-  putStrLn "done running tests"
+     args <- getArgs
+     let args' = ["-a", "123"] ++ args
+     defaultMainWithArgs tests args'

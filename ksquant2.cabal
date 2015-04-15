@@ -37,4 +37,5 @@ test-suite tests
   ghc-options:
     -Wall -Werror -main-is Test
 
-  Build-Depends:  HUnit, QuickCheck >= 2.1 && < 2.5, testrunner
+  Build-Depends:  HUnit, QuickCheck, test-framework, test-framework-hunit,
+                  test-framework-quickcheck2

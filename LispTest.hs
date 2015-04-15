@@ -26,13 +26,14 @@ rightOrError x = case x of
                    Right y -> y
                    Left _ -> error "rightOrError"
 
-readLisp1 :: Test
-readLisp1 = TestList
-            [
-              Right (LispInteger 1) ~=? readLisp "1"
-            , "readLisp: expecting only a single form" ~=? fromLeft (readLisp "1 2")
-            , "readLisp: cannot parse '('" ~=? fromLeft (readLisp "(")
-            ]
+readLisp1 :: Assertion
+readLisp1 = Right (LispInteger 1) @=? readLisp "1"
+
+readLisp2 :: Assertion
+readLisp2 = "readLisp: expecting only a single form" @=? fromLeft (readLisp "1 2")
+
+readLisp3 :: Assertion
+readLisp3 = "readLisp: cannot parse '('" @=? fromLeft (readLisp "(")
 
 prop_mapcar' :: [Integer] -> Bool
 prop_mapcar' xs = mapcar' f (LispList (map toSexp xs)) == map g xs

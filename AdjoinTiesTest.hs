@@ -10,17 +10,15 @@ n60 = readLisp' "(60)"
 nil :: LispVal
 nil = readLisp' "()"
 
-adjoin1 :: Test
-adjoin1 = TestList
-          [
-
+adjoin1 :: Assertion
+adjoin1 =
             M (4,4) (4,60 % 1)
             (D (1 % 1) (1 % 1)
              [l (1 % 4) False n60 nil,
               l (1 % 4) False n60 nil,
               l (1 % 4) False n60 nil,
               l (1 % 4) False n60 nil])
-            ~=?
+            @=?
             adjoinTies
             (M (4,4) (4,60 % 1)
              (D (1 % 1) (1 % 1)
@@ -28,5 +26,3 @@ adjoin1 = TestList
                l (1 % 4) False n60 nil,
                l (1 % 4) False n60 nil,
                l (1 % 4) False n60 nil]))
-
-          ]
