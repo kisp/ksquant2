@@ -55,7 +55,7 @@ lisp1 = TestList
                                    Left  _ -> "left"
                                    Right _ -> "right"
         ,[LispInteger 1,
-          LispInteger 2]   ~=? rightOrError (parseLisp "1 2 3")
+          LispInteger 2]   ~=? rightOrError (parseLisp "1 2")
         ]
 
 lisp2 :: Test
