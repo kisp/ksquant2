@@ -36,5 +36,8 @@ expand' :: Integral a => [Ratio a] -> a
 expand' xs = let f = foldl1 lcm (map denominator xs) % 1
              in sum (map (numerator . (*f)) xs)
 
+stickToLast :: [a] -> [a]
+stickToLast list = list ++ repeat (last list)
+
 mtr :: Show a => a -> a
 mtr x = trace (show x) x

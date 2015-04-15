@@ -17,6 +17,7 @@
 
 module Main where
 
+import Utils
 import Input
 import qualified Interval as Iv
 import qualified Measure as M
@@ -89,9 +90,6 @@ ensureListOfIntegers (LispList xs) =
     where ensureInt (LispInteger x) = Right $ fromInteger x
           ensureInt _ = Left "ensureInt"
 ensureListOfIntegers _ = Left "ensureListOfIntegers"
-
-stickToLast :: [a] -> [a]
-stickToLast list = list ++ repeat (last list)
 
 measureStream' :: (LispVal, LispVal) -> M.Ms
 measureStream' (ts, metro) = zipWith buildMeasureFromLisp
