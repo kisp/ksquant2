@@ -90,5 +90,5 @@ tests = [
 main :: IO ()
 main = do
      args <- getArgs
-     let args' = ["-a", "123"] ++ args
+     let args' = ["-a", "1000"] ++ args
      defaultMainWithArgs tests args'
