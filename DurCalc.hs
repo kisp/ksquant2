@@ -20,7 +20,8 @@ module DurCalc(notableDur
               ,divToRatio
               ,dotFactor
               ,exp2
-              ,isExp2)
+              ,isExp2
+              ,splitNotable)
 where
 
 import Data.Ratio
@@ -96,3 +97,8 @@ dotFactor :: Integer  -- ^ number of augmentation dots
           -> Rational -- ^ factor
 dotFactor n | n >= 0 = 2 - (1 % (2^n))
             | otherwise = error "dotFactor not defined on negative n"
+
+-- | Split dur into a list of notable durations if possible.
+splitNotable :: Integer -> Rational -> Maybe [Rational]
+splitNotable _ dur | dur == (1%8) = Just [1%8]
+splitNotable maxDots dur = undefined

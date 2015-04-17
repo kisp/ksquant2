@@ -134,6 +134,9 @@ isExp2_8 = False @=? isExp2 0
 prop_isExp2_complete :: Integer -> Bool
 prop_isExp2_complete n = isExp2 (exp2 n)
 
+splitNotable1 :: Assertion
+splitNotable1 = Just [1%8] @=? splitNotable 3 (1%8)
+
 durCalcTests :: TF.Test
 durCalcTests = testGroup "durCalcTests"
                   [
@@ -165,4 +168,5 @@ durCalcTests = testGroup "durCalcTests"
                   , testCase "isExp2_7" isExp2_7
                   , testCase "isExp2_8" isExp2_8
                   , testProperty "prop_isExp2_complete" prop_isExp2_complete
+                  , testCase "splitNotable1" splitNotable1
                   ]
