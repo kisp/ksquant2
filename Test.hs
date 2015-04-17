@@ -28,6 +28,7 @@ import MeasureTest
 import MeasureToEnpTest
 import SimpleFormatTest
 import AdjoinTiesTest
+import DurCalcTest
 
 intervalTests :: Test
 intervalTests = testGroup "intervalTests"
@@ -75,6 +76,8 @@ adjoinTiesTests :: Test
 adjoinTiesTests = testGroup "adjoinTiesTests"
                   [
                     testCase "adjoin1" adjoin1
+                  , testCase "adjoin2" adjoin2
+                  , testCase "adjoin3" adjoin3
                   ]
 
 tests :: [Test]
@@ -85,6 +88,7 @@ tests = [
        , measureToEnpTests
        , simpleFormatTests
        , adjoinTiesTests
+       , durCalcTests
        ]
 
 main :: IO ()

@@ -53,32 +53,7 @@ import qualified AbstractScore as A
 import qualified Interval as Iv
 import Data.List
 import qualified Lisp as L
-
-isPowerOfTwo :: Integral a => a -> Bool
-isPowerOfTwo 1 = True
-isPowerOfTwo x | x > 1 = even x && isPowerOfTwo (x `div` 2)
-isPowerOfTwo _ = error  "isPowerOfTwo"
-
-lowerPowerOfTwo :: Integral a => a -> a
-lowerPowerOfTwo 1 = 1
-lowerPowerOfTwo x | x > 1 = if isPowerOfTwo x then
-                                x
-                            else
-                                lowerPowerOfTwo (x-1)
-lowerPowerOfTwo _ = error "lowerPowerOfTwo"
-
--- e.g. when we divide by 9 the tuplet ratio will be 8 % 9
-divToRatio :: Integer -> Rational
-divToRatio d = lowerPowerOfTwo d % d
-
-notableDur :: Rational -> Bool
-notableDur x = h (numerator x) (denominator x)
-    where h 1 d = isPowerOfTwo d
-          h 3 d = isPowerOfTwo d && d >= 2
-          h 7 d = isPowerOfTwo d && d >= 4
-          -- 15 = 1 + 2 + 4 + 8
-          h 15 d = isPowerOfTwo d && d >= 8
-          h _ _ = False
+import DurCalc
 
 type Timesig = (Integer,Integer)
 type Tempo = (Integer,Rational)
@@ -129,13 +104,13 @@ l d tie notes expressions =
     if not check then
         error $ "cannot construct L from " ++ show d ++ " " ++ show tie
     else L d tie 0 notes expressions
-    where check = notableDur d
+    where check = notableDurL 1 d
 
 r :: Rational -> E
 r d = if not check then
           error "r d not valid"
       else R d 0
-    where check = notableDur d
+    where check = notableDurL 1 d
 
 d :: Rational -> Rational -> [E] -> E
 d d r es = if not(check d r es) then
@@ -180,7 +155,7 @@ measuresDivideLeafs ms divs =
     fst (smap (transform_leafs' trans) ms divs)
         where
               trans (L dur _ _ _ _) (n:ds) =
-                  let r = if notableDur (dur / (n%1)) then 1 else divToRatio n
+                  let r = if notableDurL 1 (dur / (n%1)) then 1 else divToRatio n
                   in (d dur r (replicate (fromInteger n) (l (dur / (n % 1) / r) False n60 nil)),
                         ds)
               trans r@(R _ _) ds = (r,ds)
