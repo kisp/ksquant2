@@ -36,12 +36,12 @@ isExp2 r | r == 1 = True
          | r < 1 && (numerator r) == 1   = isPowerOfTwo (denominator r)
          | otherwise = False
 
-isPowerOfTwo :: Integral a => a -> Bool
+isPowerOfTwo :: Integer -> Bool
 isPowerOfTwo 1 = True
 isPowerOfTwo x | x > 1 = even x && isPowerOfTwo (x `div` 2)
 isPowerOfTwo _ = error  "isPowerOfTwo"
 
-lowerPowerOfTwo :: Integral a => a -> a
+lowerPowerOfTwo :: Integer -> Integer
 lowerPowerOfTwo 1 = 1
 lowerPowerOfTwo x | x > 1 = if isPowerOfTwo x then
                                 x
