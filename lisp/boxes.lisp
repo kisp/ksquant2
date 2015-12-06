@@ -127,6 +127,7 @@
                           (max-div 8)
                           (forbidden-divs (7)))
   :non-generic t
+  :outputs 2
   (flet ((make-tmp-path (name)
            (make-pathname :name name :type nil :defaults (tmp-dir)))
          (delete-file-if-needed (path)
@@ -158,8 +159,8 @@
                            (call-kernel err-path kernel-path sf-path enp-path))))
                (unless (zerop code)
                  (let ((err-message (or (ignore-errors
-                                          (with-open-file (in err-path)
-                                            (read-line in)))
+                                         (with-open-file (in err-path)
+                                           (read-line in)))
                                         "<no message>")))
                    (if (capi:prompt-for-confirmation
                         (format
@@ -183,8 +184,10 @@
                                 :default-button :no)
                            (report-bug code sf-path enp-path err-path))
                          (abort))))))
-             (with-open-file (in enp-path)
-               (ccl::adjoin-ties (ccl::make-score (read in)))))
+             (let ((enp (with-open-file (in enp-path)
+                          (read in))))
+               (values (ccl::adjoin-ties (ccl::make-score enp))
+                       enp)))
         (delete-file-if-needed sf-path)
         (delete-file-if-needed enp-path)
         (delete-file-if-needed err-path)))))
