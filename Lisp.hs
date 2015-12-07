@@ -53,6 +53,12 @@ printLisp (LispString x) = lispEscapeString x
 printLisp (LispList xs) =
     "(" ++ unwords (map printLisp xs) ++ ")"
 
+comment :: Parser ()
+comment = char ';' >> many (noneOf "\n") >> return ()
+
+whitespace :: Parser ()
+whitespace = skipMany (skipMany1 space <|> comment)
+
 symbol :: Parser Char
 symbol = oneOf "/!$%-"
 
@@ -115,8 +121,8 @@ parseRatio =
 parseList :: Parser LispVal
 parseList =
     do
-      char '(' >> spaces
-      elts <- endBy parseVal spaces
+      char '(' >> whitespace
+      elts <- endBy parseVal whitespace
       _ <- char ')'
       return $ LispList elts
 
@@ -131,8 +137,8 @@ parseVal = parseKeyword <|>
 
 parseValsAndEof :: Parser [LispVal]
 parseValsAndEof = do
-  skipMany space
-  xs <- endBy1 parseVal spaces
+  whitespace
+  xs <- endBy1 parseVal whitespace
   eof
   return xs
 
