@@ -99,6 +99,20 @@ lisp2 = TestList
          rightOrError (parseLisp "t")
         ]
 
+parseComment1 :: Test
+parseComment1 = TestList
+                [
+                  [LispInteger 25] ~=? rightOrError (parseLisp "25 ;foo")
+                , [LispInteger 25] ~=? rightOrError (parseLisp "25;foo")
+                , [LispInteger 25] ~=? rightOrError (parseLisp "25\n;foo\n;foo\n")
+                , [LispInteger 25] ~=? rightOrError (parseLisp ";foo\n25")
+                , [LispList [LispInteger 1, LispInteger 2]] ~=?
+                    rightOrError (parseLisp "(1 ;foo\n2)")
+                , [LispInteger 25] ~=? rightOrError (parseLisp "25 ;bar")
+                , [LispInteger 25] ~=? rightOrError (parseLisp "25;;;")
+                , [LispInteger 25] ~=? rightOrError (parseLisp "25;")
+                ]
+
 lisp3 :: Test
 lisp3 = TestList
         [

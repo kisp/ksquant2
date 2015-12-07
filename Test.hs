@@ -52,6 +52,7 @@ lispTests = testGroup "lispTests"
             , testGroup "lisp1" $ hUnitTestToTests lisp1
             , testGroup "lisp2" $ hUnitTestToTests lisp2
             , testGroup "lisp3" $ hUnitTestToTests lisp3
+            , testGroup "parseComment1" $ hUnitTestToTests parseComment1
             ]
 
 measureTests :: Test

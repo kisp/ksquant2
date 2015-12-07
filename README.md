@@ -13,7 +13,7 @@ windows. Please make sure that after downloading and extracting the
 archive the folder is named "ksquant2".
 
 Bugs can be browsed and reported here:
-https://bugs.launchpad.net/ksquant2
+https://github.com/kisp/ksquant2/issues
 
 * changes in 0.1.10 relative to 0.1.9:
   * bugfix: for voices containing only a rest
