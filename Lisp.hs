@@ -224,7 +224,7 @@ propertyListP _ = False
 
 getf :: LispVal -> LispVal -> Maybe LispVal
 getf xs@(LispList _) field | propertyListP xs =
-                               let xs' = (fromLispList xs)
+                               let xs' = fromLispList xs
                                in do
                                  index <- elemIndex field xs'
                                  return (xs'!!(index+1))
