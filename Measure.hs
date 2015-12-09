@@ -41,6 +41,7 @@ module Measure (m
                ,Label
                ,measuresTieOrRest
                ,measuresUntilTime
+               ,measureDur
                ,labelVoice
                ,mleaves
                ,vleaves
@@ -192,11 +193,10 @@ leafEffectiveDurs = leafEffectiveDurs' 1
       leafEffectiveDurs' r (D _ r' es) =
           concatMap (leafEffectiveDurs' (r * r')) es
 
-tempoToBeatDur :: (Integer,Rational) -> Rational
-tempoToBeatDur (d,tempo) = 60 / tempo / (d%4)
-
 measureDur :: M -> Ratio Integer
-measureDur (M (n,_) tempo _) = (n%1) * tempoToBeatDur tempo
+measureDur (M timesig@(n,_) tempo _) =  (n%1) * tempoToBeatDur timesig tempo
+    where
+      tempoToBeatDur (_,d) (td,bps) = (4%d) * (60 / bps) * (4%td)
 
 -- foldl            :: (a -> b -> a) -> a -> [b] -> a
 -- foldl f acc []     =  acc
@@ -228,6 +228,7 @@ measureLeafIntervals (M (_,d) tempo div) start =
     neighbours (map (+start) (dxsToXs (map trans (leafEffectiveDurs div))))
     where trans dur = tempoToBeatDur tempo * dur_to_beat dur
           dur_to_beat dur = dur * (d%1)
+          tempoToBeatDur (d,tempo) = 60 / tempo / (d%4)
 
 measuresLeafIntervals :: Ms -> [(Ratio Integer, Ratio Integer)]
 measuresLeafIntervals ms = concatMap (uncurry measureLeafIntervals)
