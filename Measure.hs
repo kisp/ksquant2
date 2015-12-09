@@ -226,9 +226,9 @@ measuresUntilTime ms time = map fst (takeWhile p (zip ms (measuresStartTimes ms)
 measureLeafIntervals :: M -> Ratio Integer -> [(Ratio Integer, Ratio Integer)]
 measureLeafIntervals (M (_,d) tempo div) start =
     neighbours (map (+start) (dxsToXs (map trans (leafEffectiveDurs div))))
-    where trans dur = tempoToBeatDur tempo * dur_to_beat dur
+    where trans dur = tempoToBeatDur tempo * dur_to_beat dur * (4%d)
           dur_to_beat dur = dur * (d%1)
-          tempoToBeatDur (d,tempo) = 60 / tempo / (d%4)
+          tempoToBeatDur (d,tempo) = (60 / tempo / (d%4))
 
 measuresLeafIntervals :: Ms -> [(Ratio Integer, Ratio Integer)]
 measuresLeafIntervals ms = concatMap (uncurry measureLeafIntervals)
