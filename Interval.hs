@@ -163,8 +163,8 @@ rankedDivs :: (Interval a1 a, Ord a, Fractional a, Enum a) => a1 -> AscendingPoi
 rankedDivs iv xs divs = sortBy test (zip divs (map (divCost iv xs) divs))
   where test (_,a) (_,b) = compare a b
 
--- choose the best div from divs
-bestDiv :: Interval a1 Float => [Int] -> a1 -> AscendingPoints Float -> Int
+-- | Choose the best div from divs.
+bestDiv :: Interval a Float => [Int] -> a -> AscendingPoints Float -> Int
 bestDiv divs iv xs = round (fst (head (rankedDivs iv xs (map intToFloat divs)))) :: Int
 
 -- TODO implement this as a binary search
