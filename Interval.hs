@@ -15,7 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-{-# LANGUAGE MultiParamTypeClasses, FunctionalDependencies, FlexibleInstances, FlexibleContexts #-}
+{-# LANGUAGE MultiParamTypeClasses, FunctionalDependencies, FlexibleInstances,
+             FlexibleContexts #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Interval (Point
@@ -40,7 +41,7 @@ module Interval (Point
                 ,quantizeIv
                 ) where
 import Utils
-import Data.List (sortBy)
+import Data.List (sortBy,minimumBy)
 import Data.Ord (comparing)
 
 -- http://www.haskell.org/haskellwiki/Functional_dependencies
@@ -63,7 +64,7 @@ instance (Num t) => Interval (t,t) t where
 instance (Num t) => Point t t where
     point x = x
 
--- |Do the intervals a and b have common points?
+-- | Do the intervals a and b have common points?
 intersect :: (Interval a a1, Ord a1) => a -> a -> Bool
 intersect a b =
     let s1 = start a
@@ -76,7 +77,7 @@ intersect a b =
       else
           s2 < e1
 
--- |Is x in iv?
+-- | Is x in iv?
 isPointInInterval :: (Interval a1 a, Ord a) => a1 -> a -> Bool
 isPointInInterval iv x = start iv <= point x && point x < end iv
 
@@ -114,8 +115,10 @@ getAscendingPoints (AscendingPoints xs) = xs
 
 -- | For each interval return ascendingPoints that are all the points
 --   from xs contained in the interval
-groupPointsByIntervalls :: (Interval a1 a, Ord a) => AscendingIntervals a1 -> AscendingPoints a -> [AscendingPoints a]
-groupPointsByIntervalls ivs xs = f (getAscendingIntervals ivs) (getAscendingPoints xs)
+groupPointsByIntervalls :: (Interval a1 a, Ord a) =>
+  AscendingIntervals a1 -> AscendingPoints a -> [AscendingPoints a]
+groupPointsByIntervalls ivs xs = f (getAscendingIntervals ivs)
+                                   (getAscendingPoints xs)
     where f [] _ = []
           f (_:ivs) [] = ascendingPoints [] : f ivs []
           f (iv:ivs) (x:xs)
@@ -124,7 +127,8 @@ groupPointsByIntervalls ivs xs = f (getAscendingIntervals ivs) (getAscendingPoin
                             f ivs (dropWhile (< end iv) (x:xs))
 
 -- TODO call internal Constructor instead of safe ascendingPoints
-ascendingIntervals2points :: (Interval a1 a, Ord a) => AscendingIntervals a1 -> AscendingPoints a
+ascendingIntervals2points :: (Interval a1 a, Ord a) =>
+  AscendingIntervals a1 -> AscendingPoints a
 ascendingIntervals2points ivs = ascendingPoints (f (getAscendingIntervals ivs))
     where f (iv:ivs) = [start iv,end iv] ++ g ivs (end iv)
           f [] = []
@@ -135,7 +139,8 @@ ascendingIntervals2points ivs = ascendingPoints (f (getAscendingIntervals ivs))
                             else
                                 [start iv,end iv] ++ g ivs (end iv)
 
-divideInterval :: (Interval a b, Ord b, Fractional b, Enum b) => a -> b -> AscendingIntervals (b, b)
+divideInterval :: (Interval a b, Ord b, Fractional b, Enum b) =>
+  a -> b -> AscendingIntervals (b, b)
 divideInterval iv n =
     let new_dur = dur iv / n
         points = map ((+ start iv) . (*new_dur)) [0..n]
@@ -144,40 +149,52 @@ divideInterval iv n =
 -- min cost to move x to start or end of iv
 boundaryMoveCost :: (Interval a a1, Ord a1) => a -> a1 -> a1
 boundaryMoveCost iv x = let x' = point x
-                            dist = min (abs (start iv - x')) (abs (end iv) - x')
+                            dist = min (abs (start iv - x'))
+                                       (abs (end iv) - x')
                         in dist * dist
 
 -- what is the cost of dividing iv by div (e.g. 3) and moving points
 -- in xs accordingly
-divCost :: (Interval a b, Ord b, Fractional b, Enum b) => a -> AscendingPoints b -> b -> b
+divCost :: (Interval a b, Ord b, Fractional b, Enum b) =>
+  a -> AscendingPoints b -> b -> b
 divCost iv xs div = let small_ivs = divideInterval iv div
                         point_groups = groupPointsByIntervalls small_ivs xs
                         group_cost (small_iv,points) =
-                          sum (map (boundaryMoveCost small_iv) (getAscendingPoints points))
-                    in sum (zipWith (curry group_cost) (getAscendingIntervals small_ivs) point_groups)
+                          sum (map (boundaryMoveCost small_iv)
+                                   (getAscendingPoints points))
+                    in sum (zipWith (curry group_cost)
+                                    (getAscendingIntervals small_ivs)
+                                    point_groups)
 
 -- return a list of pairs (div,cost). Best pair comes first. In case of
 -- two identical costs the div that comes first in divs will be
 -- prefered (sortBy is a stable sorting algorithm).
-rankedDivs :: (Interval a1 a, Ord a, Fractional a, Enum a) => a1 -> AscendingPoints a -> [a] -> [(a, a)]
+rankedDivs :: (Interval a1 a, Ord a, Fractional a, Enum a) =>
+  a1 -> AscendingPoints a -> [a] -> [(a, a)]
 rankedDivs iv xs divs = sortBy test (zip divs (map (divCost iv xs) divs))
   where test (_,a) (_,b) = compare a b
 
 -- | Choose the best div from divs.
 bestDiv :: Interval a Float => [Int] -> a -> AscendingPoints Float -> Int
-bestDiv divs iv xs = round (fst (head (rankedDivs iv xs (map intToFloat divs)))) :: Int
+bestDiv divs iv xs = round (fst (head (rankedDivs iv xs (map intToFloat divs))))
 
 -- TODO implement this as a binary search
-locatePoint :: (Interval t a1, Show t, Ord a1, Num a, Eq t, Show a, Show a1) => AscendingIntervals t -> a1 -> (t, (a, a))
+locatePoint :: (Interval t a1, Show t, Ord a1, Num a, Eq t, Show a, Show a1) =>
+               AscendingIntervals t -> a1 -> (t, (a, a))
 locatePoint ivs x = r (getAscendingIntervals ivs) (point x) 0
     where r (iv:ivs) x index
               | isPointInInterval iv x ||
-                ((ivs == []) && (x >= end iv)) = (iv,(index,index+1))
+                (null ivs && (x >= end iv)) = (iv,(index,index+1))
               | otherwise = r ivs x (index+1)
-          r a b c = error $ "locatePoint " ++ show a ++ " " ++ show b ++ " " ++ show c
+          r a b c = error $ "locatePoint " ++ show a ++ " " ++ show b ++
+                            " " ++ show c
 
 quantizeIv :: (Interval a1 t1, Interval a a2, Ord a2, Show a2) =>
-              ((t1, t1) -> a -> t) -> AscendingIntervals a1 -> AscendingIntervals (a2, a2) -> a -> t
+  ((t1, t1) -> a -> t) ->
+  AscendingIntervals a1 ->
+  AscendingIntervals (a2, a2) ->
+  a ->
+  t
 quantizeIv f rational_ivs ivs iv =
     let rivs = getAscendingIntervals rational_ivs
         s = start iv
@@ -195,7 +212,7 @@ quantizeIv f rational_ivs ivs iv =
     in f (snd $ best result) iv
     where cost ds de = abs (de - ds) + abs ds + abs de
           test = comparing fst
-          best xs = head (sortBy test xs)
+          best = minimumBy test
           fst3 (x,_,_) = x
           mid3 (_,x,_) = x
           end3 (_,_,x) = x
