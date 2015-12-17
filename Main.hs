@@ -18,7 +18,6 @@
 module Main where
 
 import Utils
-import Input
 import qualified Interval as Iv
 import qualified Measure as M
 import Lisp
@@ -44,6 +43,8 @@ rationalPairToTimePair (x,y) = (rationalToTime x, rationalToTime y)
 
 type MeasureStructure = M.Voice
 type Divs = [Int]
+
+type Time = Float
 
 quantifyVoice :: M.Voice -> [Int] -> SF2.Events -> Either String [M.M]
 quantifyVoice ms divs v =
