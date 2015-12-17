@@ -15,29 +15,37 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Utils where
-import Data.Ratio
-import Debug.Trace
+module Utils (neighbours,isForAllNeighbours,intToFloat,stickToLast)
+where
 
-neighbours :: [b] -> [(b, b)]
+-- | Return adjacent elements as pairs.
+--
+-- >>> neighbours [1,2,3]
+-- [(1,2),(2,3)]
+-- >>> neighbours [1,2]
+-- [(1,2)]
+-- >>> neighbours [1]
+-- []
+-- >>> neighbours []
+-- []
+neighbours :: [a] -> [(a, a)]
 neighbours list = zip list (tail list)
 
-isForAllNeighbours :: (b -> b -> Bool) -> [b] -> Bool
+-- | Test if the given binary predicate is satisfied for
+-- all neighbours of the given list.
+--
+-- >>> isForAllNeighbours (<) [1,2,3]
+-- True
+isForAllNeighbours :: (a -> a -> Bool) -> [a] -> Bool
 isForAllNeighbours p list = all (uncurry p) (neighbours list)
 
+-- | Coerce given integer to float.
+--
+-- >>> intToFloat 3
+-- 3.0
 intToFloat :: Int -> Float
 intToFloat n = fromInteger (toInteger n)
 
-expand :: Integral a => Ratio a -> Ratio a -> (Ratio a, Ratio a)
-expand a b = let f = lcm (denominator a) (denominator b)
-             in (a*(f%1),b*(f%1))
-
-expand' :: Integral a => [Ratio a] -> a
-expand' xs = let f = foldl1 lcm (map denominator xs) % 1
-             in sum (map (numerator . (*f)) xs)
-
+-- | Build an infinite list by endlessly repeating the last element.
 stickToLast :: [a] -> [a]
 stickToLast list = list ++ repeat (last list)
-
-mtr :: Show a => a -> a
-mtr x = trace (show x) x
