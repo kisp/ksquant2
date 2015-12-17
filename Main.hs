@@ -46,9 +46,7 @@ type Divs = [Int]
 
 type Time = Float
 
-type Err a = Either String a
-
-quantifyVoice :: M.Ms -> Divs -> SF2.Events -> Err M.Ms
+quantifyVoice :: M.Ms -> [Divs] -> SF2.Events -> Err M.Ms
 quantifyVoice measures divs v =
     let input = SF2.voiceChords v
         input' = Iv.ascendingIntervals input
@@ -57,9 +55,10 @@ quantifyVoice measures divs v =
                                    (M.measuresLeafIntervals measures))
         points = Iv.ascendingIntervals2points input'
         groups = Iv.groupPointsByIntervalls beats_intervals points
-        bestDivs = (zipWith (Iv.bestDiv divs)
+        bestDivs = zipWith3 Iv.bestDiv
+                     divs
                      (Iv.getAscendingIntervals beats_intervals)
-                     groups)
+                     groups
         measures' = M.measuresDivideLeafs measures (map toInteger bestDivs)
         quant_grid = M.measuresLeafIntervals measures'
         quant_grid' = Iv.ascendingIntervals (map rationalPairToTimePair quant_grid)
@@ -86,12 +85,16 @@ ensureListOfLists (LispList xs@(x:_)) | atom x = Right $ LispList [LispList xs]
                                       | otherwise = Right $ LispList xs
 ensureListOfLists _ = Left "ensureListOfLists"
 
-ensureListOfIntegers :: Num b => LispVal -> Err [b]
+ensureListOfIntegers :: Num a => LispVal -> Err [a]
 ensureListOfIntegers (LispList xs) =
     mapM ensureInt xs
     where ensureInt (LispInteger x) = Right $ fromInteger x
           ensureInt _ = Left "ensureInt"
 ensureListOfIntegers _ = Left "ensureListOfIntegers"
+
+ensureList :: LispVal -> LispVal
+ensureList x@(LispList (LispList _ : _)) = x
+ensureList x@_                           = LispList [x]
 
 measureStream' :: (LispVal, LispVal) -> M.Ms
 measureStream' (ts, metro) = zipWith buildMeasureFromLisp
@@ -108,10 +111,9 @@ getMetronomes x = case getf x (LispKeyword "METRONOMES") of
   Just s -> ensureListOfLists s
   Nothing -> Left "Could not find :metronomes"
 
-getMaxDiv :: Num a => LispVal -> Err a
+getMaxDiv :: LispVal -> Err [Int]
 getMaxDiv s =  case getf s (LispKeyword "MAX-DIV") of
-  Just (LispInteger x) -> Right $ fromInteger x
-  Just _ -> Left "incorrect :max-div"
+  Just x -> ensureListOfIntegers $ ensureList x
   Nothing -> Left "Could not find :max-div"
 
 getForbDivs :: Num b => LispVal -> Err [b]
@@ -131,7 +133,9 @@ mkTrans input sf2 = do
   measures <- measuresUntilTime sf2end (measureStream' tsmetro)
   maxdiv <- getMaxDiv input
   forbid <- getForbDivs input
-  let divs = [1..maxdiv] \\ forbid
+  let divs = zipWith (\m f -> [1..m] \\ f)
+             (stickToLast maxdiv)
+             (stickToLast [forbid])
   return $ quantifyVoice measures divs
 
 getSimple :: LispVal -> Err LispVal
