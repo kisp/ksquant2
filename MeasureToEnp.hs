@@ -15,7 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module MeasureToEnp where
+module MeasureToEnp(vToEnp,mToEnp)
+where
 import qualified Measure as M
 import qualified Enp as E
 import qualified Lisp as L
