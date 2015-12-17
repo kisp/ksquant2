@@ -48,10 +48,9 @@ type Time = Float
 
 type Err a = Either String a
 
-quantifyVoice :: M.Voice -> Divs -> SF2.Events -> Err M.Ms
-quantifyVoice ms divs v =
-    let measures = A.voiceItems ms
-        input = SF2.voiceChords v
+quantifyVoice :: M.Ms -> Divs -> SF2.Events -> Err M.Ms
+quantifyVoice measures divs v =
+    let input = SF2.voiceChords v
         input' = Iv.ascendingIntervals input
         beats_intervals = Iv.ascendingIntervals
                           (map rationalPairToTimePair
@@ -129,12 +128,11 @@ mkTrans :: LispVal -> SF2.Score -> Err (SF2.Events -> Err M.Ms)
 mkTrans input sf2 = do
   let sf2end = SF2.scoreEnd sf2
   tsmetro <- liftM2 (,) (getTimeSignatures input) (getMetronomes input)
-  ms <- measuresUntilTime sf2end (measureStream' tsmetro)
-  let measurevoice = A.Voice ms
+  measures <- measuresUntilTime sf2end (measureStream' tsmetro)
   maxdiv <- getMaxDiv input
   forbid <- getForbDivs input
   let divs = [1..maxdiv] \\ forbid
-  return $ quantifyVoice measurevoice divs
+  return $ quantifyVoice measures divs
 
 getSimple :: LispVal -> Err LispVal
 getSimple x = fromMaybe (Left "Could not find :simple") (liftM Right (getf x (LispKeyword "SIMPLE")))
