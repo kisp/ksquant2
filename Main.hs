@@ -46,7 +46,9 @@ type Divs = [Int]
 
 type Time = Float
 
-quantifyVoice :: M.Voice -> [Int] -> SF2.Events -> Either String [M.M]
+type Err a = Either String a
+
+quantifyVoice :: M.Voice -> Divs -> SF2.Events -> Err M.Ms
 quantifyVoice ms divs v =
     let measures = A.voiceItems ms
         input = SF2.voiceChords v
@@ -79,13 +81,13 @@ buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])
                          head (M.measuresWithBeats [(n,d)] [(tu,fromInteger t)])
 buildMeasureFromLisp _ _ = error "buildMeasureFromLisp"
 
-ensureListOfLists :: LispVal -> Either String LispVal
+ensureListOfLists :: LispVal -> Err LispVal
 ensureListOfLists (LispList []) = Left "ensureListOfLists: empty list"
 ensureListOfLists (LispList xs@(x:_)) | atom x = Right $ LispList [LispList xs]
                                       | otherwise = Right $ LispList xs
 ensureListOfLists _ = Left "ensureListOfLists"
 
-ensureListOfIntegers :: Num b => LispVal -> Either String [b]
+ensureListOfIntegers :: Num b => LispVal -> Err [b]
 ensureListOfIntegers (LispList xs) =
     mapM ensureInt xs
     where ensureInt (LispInteger x) = Right $ fromInteger x
@@ -97,33 +99,33 @@ measureStream' (ts, metro) = zipWith buildMeasureFromLisp
                                (stickToLast (fromLispList ts))
                                (stickToLast (fromLispList metro))
 
-getTimeSignatures :: LispVal -> Either String LispVal
+getTimeSignatures :: LispVal -> Err LispVal
 getTimeSignatures x = case getf x (LispKeyword "TIME-SIGNATURES") of
   Just s -> ensureListOfLists s
   Nothing -> Left "Could not find :time-signatures"
 
-getMetronomes :: LispVal -> Either String LispVal
+getMetronomes :: LispVal -> Err LispVal
 getMetronomes x = case getf x (LispKeyword "METRONOMES") of
   Just s -> ensureListOfLists s
   Nothing -> Left "Could not find :metronomes"
 
-getMaxDiv :: Num a => LispVal -> Either String a
+getMaxDiv :: Num a => LispVal -> Err a
 getMaxDiv s =  case getf s (LispKeyword "MAX-DIV") of
   Just (LispInteger x) -> Right $ fromInteger x
   Just _ -> Left "incorrect :max-div"
   Nothing -> Left "Could not find :max-div"
 
-getForbDivs :: Num b => LispVal -> Either String [b]
+getForbDivs :: Num b => LispVal -> Err [b]
 getForbDivs s =  case getf s (LispKeyword "FORBIDDEN-DIVS") of
   Just xs@(LispList _) -> ensureListOfIntegers xs
   Just (LispSymbol "NIL") -> Right []
   Just _ -> Left "incorrect :forbidden-divs"
   Nothing -> Left "Could not find :forbidden-divs"
 
-measuresUntilTime :: Float -> M.Ms -> Either String M.Ms
+measuresUntilTime :: Float -> M.Ms -> Err M.Ms
 measuresUntilTime a b = Right $ M.measuresUntilTime b a
 
-mkTrans :: LispVal -> SF2.Score -> Either String (SF2.Events -> Either String M.Ms)
+mkTrans :: LispVal -> SF2.Score -> Err (SF2.Events -> Err M.Ms)
 mkTrans input sf2 = do
   let sf2end = SF2.scoreEnd sf2
   tsmetro <- liftM2 (,) (getTimeSignatures input) (getMetronomes input)
@@ -134,13 +136,13 @@ mkTrans input sf2 = do
   let divs = [1..maxdiv] \\ forbid
   return $ quantifyVoice measurevoice divs
 
-getSimple :: LispVal -> Either String LispVal
+getSimple :: LispVal -> Err LispVal
 getSimple x = fromMaybe (Left "Could not find :simple") (liftM Right (getf x (LispKeyword "SIMPLE")))
 
-unwrapLeft :: A.Score (Either String M.Ms) -> Either String M.Score
+unwrapLeft :: A.Score (Err M.Ms) -> Err M.Score
 unwrapLeft = Right . fmap fromRight
 
-processSimpleFormat ::  Bool -> LispVal -> Either String String
+processSimpleFormat ::  Bool -> LispVal -> Err String
 processSimpleFormat isLily input = do
   sf2 <- liftM (fmap (SF2.voiceToSimpleFormat2 . mapcar' SF.sexp2event) . fromSexp) . getSimple $ input
   trans <- mkTrans input sf2
@@ -149,15 +151,15 @@ processSimpleFormat isLily input = do
     then liftM (L.showLily . fmap vToLily) $ unwrapLeft mscore
     else liftM (printSexp . fmap (Enp.voice2sexp . vToEnp)) $ unwrapLeft mscore
 
-appendNewline :: String -> Either String String
+appendNewline :: String -> Err String
 appendNewline s = Right $ s ++ "\n"
 
-processParsedInput :: [LispVal] -> Either String String
+processParsedInput :: [LispVal] -> Err String
 processParsedInput [s] = processSimpleFormat False s >>= appendNewline
 processParsedInput [s,_] = processSimpleFormat False s >>= appendNewline
 processParsedInput _ = Left "processParsedInput called on an unexpected number of forms"
 
-processInput :: String -> Either String String
+processInput :: String -> Err String
 processInput input = parseLisp input >>= processParsedInput
 
 main :: IO ()
