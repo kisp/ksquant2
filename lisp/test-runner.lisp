@@ -48,8 +48,11 @@
         (format t "expected: ~S~%but got ~S~%" expected result))
       success)))
 
-(let ((success (every #'identity (mapcar 'report-on-file
-                                         (or ext:*args*
-                                             (input-files))))))
+(let* ((failures (count-if #'null
+                  (mapcar 'report-on-file
+                    (or ext:*args*
+                        (input-files)))))
+       (success (zerop failures)))
+  (format t "~D failure~:P~%" failures)
   (finish-output)
   (exit (if success 0 1)))
