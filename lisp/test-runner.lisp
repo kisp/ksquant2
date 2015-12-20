@@ -18,7 +18,8 @@
 (in-package #:common-lisp-user)
 
 (defun input-files ()
-  (directory "shell-tests/*.lisp"))
+  (sort (directory "shell-tests/*.lisp")
+        #'string< :key #'file-namestring))
 
 (defun read-input-file (path)
   (with-open-file (in path)
