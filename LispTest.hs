@@ -81,6 +81,10 @@ lisp2 = TestList
          rightOrError (parseLisp "(1 2)")
         ,[LispList []] ~=?
          rightOrError (parseLisp "()")
+        ,[LispList []] ~=?
+         rightOrError (parseLisp "nil")
+        ,[LispList []] ~=?
+         rightOrError (parseLisp "NIL")
         ,[LispList [LispList [LispInteger 1]]] ~=?
          rightOrError (parseLisp "((1))")
         ,[LispInteger (-123)] ~=?

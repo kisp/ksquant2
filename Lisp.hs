@@ -73,7 +73,10 @@ parseSymbol :: Parser LispVal
 parseSymbol =
     do
       s <- many1 (letter <|> symbol <|> digit)
-      return (LispSymbol (map toUpper s))
+      let su = map toUpper s
+      return (case su of
+               "NIL" -> LispList []
+               _     -> (LispSymbol su))
 
 parseString :: Parser LispVal
 parseString =
