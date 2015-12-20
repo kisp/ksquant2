@@ -15,6 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+{-# LANGUAGE FlexibleInstances #-}
+
 module Lisp (Sexp, toSexp, fromSexp, printSexp, LispVal(..), mapcar', mapcarUpToPlist, readLisp, readLisp', cons,
              clNull, car, cdr, getf, getf', atom, fromLispList, parseLisp, printLisp, propertyListP,
              lispEscapeString)
@@ -265,3 +267,8 @@ instance Sexp Integer where
   toSexp = LispInteger
   fromSexp (LispInteger x) = x
   fromSexp _ = error "fromSexp: not (LispInteger x)"
+
+instance Sexp [LispVal] where
+  toSexp = LispList
+  fromSexp (LispList xs) = xs
+  fromSexp _ = error "fromSexp: not (LispList xs)"

@@ -15,7 +15,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Main where
+module Main (main)
+where
 
 import Utils
 import qualified Interval as Iv
@@ -41,7 +42,6 @@ rationalToTime = fromRational
 rationalPairToTimePair :: (Rational, Rational) -> (Time, Time)
 rationalPairToTimePair (x,y) = (rationalToTime x, rationalToTime y)
 
-type MeasureStructure = M.Voice
 type Divs = [Int]
 
 type Time = Float
@@ -89,12 +89,16 @@ ensureListOfIntegers :: Num a => LispVal -> Err [a]
 ensureListOfIntegers (LispList xs) =
     mapM ensureInt xs
     where ensureInt (LispInteger x) = Right $ fromInteger x
-          ensureInt _ = Left "ensureInt"
+          ensureInt v = Left $ "ensureInt: " ++ (show v)
 ensureListOfIntegers _ = Left "ensureListOfIntegers"
 
 ensureList :: LispVal -> LispVal
-ensureList x@(LispList (LispList _ : _)) = x
-ensureList x@_                           = LispList [x]
+ensureList x@(LispList _) = x
+ensureList x              = LispList [x]
+
+ensureList2 :: LispVal -> LispVal
+ensureList2 x@(LispList (LispList _ : _)) = x
+ensureList2 x@_                           = LispList [x]
 
 measureStream' :: (LispVal, LispVal) -> M.Ms
 measureStream' (ts, metro) = zipWith buildMeasureFromLisp
@@ -113,14 +117,12 @@ getMetronomes x = case getf x (LispKeyword "METRONOMES") of
 
 getMaxDiv :: LispVal -> Err [Int]
 getMaxDiv s =  case getf s (LispKeyword "MAX-DIV") of
-  Just x -> ensureListOfIntegers $ ensureList x
+  Just x  -> ensureListOfIntegers $ ensureList x
   Nothing -> Left "Could not find :max-div"
 
-getForbDivs :: Num b => LispVal -> Err [b]
+getForbDivs :: LispVal -> Err [[Int]]
 getForbDivs s =  case getf s (LispKeyword "FORBIDDEN-DIVS") of
-  Just xs@(LispList _) -> ensureListOfIntegers xs
-  Just (LispSymbol "NIL") -> Right []
-  Just _ -> Left "incorrect :forbidden-divs"
+  Just x  -> mapM ensureListOfIntegers (fromSexp (ensureList2 x))
   Nothing -> Left "Could not find :forbidden-divs"
 
 measuresUntilTime :: Float -> M.Ms -> Err M.Ms
@@ -135,7 +137,7 @@ mkTrans input sf2 = do
   forbid <- getForbDivs input
   let divs = zipWith (\m f -> [1..m] \\ f)
              (stickToLast maxdiv)
-             (stickToLast [forbid])
+             (stickToLast forbid)
   return $ quantifyVoice measures divs
 
 getSimple :: LispVal -> Err LispVal
