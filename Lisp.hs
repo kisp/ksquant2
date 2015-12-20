@@ -145,8 +145,8 @@ parseValsAndEof = do
   eof
   return xs
 
--- |Parse a String to either a list of LispVals (the string can
--- |contain more than one form), or to ParseError.
+-- | Parse a String to either a list of LispVals (the string can
+-- | contain more than one form), or to ParseError.
 parseLisp :: String -> Either String [LispVal]
 parseLisp s = case parse parseValsAndEof "" s of
   Right x -> Right x
