@@ -16,7 +16,8 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -- | Some utilities.
-module Utils (Err,neighbours,isForAllNeighbours,intToFloat,stickToLast)
+module Utils (Err,neighbours,isForAllNeighbours
+             ,intToFloat,stickToLast,repeatList)
 where
 
 -- | Computation result of type 'a' or error as a String.
@@ -53,3 +54,14 @@ intToFloat n = fromInteger (toInteger n)
 -- | Build an infinite list by endlessly repeating the last element.
 stickToLast :: [a] -> [a]
 stickToLast list = list ++ repeat (last list)
+
+
+-- | Expand first list by repeating elements according
+-- to the repetition counts given by the second list.
+repeatList :: (Num b, Ord b) => [a] -> [b] -> [a]
+repeatList [] _ = []
+repeatList _ [] = []
+repeatList (x:xs) (1:rs) = x:(repeatList xs rs)
+repeatList (x:xs) (r:rs) | r > 1 = x:(repeatList (x:xs) (r-1:rs))
+                     | r < 1 = repeatList xs rs
+                     | otherwise = undefined

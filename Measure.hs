@@ -33,6 +33,7 @@ module Measure (m
                ,leafDurs
                ,leafEffectiveDurs
                ,measuresLeafIntervals
+               ,measureNumLeaf
                ,measuresTransformLeafs
                ,wrapWithD
                ,Score
@@ -233,6 +234,9 @@ measureLeafIntervals (M (_,d) tempo div) start =
 measuresLeafIntervals :: Ms -> [(Ratio Integer, Ratio Integer)]
 measuresLeafIntervals ms = concatMap (uncurry measureLeafIntervals)
                               (zip ms (measuresStartTimes ms))
+
+measureNumLeaf :: M -> Int
+measureNumLeaf m = length (measureLeafIntervals m 0)
 
 -- if leaf start time is not in any iv, then rest. if leaf start time
 -- is in an interval keep it and make it a tie if the end time is not

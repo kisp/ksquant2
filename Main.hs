@@ -138,7 +138,8 @@ mkTrans input sf2 = do
   let divs = zipWith (\m f -> [1..m] \\ f)
              (stickToLast maxdiv)
              (stickToLast forbid)
-  return $ quantifyVoice measures divs
+  let beatDivs = repeatList divs (map M.measureNumLeaf measures)
+  return $ quantifyVoice measures beatDivs
 
 getSimple :: LispVal -> Err LispVal
 getSimple x = fromMaybe (Left "Could not find :simple") (liftM Right (getf x (LispKeyword "SIMPLE")))
