@@ -1,19 +1,38 @@
 [![Build Status](https://travis-ci.org/kisp/ksquant2.svg?branch=master)](https://travis-ci.org/kisp/ksquant2)
 
 
-I recommend downloading the pre-compiled version for OSX:
-http://sprotte.org/downloads/ksquant2-osx-0-1-10-tgz.html
+Compilation of ksquant2 kernel
+===============================
 
-or for windows:
-http://sprotte.org/downloads/ksquant2-win-0-1-10-zip.html
+The ksquant2 kernel is written in Haskell, so you need a working Haskell installation.
+
+The following commands set up a cabal sandbox, so Haskell dependencies that are needed for
+compilation of ksquant2 are only installed locally inside the ksquant2 directory.
+
+```
+$ cd /path/to/ksquant2
+$ cabal sandbox init                   # Initialise the sandbox
+$ cabal install --only-dependencies    # Install dependencies into the sandbox
+$ cabal build                          # Build ksquant2
+```
+
+Installation
+=====================
 
 Then it can be installed as a normal PWGL user-library in
 $HOME/PWGL-User/User-library or the corresponding place on
 windows. Please make sure that after downloading and extracting the
 archive the folder is named "ksquant2".
 
+Bugs
+=================
+
 Bugs can be browsed and reported here:
 https://github.com/kisp/ksquant2/issues
+
+
+Changes
+====================
 
 * changes in 0.1.10 relative to 0.1.9:
   * bugfix: for voices containing only a rest
@@ -25,7 +44,9 @@ https://github.com/kisp/ksquant2/issues
   * bugfix: It was not possible to start with a rest, i.e. (0.0 :REST T)
             did not work correctly
 
---------------------------------------------------------------------------------
+
+License
+================================
 
 This file is part of KSQuant2.
 
