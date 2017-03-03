@@ -2,10 +2,6 @@
 ":"; exec emacs --no-site-file --script "$0" -- "$@" # -*-emacs-lisp-*-
 (setq argv (cdr argv))
 
-;; (load "~/.emacs")
-
-;; (setq debug-on-error t)
-
 (setq find-file-hook (remove 'vc-find-file-hook find-file-hook))
 
 (setq-default indent-tabs-mode nil)
@@ -13,9 +9,12 @@
 (defun cleanup-file (file)
   (message "Opening %s..." file)
   (find-file file)
-  ;; (setq indent-tabs-mode nil)
-  (whitespace-cleanup)
-  (save-buffer)
+  (if (eql buffer-file-coding-system 'no-conversion)
+      (message "Binary file!")
+    (progn
+      (setq indent-tabs-mode nil)       ;maybe we do not need this
+      (whitespace-cleanup)
+      (save-buffer)))
   (kill-buffer))
 
 (dolist (arg argv)
