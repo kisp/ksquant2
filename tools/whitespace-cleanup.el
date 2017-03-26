@@ -7,6 +7,8 @@
 (setq-default indent-tabs-mode nil)
 
 (defun cleanup-file (file)
+  (unless (file-exists-p file)
+    (error "File does not exist: %s" file))
   (message "Opening %s..." file)
   (find-file file)
   (if (eql buffer-file-coding-system 'no-conversion)
