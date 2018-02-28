@@ -36,15 +36,13 @@ module Interval (Point
                 ,groupPointsByIntervalls
                 ,ascendingIntervals2points
                 ,divideInterval
-                ,bestDiv
                 ,locatePoint
-                ,quantizeIv
-                ) where
+                )
+where
 
-import Types (WInt)
+import Types (Time)
+
 import Utils
-import Data.List (sortBy,minimumBy)
-import Data.Ord (comparing)
 
 -- http://www.haskell.org/haskellwiki/Functional_dependencies
 -- This tells Haskell that b is uniquely determined from a.
@@ -59,9 +57,21 @@ class (Num b) => Interval a b | a -> b where
 class Point a b | a -> b where
     point :: a -> b
 
-instance (Num t) => Interval (t,t) t where
-    start (x,_) = x
-    end (_,x) = x
+-- instance (Num t) => Interval (t,t) t where
+--    start (x,_) = x
+--    end (_,x) = x
+
+instance Interval (Time, Time) Time where
+  start (x,_) = x
+  end (_,x) = x
+
+instance Interval (Int, Int) Int where
+  start (x,_) = x
+  end (_,x) = x
+
+-- instance Interval (Rational, Rational) Rational where
+--   start (x,_) = x
+--   end (_,x) = x
 
 instance Point t t where
     point x = x
@@ -141,44 +151,12 @@ ascendingIntervals2points ivs = ascendingPoints (f (getAscendingIntervals ivs))
                             else
                                 [start iv,end iv] ++ g ivs (end iv)
 
-divideInterval :: (Interval a b, Ord b, Fractional b, Enum b) =>
-  a -> b -> AscendingIntervals (b, b)
+divideInterval :: (Rational, Rational) -> Integer -> AscendingIntervals (Rational, Rational)
 divideInterval iv n =
-    let new_dur = dur iv / n
-        points = map ((+ start iv) . (*new_dur)) [0..n]
+    let n' = fromInteger n
+        new_dur = dur iv / n'
+        points = map ((+ start iv) . (*new_dur)) [0..n']
     in ascendingIntervals (neighbours points)
-
--- min cost to move x to start or end of iv
-boundaryMoveCost :: (Interval a a1, Ord a1) => a -> a1 -> a1
-boundaryMoveCost iv x = let x' = point x
-                            dist = min (abs (start iv - x'))
-                                       (abs (end iv) - x')
-                        in dist * dist
-
--- what is the cost of dividing iv by div (e.g. 3) and moving points
--- in xs accordingly
-divCost :: (Interval a b, Ord b, Fractional b, Enum b) =>
-  a -> AscendingPoints b -> b -> b
-divCost iv xs div = let small_ivs = divideInterval iv div
-                        point_groups = groupPointsByIntervalls small_ivs xs
-                        group_cost (small_iv,points) =
-                          sum (map (boundaryMoveCost small_iv)
-                                   (getAscendingPoints points))
-                    in sum (zipWith (curry group_cost)
-                                    (getAscendingIntervals small_ivs)
-                                    point_groups)
-
--- return a list of pairs (div,cost). Best pair comes first. In case of
--- two identical costs the div that comes first in divs will be
--- prefered (sortBy is a stable sorting algorithm).
-rankedDivs :: (Interval a1 a, Ord a, Fractional a, Enum a) =>
-  a1 -> AscendingPoints a -> [a] -> [(a, a)]
-rankedDivs iv xs divs = sortBy test (zip divs (map (divCost iv xs) divs))
-  where test (_,a) (_,b) = compare a b
-
--- | Choose the best div from divs.
-bestDiv :: Interval a Float => [WInt] -> a -> AscendingPoints Float -> WInt
-bestDiv divs iv xs = round (fst (head (rankedDivs iv xs (map fromInteger divs))))
 
 -- TODO implement this as a binary search
 locatePoint :: (Interval t a1, Show t, Ord a1, Num a, Eq t, Show a, Show a1) =>
@@ -190,31 +168,3 @@ locatePoint ivs x = r (getAscendingIntervals ivs) (point x) 0
               | otherwise = r ivs x (index+1)
           r a b c = error $ "locatePoint " ++ show a ++ " " ++ show b ++
                             " " ++ show c
-
-quantizeIv :: (Interval a1 t1, Interval a a2, Ord a2, Show a2) =>
-  ((t1, t1) -> a -> t) ->
-  AscendingIntervals a1 ->
-  AscendingIntervals (a2, a2) ->
-  a ->
-  t
-quantizeIv f rational_ivs ivs iv =
-    let rivs = getAscendingIntervals rational_ivs
-        s = start iv
-        e = end iv
-        ((s0,s1),(si0,si1)) = locatePoint ivs s
-        ((e0,e1),(ei0,ei1)) = locatePoint ivs e
-        result = [(cost ds de,(end3 a,end3 b)) |
-                     a <- [(s0,si0,start $ rivs !! si0),
-                           (s1,si1,end $ rivs !! si0)],
-                     b <- [(e0,ei0,start $ rivs !! ei0),
-                           (e1,ei1,end $ rivs !! ei0)],
-                     mid3 a /= mid3 b,
-                     let ds = abs (s - fst3 a),
-                     let de = abs (e - fst3 b)]
-    in f (snd $ best result) iv
-    where cost ds de = abs (de - ds) + abs ds + abs de
-          test = comparing fst
-          best = minimumBy test
-          fst3 (x,_,_) = x
-          mid3 (_,x,_) = x
-          end3 (_,_,x) = x

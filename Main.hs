@@ -18,16 +18,27 @@
 module Main (main)
 where
 
-import Types (Time, Err, Divs, WInt)
+import Types (Time, Err, DivChoicesSeq, WInt)
 import Utils
 import qualified Interval as Iv
-import qualified Measure as M
+import qualified Measure as M (Ms
+                              , measuresLeafIntervals
+                              , measuresDivideLeafs
+                              , measuresTieOrRest
+                              , E(L,R,D)
+                              , M
+                              , measuresTransformLeafs
+                              , measuresWithBeats
+                              , measuresUntilTime
+                              , measureNumLeaf
+                              , Score)
 import Lisp
 import qualified SimpleFormat as SF
 import qualified SimpleFormat2 as SF2
 import qualified AbstractScore as A
 import qualified Enp as E (voice2sexp)
 import qualified Lily as L
+import qualified Quantize as Qu (bestDiv, quantizeIv)
 import AdjoinTies
 import MeasureToEnp
 import MeasureToLily
@@ -43,24 +54,24 @@ rationalToTime = fromRational
 rationalPairToTimePair :: (Rational, Rational) -> (Time, Time)
 rationalPairToTimePair (x,y) = (rationalToTime x, rationalToTime y)
 
-quantifyVoice :: M.Ms -> [Divs] -> SF2.Events -> Err M.Ms
-quantifyVoice measures divs v =
-    let input = SF2.voiceChords v
+quantifyVoice :: M.Ms -> DivChoicesSeq -> SF2.Events -> Err M.Ms
+quantifyVoice measures divChoicesSeq voice =
+    let input = SF2.voiceChords voice
         input' = Iv.ascendingIntervals input
         beats_intervals = Iv.ascendingIntervals
                           (map rationalPairToTimePair
                                    (M.measuresLeafIntervals measures))
         points = Iv.ascendingIntervals2points input'
         groups = Iv.groupPointsByIntervalls beats_intervals points
-        bestDivs = zipWith3 Iv.bestDiv
-                     divs
+        bestDivs = zipWith3 Qu.bestDiv
+                     divChoicesSeq
                      (Iv.getAscendingIntervals beats_intervals)
                      groups
         measures' = M.measuresDivideLeafs measures (map toInteger bestDivs)
         quant_grid = M.measuresLeafIntervals measures'
         quant_grid' = Iv.ascendingIntervals (map rationalPairToTimePair quant_grid)
         quant_grid_asc = (Iv.ascendingIntervals quant_grid)
-        qevents = map (Iv.quantizeIv SF2.qeventFromEvent quant_grid_asc quant_grid') input
+        qevents = map (Qu.quantizeIv SF2.qeventFromEvent quant_grid_asc quant_grid') input
         measures'' = M.measuresTieOrRest measures' qevents quant_grid
         getNotes (M.L dur tie label _ _) qevent =
             (M.L dur tie label (SF2.qeventNotes qevent) (SF2.qeventExpressions qevent))
@@ -122,7 +133,7 @@ getForbDivs s =  case getf s (LispKeyword "FORBIDDEN-DIVS") of
   Just x  -> mapM ensureListOfIntegers (fromSexp (ensureList2 x))
   Nothing -> Left "Could not find :forbidden-divs"
 
-measuresUntilTime :: Float -> M.Ms -> Err M.Ms
+measuresUntilTime :: Time -> M.Ms -> Err M.Ms
 measuresUntilTime a b = Right $ M.measuresUntilTime b a
 
 mkTrans :: LispVal -> SF2.Score -> Err (SF2.Events -> Err M.Ms)

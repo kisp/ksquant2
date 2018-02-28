@@ -16,6 +16,7 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 {-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Lisp (Sexp, toSexp, fromSexp, printSexp, LispVal(..), mapcar', mapcarUpToPlist, readLisp, readLisp', cons,
              clNull, car, cdr, getf, getf', atom, fromLispList, parseLisp, printLisp, propertyListP,
@@ -25,12 +26,14 @@ import Text.ParserCombinators.Parsec
 import Data.Char (toUpper)
 import Data.List (elemIndex)
 import Data.Maybe
+import Data.Ratio (numerator, denominator)
 
 data LispVal = LispInteger Integer
              | LispKeyword String
              | LispSymbol String
              | LispString String
-             | LispFloat Float
+             | LispFloat Rational
+             | LispRatio Rational
              | LispList [LispVal]
              deriving (Eq)
 
@@ -48,7 +51,10 @@ lispEscapeString s = "\"" ++ rec s ++ "\""
 -- |Print a LispVal to String.
 printLisp :: LispVal -> String
 printLisp (LispInteger x) = show x
-printLisp (LispFloat x) = show x
+printLisp (LispFloat x) = show x'
+  where x' = fromRational x
+        x' :: Double
+printLisp (LispRatio r) = show (numerator r) ++ "/" ++ show (denominator r)
 printLisp (LispKeyword x) = ':' : x
 printLisp (LispSymbol x) = x
 printLisp (LispString x) = lispEscapeString x
@@ -105,11 +111,17 @@ parseFloat =
     do
       sign <- parseSign
       ds <- many1 digit
-      dot <- char '.'
+      _ <- char '.'
       ds2 <- many1 digit
+      let ds' = read ds :: Integer
+      let ds2' = read ds2 :: Integer
+      let n = fromInteger ds'
+      let numerator = fromInteger ds2'
+      let denominator = 10^^((fromIntegral (length ds2)) :: Integer)
+      let r = (n + (numerator / denominator)) :: Rational
       (LispInteger e) <- (oneOf "sfdleSFDLE" >> parseInteger) <|>
                          return (LispInteger 0)
-      return $ (LispFloat . (*10^^e) . (*sign) . read) (ds ++ [dot] ++ ds2)
+      return $ (LispFloat . (*10^^e) . (*sign)) r
 
 parseRatio :: Parser LispVal
 parseRatio =
@@ -119,9 +131,9 @@ parseRatio =
       numerator <- many1 digit
       _ <- char '/'
       denominator <- many1 digit
-      let numerator' = read numerator
-      let denominator' = read denominator
-      return $ (LispFloat . (*sign)) (numerator' / denominator')
+      let numerator' = read numerator :: Integer
+      let denominator' = read denominator :: Integer
+      return $ (LispRatio . (*sign)) ((fromIntegral numerator') / (fromIntegral denominator'))
 
 parseList :: Parser LispVal
 parseList =

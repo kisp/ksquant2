@@ -18,7 +18,6 @@
 -- | Some utilities.
 module Utils (neighbours
              ,isForAllNeighbours
-             ,intToFloat
              ,stickToLast
              ,repeatList)
 where
@@ -44,17 +43,9 @@ neighbours list = zip list (tail list)
 isForAllNeighbours :: (a -> a -> Bool) -> [a] -> Bool
 isForAllNeighbours p list = all (uncurry p) (neighbours list)
 
--- | Coerce given integer to float.
---
--- >>> intToFloat 3
--- 3.0
-intToFloat :: Int -> Float
-intToFloat n = fromInteger (toInteger n)
-
 -- | Build an infinite list by endlessly repeating the last element.
 stickToLast :: [a] -> [a]
 stickToLast list = list ++ repeat (last list)
-
 
 -- | Expand first list by repeating elements according
 -- to the repetition counts given by the second list.

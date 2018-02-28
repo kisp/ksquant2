@@ -20,6 +20,7 @@ import Lisp
 import Test.HUnit
 import Data.Maybe
 import Data.Either.Unwrap
+import Data.Ratio
 
 rightOrError :: Either t t1 -> t1
 rightOrError x = case x of
@@ -95,9 +96,9 @@ lisp2 = TestList
          rightOrError (parseLisp "1 ")
         ,[LispInteger 1] ~=?
          rightOrError (parseLisp "+1 ")
-        ,[LispFloat 0.5] ~=?
+        ,[LispRatio $ 1 % 2] ~=?
          rightOrError (parseLisp "1/2")
-        ,[LispFloat (-0.1)] ~=?
+        ,[LispRatio $ (-1) % 10] ~=?
          rightOrError (parseLisp "-1/10")
         ,[LispSymbol "T"] ~=?
          rightOrError (parseLisp "t")

@@ -193,7 +193,7 @@ leafEffectiveDurs = leafEffectiveDurs' 1
       leafEffectiveDurs' r (D _ r' es) =
           concatMap (leafEffectiveDurs' (r * r')) es
 
-measureDur :: M -> Ratio Integer
+measureDur :: M -> Rational
 measureDur (M timesig@(n,_) tempo _) =  (n%1) * tempoToBeatDur timesig tempo
     where
       tempoToBeatDur (_,d) (td,bps) = (4%d) * (60 / bps) * (4%td)
@@ -202,13 +202,13 @@ measureDur (M timesig@(n,_) tempo _) =  (n%1) * tempoToBeatDur timesig tempo
 -- foldl f acc []     =  acc
 -- foldl f acc (x:xs) =  foldl f (f acc x) xs
 
-dxsToXs :: [Ratio Integer] -> [Ratio Integer]
+dxsToXs :: [Rational] -> [Rational]
 dxsToXs = scanl (+) 0
 
-measuresStartTimes :: Ms -> [Ratio Integer]
+measuresStartTimes :: Ms -> [Rational]
 measuresStartTimes ms = dxsToXs (map measureDur ms)
 
-measuresUntilTime :: Ms -> Float -> Ms
+measuresUntilTime :: (RealFrac t) => Ms -> t -> Ms
 measuresUntilTime ms time = map fst (takeWhile p (zip ms (measuresStartTimes ms)))
     where p (_,s) = fromRational s < time
 
@@ -223,14 +223,14 @@ measuresUntilTime ms time = map fst (takeWhile p (zip ms (measuresStartTimes ms)
 -- measures_leaf_start_times ms = (concatMap (uncurry measure_leaf_start_times)
 --                                               (zip ms (measuresStartTimes ms)))
 
-measureLeafIntervals :: M -> Ratio Integer -> [(Ratio Integer, Ratio Integer)]
+measureLeafIntervals :: M -> Rational -> [(Rational, Rational)]
 measureLeafIntervals (M (_,d) tempo div) start =
     neighbours (map (+start) (dxsToXs (map trans (leafEffectiveDurs div))))
     where trans dur = tempoToBeatDur tempo * dur_to_beat dur * (4%d)
           dur_to_beat dur = dur * (d%1)
           tempoToBeatDur (d,tempo) = (60 / tempo / (d%4))
 
-measuresLeafIntervals :: Ms -> [(Ratio Integer, Ratio Integer)]
+measuresLeafIntervals :: Ms -> [(Rational, Rational)]
 measuresLeafIntervals ms = concatMap (uncurry measureLeafIntervals)
                               (zip ms (measuresStartTimes ms))
 

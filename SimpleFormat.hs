@@ -55,8 +55,10 @@ sexp2event s = sexp2event' s False
 
 sexp2event' :: LispVal -> Bool -> Event
 sexp2event' (LispInteger x) r = sexp2event' (LispFloat (fromInteger x)) r
-sexp2event' (LispFloat x) r | x < 0 || r = Rest (abs x)
-                            | otherwise = Chord x n60 (readLisp' "()")
+sexp2event' (LispFloat x) r | x < 0 || r = Rest (fromRational (abs x))
+                            | otherwise = Chord (fromRational x) n60 (readLisp' "()")
+sexp2event' (LispRatio x) r | x < 0 || r = Rest (fromRational (abs x))
+                            | otherwise = Chord (fromRational x) n60 (readLisp' "()")
 
 sexp2event' xs@(LispList _) _
     = if foundAndT $ getf (cdr xs) (readLisp' ":rest")
