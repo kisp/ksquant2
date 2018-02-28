@@ -17,7 +17,7 @@
 
 (:SIMPLE ((((0 :NOTES (60))
             (1/2 :NOTES (60))
-	    (1 :NOTES (60))
+            (1 :NOTES (60))
             (2 :NOTES (60))
             (3 :NOTES (60))
             4)))

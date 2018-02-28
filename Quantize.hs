@@ -51,7 +51,7 @@ rankedDivs iv xs divChoices = sortBy test (zip divChoices costs)
   where test (_,a) (_,b) = compare a b
         costs :: [Cost]
         costs = map (divCost iv xs) divChoices
-        
+
 quantizeIv :: (Interval (a, a) a, Interval t2 a, Interval t t1, Show a, Ord a) =>
   ((t1, t1) -> t2 -> t3) -> AscendingIntervals t -> AscendingIntervals (a, a) -> t2 -> t3
 quantizeIv f rational_ivs ivs iv =
@@ -82,7 +82,7 @@ boundaryMoveCost iv x = let x' = point x
                             dist = min (abs (start iv - x'))
                                        (abs (end iv) - x')
                         in dist * dist
-                           
+
 -- what is the cost of dividing iv by div (e.g. 3) and moving points
 -- in xs accordingly
 divCost :: TimeInterval -> AscendingPoints Time -> Div -> Cost
@@ -95,4 +95,3 @@ divCost iv xs div = let small_ivs = divideInterval iv div
                     in sum (zipWith (curry group_cost)
                                     (getAscendingIntervals small_ivs)
                                     point_groups)
-
