@@ -16,9 +16,9 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module MeasureToEnpTest where
-import Measure
+import qualified Measure as M ( M(M), E(L) )
 import MeasureToEnp
-import Enp
+import qualified Enp as E ( Elt (..), Measure(..) )
 import Test.HUnit
 import Data.Ratio
 import Lisp
@@ -31,16 +31,16 @@ nil = readLisp' "()"
 mtoenp1 :: Test
 mtoenp1 = TestList
            [
-            Enp.Measure (4,4) (4,60) [Enp.Div 4 [Enp.Chord 1 False n60 nil]]
-            ~=? let leaf = (L 1 False 0 n60 nil)
+            E.Measure (4,4) (4,60) [E.Div 4 [E.Chord 1 False n60 nil]]
+            ~=? let leaf = (M.L 1 False 0 n60 nil)
                 in mToEnp
                        [(0,leaf)]
-                       (M (4,4) (4,60 % 1) leaf)
-           ,Enp.Measure (1,4) (4,60) [Enp.Div 1 [Enp.Chord 1 False n60 nil]]
-            ~=? let leaf = (L (1%4) False 0 n60 nil)
+                       (M.M (4,4) (4,60 % 1) leaf)
+           ,E.Measure (1,4) (4,60) [E.Div 1 [E.Chord 1 False n60 nil]]
+            ~=? let leaf = (M.L (1%4) False 0 n60 nil)
                 in mToEnp
                        [(0,leaf)]
-                       (M (1,4) (4,60 % 1) leaf)
+                       (M.M (1,4) (4,60 % 1) leaf)
            -- ,Enp.Measure (2,4) [Enp.Div 1 [Enp.Chord 1 False],
            --                    Enp.Div 1 [Enp.Chord 1 False,Enp.Chord 1 False]]
            --  ~=? mToEnp (m (2,4) (60 % 1)

@@ -18,6 +18,7 @@
 module Main (main)
 where
 
+import Types (Time, Err, Divs, WInt)
 import Utils
 import qualified Interval as Iv
 import qualified Measure as M
@@ -25,7 +26,7 @@ import Lisp
 import qualified SimpleFormat as SF
 import qualified SimpleFormat2 as SF2
 import qualified AbstractScore as A
-import qualified Enp
+import qualified Enp as E (voice2sexp)
 import qualified Lily as L
 import AdjoinTies
 import MeasureToEnp
@@ -41,10 +42,6 @@ rationalToTime = fromRational
 
 rationalPairToTimePair :: (Rational, Rational) -> (Time, Time)
 rationalPairToTimePair (x,y) = (rationalToTime x, rationalToTime y)
-
-type Divs = [Int]
-
-type Time = Float
 
 quantifyVoice :: M.Ms -> [Divs] -> SF2.Events -> Err M.Ms
 quantifyVoice measures divs v =
@@ -115,12 +112,12 @@ getMetronomes x = case getf x (LispKeyword "METRONOMES") of
   Just s -> ensureListOfLists s
   Nothing -> Left "Could not find :metronomes"
 
-getMaxDiv :: LispVal -> Err [Int]
+getMaxDiv :: LispVal -> Err [WInt]
 getMaxDiv s =  case getf s (LispKeyword "MAX-DIV") of
   Just x  -> ensureListOfIntegers $ ensureList x
   Nothing -> Left "Could not find :max-div"
 
-getForbDivs :: LispVal -> Err [[Int]]
+getForbDivs :: LispVal -> Err [[WInt]]
 getForbDivs s =  case getf s (LispKeyword "FORBIDDEN-DIVS") of
   Just x  -> mapM ensureListOfIntegers (fromSexp (ensureList2 x))
   Nothing -> Left "Could not find :forbidden-divs"
@@ -154,7 +151,7 @@ processSimpleFormat isLily input = do
   mscore <- liftM (fmap trans) (Right sf2)
   if isLily
     then liftM (L.showLily . fmap vToLily) $ unwrapLeft mscore
-    else liftM (printSexp . fmap (Enp.voice2sexp . vToEnp)) $ unwrapLeft mscore
+    else liftM (printSexp . fmap (E.voice2sexp . vToEnp)) $ unwrapLeft mscore
 
 appendNewline :: String -> Err String
 appendNewline s = Right $ s ++ "\n"

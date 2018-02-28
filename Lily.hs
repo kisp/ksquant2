@@ -29,6 +29,8 @@ module Lily (showLily
             ,powerToSimpleDur
             )
 where
+
+import Types (WInt)
 import Data.List
 import Data.Ratio
 import qualified AbstractScore as A
@@ -52,7 +54,7 @@ data Dur = Dur SimpleDur Int
 
 type Tied = Bool
 
-type Octave = Int
+type Octave = WInt
 
 data Name = A | B | C | D | E | F | G
           deriving Show

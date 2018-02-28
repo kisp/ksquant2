@@ -25,10 +25,10 @@ module SimpleFormat (
   ,sexp2event)
 where
 
+import Types (Time)
 import Lisp
 import qualified AbstractScore as A
 
-type Time = Float
 type Notes = LispVal
 type Expressions = LispVal
 

@@ -18,7 +18,7 @@
 module MeasureToEnp(vToEnp,mToEnp)
 where
 import qualified Measure as M
-import qualified Enp as E
+import qualified Enp as E ( Elt(..), EnpDur, Measure, dur, scaleElt, makeMeasure, Measures )
 import qualified Lisp as L
 import Data.Ratio
 import Prelude hiding (id)
@@ -61,7 +61,7 @@ wrapIfNeeded :: E.Elt -> E.Elt
 wrapIfNeeded e@(E.Div _ _) = e
 wrapIfNeeded x = E.Div 1 [x]
 
-adaptForTimesig :: (E.Dur, t) -> [E.Elt] -> [E.Elt]
+adaptForTimesig :: (E.EnpDur, t) -> [E.Elt] -> [E.Elt]
 adaptForTimesig (n,_) es = let f = n `div` sum (map E.dur es)
                            in map (E.scaleElt f) es
 

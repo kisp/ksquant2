@@ -49,6 +49,8 @@ module Measure (m
                ,eid
                )
 where
+
+import Types (Timesig, Tempo, InfInt)
 import Data.Ratio
 import Utils
 import qualified AbstractScore as A
@@ -57,9 +59,6 @@ import Data.List
 import qualified Lisp as L
 import DurCalc
 
-type Timesig = (Integer,Integer)
-type Tempo = (Integer,Rational)
-
 type Score = A.Score Ms
 type Part = A.Part Ms
 type Voice = A.Voice Ms
@@ -67,9 +66,9 @@ type Voice = A.Voice Ms
 type Ms = [M]
 
 data M = M Timesig Tempo E
-       deriving (Show,Eq)
+       deriving (Show, Eq)
 
-type Label = Integer
+type Label = InfInt
 type Notes = L.LispVal
 type Expressions = L.LispVal
 

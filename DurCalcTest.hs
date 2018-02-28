@@ -19,6 +19,7 @@
 
 module DurCalcTest where
 
+import Types (WRat)
 import qualified Test.Framework.Providers.API as TF
 import Test.Framework.Providers.API(testGroup)
 import Test.Framework.Providers.HUnit(testCase)
@@ -30,7 +31,7 @@ import Data.Ratio
 import DurCalc
 import Control.Monad
 
-newtype Dur = Dur Rational
+newtype Dur = Dur WRat
     deriving (Show, Eq)
 
 -- instance Arbitrary Dur where

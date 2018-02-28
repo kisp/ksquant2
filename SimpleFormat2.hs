@@ -34,13 +34,13 @@ module SimpleFormat2 (voiceToSimpleFormat2
                      ,voiceChords)
 where
 
+import Types (Time, WRat)
 import Utils
 import qualified SimpleFormat as SF1
 import qualified AbstractScore as A
 import Interval
 import qualified Lisp as L
 
-type Time = Float
 type Start = Time
 type End = Time
 
@@ -57,8 +57,8 @@ data Event = Chord Start End Notes Expressions
            | EndMarker Start
            deriving Show
 
-type QStart = Rational
-type QEnd = Rational
+type QStart = WRat
+type QEnd = WRat
 
 data QEvent = QChord QStart QEnd Notes Expressions
            deriving Show

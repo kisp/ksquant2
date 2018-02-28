@@ -15,14 +15,17 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module AdjoinTiesTest where
+module AdjoinTiesTest
+where
+
+import Types (WRat)
 import Measure
 import Test.HUnit
 import Data.Ratio
 import Lisp
 import AdjoinTies
 
-type Dur = Ratio Integer
+type Dur = WRat
 
 n60 :: LispVal
 n60 = readLisp' "(60)"

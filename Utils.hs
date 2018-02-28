@@ -16,12 +16,12 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -- | Some utilities.
-module Utils (Err,neighbours,isForAllNeighbours
-             ,intToFloat,stickToLast,repeatList)
+module Utils (neighbours
+             ,isForAllNeighbours
+             ,intToFloat
+             ,stickToLast
+             ,repeatList)
 where
-
--- | Computation result of type 'a' or error as a String.
-type Err a = Either String a
 
 -- | Return adjacent elements as pairs.
 --

@@ -40,6 +40,8 @@ module Interval (Point
                 ,locatePoint
                 ,quantizeIv
                 ) where
+
+import Types (WInt)
 import Utils
 import Data.List (sortBy,minimumBy)
 import Data.Ord (comparing)
@@ -61,7 +63,7 @@ instance (Num t) => Interval (t,t) t where
     start (x,_) = x
     end (_,x) = x
 
-instance (Num t) => Point t t where
+instance Point t t where
     point x = x
 
 -- | Do the intervals a and b have common points?
@@ -175,8 +177,8 @@ rankedDivs iv xs divs = sortBy test (zip divs (map (divCost iv xs) divs))
   where test (_,a) (_,b) = compare a b
 
 -- | Choose the best div from divs.
-bestDiv :: Interval a Float => [Int] -> a -> AscendingPoints Float -> Int
-bestDiv divs iv xs = round (fst (head (rankedDivs iv xs (map intToFloat divs))))
+bestDiv :: Interval a Float => [WInt] -> a -> AscendingPoints Float -> WInt
+bestDiv divs iv xs = round (fst (head (rankedDivs iv xs (map fromInteger divs))))
 
 -- TODO implement this as a binary search
 locatePoint :: (Interval t a1, Show t, Ord a1, Num a, Eq t, Show a, Show a1) =>

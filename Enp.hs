@@ -25,15 +25,15 @@ module Enp (voice2sexp
            ,makeMeasure
            ,scaleElt
            ,dur
-           ,Dur)
+           ,EnpDur)
 where
+
+import Types (WInt, Tempo, Timesig)
 import Data.Either.Unwrap
 import Lisp
 import qualified AbstractScore as A
 
-type Dur = Integer
-type Timesig = (Integer,Integer)
-type Tempo = (Integer,Rational)
+type EnpDur = WInt
 
 type Score = A.Score Measures
 type Part = A.Part Measures
@@ -49,12 +49,12 @@ type Notes = LispVal
 type Expressions = LispVal
 
 -- |Tied here has ENP semantics, which is a tie "going to the left".
-data Elt = Chord Dur Tied Notes Expressions
-           | Rest Dur
-           | Div Dur [Elt]
+data Elt = Chord EnpDur Tied Notes Expressions
+           | Rest EnpDur
+           | Div EnpDur [Elt]
            deriving (Show, Eq)
 
-dur :: Elt -> Dur
+dur :: Elt -> EnpDur
 dur (Chord d _ _ _) = d
 dur (Rest d) = d
 dur (Div d _) = d

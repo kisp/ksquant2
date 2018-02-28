@@ -1,0 +1,61 @@
+type Label = InfInt
+type Err a = Either String a
+
+type InfInt = Integer
+type WInt = Integer
+type WRat = Rational
+
+
+type Time = Float
+
+
+type Dur = Dur WRat (newtype)
+type Dur = WRat
+type EnpDur = WInt
+
+
+
+
+
+type Start = Time
+type End = Time
+
+type QStart = WRat
+type QEnd = WRat
+
+
+
+
+
+
+
+type Score = A.Score Events
+type Score = A.Score Measures
+type Score = A.Score Ms
+
+type Part = A.Part Events
+type Part = A.Part Measures
+type Part = A.Part Ms
+
+type Voice = A.Voice Events
+type Voice = A.Voice Measures
+type Voice = A.Voice Ms
+
+type Measures = [Measure]
+type Ms = [M]
+
+type Notes = LispVal
+type Notes = L.LispVal
+
+type Expressions = LispVal
+type Expressions = L.LispVal
+
+type Events = [Event]
+
+
+
+type Divs = [WInt]
+type Timesig = (WInt, WInt)
+type Tied = Bool
+type Octave = WInt
+type Tempo = (WInt, Rational)
