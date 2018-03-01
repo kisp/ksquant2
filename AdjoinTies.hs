@@ -17,9 +17,9 @@
 
 module AdjoinTies(adjoinTies)
 where
-import Measure
-import Data.Ratio
-import Lisp
+import Measure ( M(M), E(L,D) )
+import Data.Ratio ((%))
+import Lisp ( LispVal, readLisp' )
 --import Debug.Trace
 
 n60 :: LispVal
