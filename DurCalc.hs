@@ -23,7 +23,7 @@ module DurCalc(notableDur
               ,isExp2)
 where
 
-import Data.Ratio
+import Data.Ratio ( numerator, denominator, (%) )
 
 -- | Compute @2^n@ for any integer @n@.
 exp2 :: Integer -> Rational

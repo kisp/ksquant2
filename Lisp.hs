@@ -20,7 +20,7 @@
 
 module Lisp (Sexp, toSexp, fromSexp, printSexp, LispVal(..), mapcar', mapcarUpToPlist, readLisp, readLisp', cons,
              clNull, car, cdr, getf, getf', atom, fromLispList, parseLisp, printLisp, propertyListP,
-             lispEscapeString)
+             lispEscapeString, nil, n60)
 where
 import Text.ParserCombinators.Parsec
 import Data.Char (toUpper)
@@ -284,3 +284,8 @@ instance Sexp [LispVal] where
   toSexp = LispList
   fromSexp (LispList xs) = xs
   fromSexp _ = error "fromSexp: not (LispList xs)"
+
+n60 :: LispVal
+n60 = readLisp' "(60)"
+nil :: LispVal
+nil = readLisp' "()"

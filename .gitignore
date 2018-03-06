@@ -26,3 +26,4 @@ cabal.sandbox.config
 *.ctb
 bin
 tmp
+tmp_xxx

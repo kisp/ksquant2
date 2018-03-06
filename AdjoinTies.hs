@@ -19,13 +19,8 @@ module AdjoinTies(adjoinTies)
 where
 import Measure ( M(M), E(L,D) )
 import Data.Ratio ((%))
-import Lisp ( LispVal, readLisp' )
+import Lisp ( nil, n60 )
 --import Debug.Trace
-
-n60 :: LispVal
-n60 = readLisp' "(60)"
-nil :: LispVal
-nil = readLisp' "()"
 
 adjoinTies' :: M -> M
 adjoinTies' x =

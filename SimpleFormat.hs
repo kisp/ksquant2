@@ -23,6 +23,7 @@ module SimpleFormat (
   ,Events
   ,eventStart
   ,sexp2event)
+
 where
 
 import Types (Time)
@@ -46,9 +47,6 @@ data Event = Chord Time Notes Expressions
 eventStart :: Event -> Time
 eventStart (Chord x _ _) = x
 eventStart (Rest x) = x
-
-n60 :: LispVal
-n60 = readLisp' "(60)"
 
 sexp2event :: LispVal -> Event
 sexp2event s = sexp2event' s False

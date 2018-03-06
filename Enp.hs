@@ -29,20 +29,20 @@ module Enp (voice2sexp
 where
 
 import Types (WInt, Tempo, Timesig)
-import Data.Either.Unwrap
-import Lisp
+import Data.Either.Unwrap (fromRight)
+import Lisp (LispVal(LispList, LispKeyword, LispInteger, LispFloat), clNull, parseLisp, cons )
 import qualified AbstractScore as A
 
 type EnpDur = WInt
+
+data Measure = Measure Timesig Tempo [Elt]
+           deriving (Show, Eq)
 
 type Score = A.Score Measures
 type Part = A.Part Measures
 type Voice = A.Voice Measures
 
 type Measures = [Measure]
-
-data Measure = Measure Timesig Tempo [Elt]
-           deriving (Show, Eq)
 
 type Tied = Bool
 type Notes = LispVal

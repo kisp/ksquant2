@@ -42,7 +42,7 @@ where
 
 import Types (Time)
 
-import Utils
+import Utils (isForAllNeighbours, neighbours)
 
 -- http://www.haskell.org/haskellwiki/Functional_dependencies
 -- This tells Haskell that b is uniquely determined from a.

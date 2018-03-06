@@ -23,10 +23,12 @@ module Types(
   , Div
   , DivChoices
   , DivChoicesSeq
+  , BestDivsSeq
   , Err
   , Timesig
   , Tempo
   , WRat
+  , QuantGrid
   )
 where
 
@@ -45,6 +47,9 @@ type TimeInterval = (Time, Time)
 type Div = WInt
 type DivChoices = [Div]
 type DivChoicesSeq = [DivChoices]
+type BestDivsSeq = [Div]
+
+type QuantGrid = [(WRat, WRat)]
 
 -- | Computation result of type 'a' or error as a String.
 type Err a = Either String a

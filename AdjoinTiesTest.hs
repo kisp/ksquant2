@@ -27,11 +27,6 @@ import AdjoinTies
 
 type Dur = WRat
 
-n60 :: LispVal
-n60 = readLisp' "(60)"
-nil :: LispVal
-nil = readLisp' "()"
-
 q, e, s :: Dur
 q = 1 % 4
 e = 1 % 8

@@ -25,13 +25,14 @@ module SimpleFormat2 (voiceToSimpleFormat2
                      ,Event
                      ,Events
                      ,QEvent
+                     ,QEvents
                      ,sampleVoice
                      ,voiceEnd
                      ,scoreEnd
                      ,qeventFromEvent
                      ,qeventNotes
                      ,qeventExpressions
-                     ,voiceChords)
+                     ,withoutEndMarker)
 where
 
 import Types (Time, WRat)
@@ -62,6 +63,8 @@ type QEnd = WRat
 
 data QEvent = QChord QStart QEnd Notes Expressions
            deriving Show
+
+type QEvents = [QEvent]
 
 qeventFromEvent :: (Interval a QStart) => a -> Event -> QEvent
 qeventFromEvent quantized_iv (Chord _ _ n e) =
@@ -95,9 +98,8 @@ voiceToSimpleFormat2 v =
 voiceEnd :: Voice -> End
 voiceEnd v = (start . last) $ A.voiceItems v
 
-
-voiceChords :: [a] -> [a]
-voiceChords = init
+withoutEndMarker :: [a] -> [a]
+withoutEndMarker = init -- butlast
 
 scoreEnd :: Score -> End
 scoreEnd s = maximum (map voiceEnd (concatMap A.partVoices (A.scoreParts s)))

@@ -15,12 +15,17 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+{-# LANGUAGE FlexibleContexts #-}
+
 module Main (main)
 where
 
-import Types (Time, Err, DivChoicesSeq, WInt)
-import Utils
-import qualified Interval as Iv
+import Types (Time, Err, DivChoicesSeq, WInt, BestDivsSeq, QuantGrid)
+import Utils (stickToLast, repeatList)
+import qualified Interval as Iv (ascendingIntervals
+                                , ascendingIntervals2points
+                                , groupPointsByIntervalls
+                                , getAscendingIntervals)
 import qualified Measure as M (Ms
                               , measuresLeafIntervals
                               , measuresDivideLeafs
@@ -32,24 +37,43 @@ import qualified Measure as M (Ms
                               , measuresUntilTime
                               , measureNumLeaf
                               , Score)
-import Lisp
-import qualified SimpleFormat as SF
-import qualified SimpleFormat2 as SF2
-import qualified AbstractScore as A
+import Lisp (LispVal(LispList, LispInteger, LispKeyword)
+            , atom
+            , fromLispList
+            , getf
+            , fromSexp
+            , mapcar'
+            , printSexp
+            , parseLisp)
+import qualified SimpleFormat as SF (Score, sexp2event)
+import qualified SimpleFormat2 as SF2 (Events
+                                      , qeventFromEvent
+                                      , qeventNotes
+                                      , qeventExpressions
+                                      , Score
+                                      , scoreEnd
+                                      , voiceToSimpleFormat2
+                                      , withoutEndMarker
+                                      , QEvents)
+import qualified AbstractScore as A (Score)
 import qualified Enp as E (voice2sexp)
 import qualified Lily as L (showLily)
 import qualified Quantize as Qu (bestDiv, quantizeIv)
-import AdjoinTies
-import MeasureToEnp
-import MeasureToLily
+import AdjoinTies (adjoinTies)
+import MeasureToEnp (vToEnp)
+import MeasureToLily (vToLily)
 import Data.List ((\\))
-import Data.Maybe
-import Data.Either.Unwrap
-import Control.Monad
-import System.IO
-import System.Exit
-import System.Environment
-import System.Console.GetOpt
+import Data.Maybe (fromMaybe)
+import Data.Either.Unwrap (fromRight)
+import Control.Monad (liftM, liftM2, unless)
+import System.IO (hPutStrLn, hPutStr, stderr)
+import System.Exit (exitWith, ExitCode(ExitSuccess, ExitFailure))
+import System.Environment (getArgs)
+import System.Console.GetOpt (OptDescr(Option)
+                             , ArgDescr(ReqArg, NoArg)
+                             , usageInfo
+                             , getOpt
+                             , ArgOrder(RequireOrder))
 
 rationalToTime :: Rational -> Time
 rationalToTime = fromRational
@@ -57,32 +81,55 @@ rationalToTime = fromRational
 rationalPairToTimePair :: (Rational, Rational) -> (Time, Time)
 rationalPairToTimePair (x,y) = (rationalToTime x, rationalToTime y)
 
-quantifyVoice :: M.Ms -> DivChoicesSeq -> SF2.Events -> Err M.Ms
+computeBestDivs :: M.Ms -> DivChoicesSeq -> SF2.Events -> BestDivsSeq
+computeBestDivs measures divChoicesSeq input =
+  let
+    input' = Iv.ascendingIntervals input
+    beats_intervals = Iv.ascendingIntervals
+                      (map rationalPairToTimePair
+                        (M.measuresLeafIntervals measures))
+    beats_intervals' = (Iv.getAscendingIntervals beats_intervals)
+    points = Iv.ascendingIntervals2points input'
+    groups = Iv.groupPointsByIntervalls beats_intervals points
+  in zipWith3 Qu.bestDiv
+     divChoicesSeq
+     beats_intervals'
+     groups
+
+computeQEvents :: QuantGrid -> SF2.Events -> SF2.QEvents
+computeQEvents quant_grid input =
+  let
+    quant_grid' = Iv.ascendingIntervals (map rationalPairToTimePair quant_grid)
+    quant_grid_asc = (Iv.ascendingIntervals quant_grid)
+  in
+    map (Qu.quantizeIv SF2.qeventFromEvent quant_grid_asc quant_grid') input
+
+quantifyVoice :: M.Ms -> DivChoicesSeq -> SF2.Events -> M.Ms
 quantifyVoice measures divChoicesSeq voice =
-    let input = SF2.voiceChords voice
-        input' = Iv.ascendingIntervals input
-        beats_intervals = Iv.ascendingIntervals
-                          (map rationalPairToTimePair
-                                   (M.measuresLeafIntervals measures))
-        points = Iv.ascendingIntervals2points input'
-        groups = Iv.groupPointsByIntervalls beats_intervals points
-        bestDivs = zipWith3 Qu.bestDiv
-                     divChoicesSeq
-                     (Iv.getAscendingIntervals beats_intervals)
-                     groups
+  let
+    getNotes (M.L dur tie label _ _) qevent =
+      (M.L dur tie label (SF2.qeventNotes qevent) (SF2.qeventExpressions qevent))
+    getNotes (M.R _ _) _ = error "getNotes: R"
+    getNotes (M.D _  _ _) _ = error "getNotes: D"
+
+    measuresTieOrRest' a b m = M.measuresTieOrRest m a b
+
+    measuresTransformLeafs' a b c m = M.measuresTransformLeafs a m b c
+  in
+    let input = SF2.withoutEndMarker voice
+        bestDivs = computeBestDivs measures divChoicesSeq input
         measures' = M.measuresDivideLeafs measures (map toInteger bestDivs)
         quant_grid = M.measuresLeafIntervals measures'
-        quant_grid' = Iv.ascendingIntervals (map rationalPairToTimePair quant_grid)
-        quant_grid_asc = (Iv.ascendingIntervals quant_grid)
-        qevents = map (Qu.quantizeIv SF2.qeventFromEvent quant_grid_asc quant_grid') input
-        measures'' = M.measuresTieOrRest measures' qevents quant_grid
-        getNotes (M.L dur tie label _ _) qevent =
-            (M.L dur tie label (SF2.qeventNotes qevent) (SF2.qeventExpressions qevent))
-        getNotes (M.R _ _) _ = error "getNotes: R"
-        getNotes (M.D _  _ _) _ = error "getNotes: D"
-        measures''' = M.measuresTransformLeafs getNotes measures'' qevents quant_grid
-        measures'''' = map adjoinTies measures'''
-    in Right measures''''
+        qevents = computeQEvents quant_grid input
+        transformMeasures =
+          (map adjoinTies .
+           measuresTransformLeafs' getNotes qevents quant_grid .
+           measuresTieOrRest' qevents quant_grid)
+    in transformMeasures measures'
+        
+quantifyVoiceOrErr :: M.Ms -> DivChoicesSeq -> SF2.Events -> Err M.Ms
+quantifyVoiceOrErr measures divChoicesSeq voice =
+  Right (quantifyVoice measures divChoicesSeq voice)
 
 buildMeasureFromLisp :: LispVal -> LispVal -> M.M
 buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])
@@ -139,7 +186,27 @@ getForbDivs s =  case getf s (LispKeyword "FORBIDDEN-DIVS") of
 measuresUntilTime :: Time -> M.Ms -> Err M.Ms
 measuresUntilTime a b = Right $ M.measuresUntilTime b a
 
-mkTrans :: LispVal -> SF2.Score -> Err (SF2.Events -> Err M.Ms)
+getSimple :: LispVal -> Err LispVal
+getSimple x = fromMaybe (Left "Could not find :simple") (liftM Right (getf x (LispKeyword "SIMPLE")))
+
+unwrapLeft :: A.Score (Err M.Ms) -> Err M.Score
+unwrapLeft = Right . fmap fromRight
+
+scoreToLily :: M.Score -> String
+scoreToLily = L.showLily . fmap vToLily
+
+scoreToEnp :: M.Score -> String
+scoreToEnp = printSexp . fmap (E.voice2sexp . vToEnp)
+
+scoreToOutputFormat :: Options -> Err (M.Score -> String)
+scoreToOutputFormat
+  Options { optOutputFormat = "ly" } = Right (appendNewline . scoreToLily)
+scoreToOutputFormat
+  Options { optOutputFormat = "enp" } = Right (appendNewline . scoreToEnp)
+scoreToOutputFormat
+  Options { optOutputFormat = x } = Left $ "unknown output format: " ++ x
+
+mkTrans :: LispVal -> SF2.Score -> Err (SF2.Score -> A.Score (Err M.Ms))
 mkTrans input sf2 = do
   let sf2end = SF2.scoreEnd sf2
   tsmetro <- liftM2 (,) (getTimeSignatures input) (getMetronomes input)
@@ -150,37 +217,40 @@ mkTrans input sf2 = do
              (stickToLast maxdiv)
              (stickToLast forbid)
   let beatDivs = repeatList divs (map M.measureNumLeaf measures)
-  return $ quantifyVoice measures beatDivs
+  let trans = quantifyVoiceOrErr measures beatDivs
+  return $ fmap trans
 
-getSimple :: LispVal -> Err LispVal
-getSimple x = fromMaybe (Left "Could not find :simple") (liftM Right (getf x (LispKeyword "SIMPLE")))
-
-unwrapLeft :: A.Score (Err M.Ms) -> Err M.Score
-unwrapLeft = Right . fmap fromRight
-
-processSimpleFormat ::  Options -> LispVal -> Err String
-processSimpleFormat opts input =
+simple2sf2_score ::  LispVal -> SF2.Score
+simple2sf2_score simple =
   let
-    Options { optOutputFormat = outputFormat } = opts
-    isLily = (outputFormat == "ly")
-  in do
-    sf2 <- liftM (fmap (SF2.voiceToSimpleFormat2 . mapcar' SF.sexp2event) . fromSexp) . getSimple $ input
-    trans <- mkTrans input sf2
-    mscore <- liftM (fmap trans) (Right sf2)
-    if isLily
-      then liftM (L.showLily . fmap vToLily) $ unwrapLeft mscore
-      else liftM (printSexp . fmap (E.voice2sexp . vToEnp)) $ unwrapLeft mscore
+    lispVal2Score :: LispVal -> A.Score LispVal
+    lispVal2Score = fromSexp
+    score = lispVal2Score simple :: A.Score LispVal
+    sf_score = fmap (mapcar' SF.sexp2event) score :: SF.Score
+    sf2_score = fmap SF2.voiceToSimpleFormat2 sf_score :: SF2.Score
+  in sf2_score
 
-appendNewline :: String -> Err String
-appendNewline s = Right $ s ++ "\n"
+processParsedInput ::  Options -> LispVal -> Err String
+processParsedInput opts input =
+  do
+    simple <- getSimple input :: Err LispVal
+    let sf2_score = simple2sf2_score simple :: SF2.Score
 
-processParsedInput :: Options -> [LispVal] -> Err String
-processParsedInput opts [s] = processSimpleFormat opts s >>= appendNewline
-processParsedInput opts [s,_] = processSimpleFormat opts s >>= appendNewline
-processParsedInput _ _ = Left "processParsedInput called on an unexpected number of forms"
+    trans <- mkTrans input sf2_score :: Err (SF2.Score -> A.Score (Err M.Ms))
+    let mscore = (trans sf2_score :: A.Score (Err M.Ms))
+
+    mscore' <- unwrapLeft mscore
+    scoreFormatter <- scoreToOutputFormat opts
+    return $ scoreFormatter mscore'
 
 processInput :: Options -> String -> Err String
-processInput opts input = parseLisp input >>= processParsedInput opts
+processInput opts input = do
+  forms <- parseLisp input
+  let (first_form:_) = forms
+  processParsedInput opts first_form
+
+appendNewline :: String -> String
+appendNewline s = s ++ "\n"
 
 data Options = Options  { optVerbose        :: Bool
                         , optInputFormat    :: String

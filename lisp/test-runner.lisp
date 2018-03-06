@@ -26,12 +26,12 @@
     (values (read in) (read in))))
 
 (defun run-test (data expected)
-  (with-open-file (out "tmp" :direction :output :if-exists :supersede)
+  (with-open-file (out "tmp_xxx" :direction :output :if-exists :supersede)
     ;; (with-standard-io-syntax
     ;;   (write data :stream out))
     (prin1 data out))
   (let ((process
-          (run-shell-command "./dist/build/ksquant2/ksquant2 <tmp >out")))
+          (run-shell-command "./dist/build/ksquant2/ksquant2 <tmp_xxx >out")))
     (if (not process)
         (let ((result
                 (with-open-file (in "out") (read in))))
