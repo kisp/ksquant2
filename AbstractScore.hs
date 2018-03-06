@@ -16,11 +16,19 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module AbstractScore
-    (Score(..)
-    ,Part(..)
-    ,Voice(..))
+    (Score(scoreParts)
+    ,Part(partVoices)
+    ,Voice(Voice, voiceItems))
+
 where
-import Lisp
+
+import Lisp (Sexp
+            , toSexp
+            , fromSexp
+            , LispVal(LispList)
+            , mapcar'
+            , mapcarUpToPlist
+            , fromLispList)
 
 data Score a = Score { scoreParts :: [Part a] }
 data Part a = Part { partVoices :: [Voice a], partAttributes :: LispVal }
