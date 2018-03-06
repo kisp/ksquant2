@@ -30,10 +30,18 @@ module Lily (showLily
             )
 where
 
-import Types (WInt)
-import Data.List
-import Data.Ratio
-import qualified AbstractScore as A
+import Types (WInt, WRat)
+import Data.Ratio ((%), denominator)
+import Data.List (intercalate)
+import qualified AbstractScore as A (Score
+                                    , Part
+                                    , Voice
+                                    , scoreParts
+                                    , partVoices
+                                    , voiceItems)
+
+data Measure = Measure Int Int [Elt]
+               deriving Show
 
 type Score = A.Score Measures
 type Part = A.Part Measures
@@ -70,10 +78,7 @@ data Elt = Chord Dur [Pitch] Tied
          | Times Int Int [Elt]
            deriving Show
 
-data Measure = Measure Int Int [Elt]
-               deriving Show
-
-simpleDurToRatio :: SimpleDur -> Ratio Int
+simpleDurToRatio :: SimpleDur -> WRat
 simpleDurToRatio x =
     case x of
       D1 -> 1 % 1
@@ -90,6 +95,7 @@ pitchToLily (Pitch B Natural 3) = "b"
 pitchToLily (Pitch C Natural 4) = "c'"
 pitchToLily (Pitch C Sharp 4) = "cis'"
 pitchToLily (Pitch D Natural 4) = "d'"
+pitchToLily (Pitch E Natural 4) = "e'"
 pitchToLily (Pitch F Natural 4) = "f'"
 pitchToLily p = error $ "pitchToLily not implemented: " ++ show p
 

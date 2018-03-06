@@ -37,7 +37,7 @@ import qualified SimpleFormat as SF
 import qualified SimpleFormat2 as SF2
 import qualified AbstractScore as A
 import qualified Enp as E (voice2sexp)
-import qualified Lily as L
+import qualified Lily as L (showLily)
 import qualified Quantize as Qu (bestDiv, quantizeIv)
 import AdjoinTies
 import MeasureToEnp

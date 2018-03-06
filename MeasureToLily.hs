@@ -17,10 +17,19 @@
 
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
-module MeasureToLily
-       (mToLily,vToLily) where
-import qualified Measure as M
-import qualified Lily as L
+module MeasureToLily (mToLily, vToLily)
+
+where
+
+import qualified Measure as M (Ms, M(M), E(L,R,D))
+import qualified Lily as L (Dur(Dur)
+                           , Pitch(Pitch)
+                           , Name(A, B, C, D, E, F, G)
+                           , Accidental(Natural, Sharp, Flat)
+                           , powerToSimpleDur
+                           , Elt(Chord, Rest, Times)
+                           , Measure(Measure)
+                           , Measures)
 import Data.Ratio
 import Lisp
 
@@ -34,6 +43,7 @@ midiToLily 59 = L.Pitch L.B L.Natural 3
 midiToLily 60 = L.Pitch L.C L.Natural 4
 midiToLily 61 = L.Pitch L.C L.Sharp 4
 midiToLily 62 = L.Pitch L.D L.Natural 4
+midiToLily 64 = L.Pitch L.E L.Natural 4
 midiToLily 65 = L.Pitch L.F L.Natural 4
 midiToLily x = error $ "midiToLily not implemented: " ++ show x
 
