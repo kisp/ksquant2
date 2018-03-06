@@ -10,7 +10,8 @@ sudo: required
 
 install:
   - sudo apt-get update
-  - sudo apt-get install clisp
+  - sudo apt-get install clisp ruby bundler
+  - bundle
   - cabal install --only-dependencies --enable-tests
 
 script:
@@ -18,3 +19,7 @@ script:
   - cabal build
   - cabal test
   - clisp -norc lisp/test-runner.lisp
+  - rm -f tmp
+  - mkdir bin tmp
+  - ln -s ../dist/build/ksquant2/ksquant2 bin/ksquant2
+  - cucumber

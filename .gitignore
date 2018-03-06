@@ -24,3 +24,5 @@ main-coverage
 .cabal-sandbox
 cabal.sandbox.config
 *.ctb
+bin
+tmp
