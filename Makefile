@@ -10,7 +10,7 @@
 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
@@ -18,28 +18,28 @@
 
 .PHONY: all
 all:
-        cabal clean
-        cabal configure --enable-tests
-        cabal build
-        rm -f tests.tix
-        dist/build/tests/tests
-        hlint *.hs
+	cabal clean
+	cabal configure --enable-tests
+	cabal build
+	rm -f tests.tix
+	dist/build/tests/tests
+	hlint *.hs
 
 .PHONY: shell-tests
 shell-tests:
-        ghc -fhpc --make Main.hs -o main
-        rm -f main.tix
-        clisp -norc lisp/test-runner.lisp
+	ghc -fhpc --make Main.hs -o main
+	rm -f main.tix
+	clisp -norc lisp/test-runner.lisp
 
 .PHONY: coverage
 coverage: all shell-tests
-        hpc sum --union main.tix tests.tix --output=total.tix
-        hpc markup total.tix
+	hpc sum --union main.tix tests.tix --output=total.tix
+	hpc markup total.tix
 
 .PHONY: clean
 clean:
-        git clean -f -x -d
+	git clean -f -x -d
 
 .PHONY: whitespace-clean
 whitespace-clean:
-        git ls-files | xargs file | grep text | sed 's/^\(.*\):.*/\1/g' | xargs ./tools/whitespace-cleanup.el
+	git ls-files | xargs file | grep text | sed 's/^\(.*\):.*/\1/g' | xargs ./tools/whitespace-cleanup.el

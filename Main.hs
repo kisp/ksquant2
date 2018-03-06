@@ -126,7 +126,7 @@ quantifyVoice measures divChoicesSeq voice =
            measuresTransformLeafs' getNotes qevents quant_grid .
            measuresTieOrRest' qevents quant_grid)
     in transformMeasures measures'
-        
+
 quantifyVoiceOrErr :: M.Ms -> DivChoicesSeq -> SF2.Events -> Err M.Ms
 quantifyVoiceOrErr measures divChoicesSeq voice =
   Right (quantifyVoice measures divChoicesSeq voice)
