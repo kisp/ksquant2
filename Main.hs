@@ -46,7 +46,10 @@ import Data.List ((\\))
 import Data.Maybe
 import Data.Either.Unwrap
 import Control.Monad
+import System.IO
+import System.Exit
 import System.Environment
+import System.Console.GetOpt
 
 rationalToTime :: Rational -> Time
 rationalToTime = fromRational
@@ -155,40 +158,107 @@ getSimple x = fromMaybe (Left "Could not find :simple") (liftM Right (getf x (Li
 unwrapLeft :: A.Score (Err M.Ms) -> Err M.Score
 unwrapLeft = Right . fmap fromRight
 
-processSimpleFormat ::  Bool -> LispVal -> Err String
-processSimpleFormat isLily input = do
-  sf2 <- liftM (fmap (SF2.voiceToSimpleFormat2 . mapcar' SF.sexp2event) . fromSexp) . getSimple $ input
-  trans <- mkTrans input sf2
-  mscore <- liftM (fmap trans) (Right sf2)
-  if isLily
-    then liftM (L.showLily . fmap vToLily) $ unwrapLeft mscore
-    else liftM (printSexp . fmap (E.voice2sexp . vToEnp)) $ unwrapLeft mscore
+processSimpleFormat ::  Options -> LispVal -> Err String
+processSimpleFormat opts input =
+  let
+    Options { optOutputFormat = outputFormat } = opts
+    isLily = (outputFormat == "ly")
+  in do
+    sf2 <- liftM (fmap (SF2.voiceToSimpleFormat2 . mapcar' SF.sexp2event) . fromSexp) . getSimple $ input
+    trans <- mkTrans input sf2
+    mscore <- liftM (fmap trans) (Right sf2)
+    if isLily
+      then liftM (L.showLily . fmap vToLily) $ unwrapLeft mscore
+      else liftM (printSexp . fmap (E.voice2sexp . vToEnp)) $ unwrapLeft mscore
 
 appendNewline :: String -> Err String
 appendNewline s = Right $ s ++ "\n"
 
-processParsedInput :: [LispVal] -> Err String
-processParsedInput [s] = processSimpleFormat False s >>= appendNewline
-processParsedInput [s,_] = processSimpleFormat False s >>= appendNewline
-processParsedInput _ = Left "processParsedInput called on an unexpected number of forms"
+processParsedInput :: Options -> [LispVal] -> Err String
+processParsedInput opts [s] = processSimpleFormat opts s >>= appendNewline
+processParsedInput opts [s,_] = processSimpleFormat opts s >>= appendNewline
+processParsedInput _ _ = Left "processParsedInput called on an unexpected number of forms"
 
-processInput :: String -> Err String
-processInput input = parseLisp input >>= processParsedInput
+processInput :: Options -> String -> Err String
+processInput opts input = parseLisp input >>= processParsedInput opts
+
+data Options = Options  { optVerbose        :: Bool
+                        , optInputFormat    :: String
+                        , optOutputFormat   :: String
+                        }
+
+startOptions :: Options
+startOptions = Options  { optVerbose        = False
+                        , optInputFormat    = "sf"
+                        , optOutputFormat   = "enp"
+                        }
+
+options :: [ OptDescr (Options -> IO Options) ]
+options =
+    [ Option "r" ["read", "from"]
+        (ReqArg
+            (\arg opt -> return opt { optInputFormat = arg })
+            "FORMAT")
+        "Input format"
+
+    , Option "w" ["write", "to"]
+        (ReqArg
+            (\arg opt -> return opt { optOutputFormat = arg })
+            "FORMAT")
+        "Output format"
+
+    , Option "v" ["verbose"]
+        (NoArg
+            (\opt -> return opt { optVerbose = True }))
+        "Enable verbose messages"
+
+    , Option "V" ["version"]
+        (NoArg
+            (\_ -> do
+                hPutStrLn stderr "KSQuant2 0.01"
+                exitWith ExitSuccess))
+        "Print version"
+
+    , Option "h" ["help"]
+        (NoArg
+            (\_ -> do
+                hPutStrLn stderr (usageInfo usageHeader options)
+                exitWith ExitSuccess))
+        "Show help"
+    ]
+
+usageHeader :: String
+usageHeader = "Usage: ksquant2 [OPTIONS]"
+
+handleInvalidOptions :: [String] -> IO ()
+handleInvalidOptions errors = do
+  hPutStrLn stderr $ concat errors
+  hPutStr stderr $ usageInfo usageHeader options
+  exitWith $ ExitFailure 1
 
 main :: IO ()
 main = do
   args <- getArgs
-  putOutput args . processInput =<< getInput args
-  where
-    getInput :: [FilePath] -> IO String
-    getInput [] = getContents
-    getInput [i] = readFile i
-    getInput [i,_] = readFile i
-    getInput args = error $ "getInput with args " ++ show args ++ "?"
 
-    putOutput :: [FilePath] -> Either String String -> IO ()
-    putOutput [] (Right s) = putStrLn s
-    putOutput [_] (Right s) = putStrLn s
-    putOutput [_,o] (Right s) = writeFile o s
-    putOutput args (Right _) = error $ "putOutput with args " ++ show args ++ "?"
-    putOutput _ (Left err) = error err
+  let (actions, nonOptions, errors) = getOpt RequireOrder options args
+
+  unless (errors == [] && (length nonOptions) <= 2) (handleInvalidOptions errors)
+
+  opts <- foldl (>>=) (return startOptions) actions
+
+  let (nonOptions', inputHandler) = getInputHandler nonOptions
+  let outputHandler = getOutputHandler nonOptions'
+
+  outputHandler . processInput opts =<< inputHandler
+
+  where
+    getInputHandler :: [String] -> ([String], IO String)
+    getInputHandler [] = ([], getContents)
+    getInputHandler ("-":r) = (r, getContents)
+    getInputHandler (i:r) = (r, readFile i)
+
+    getOutputHandler :: [String] -> Either String String -> IO ()
+    getOutputHandler [] (Right s) = putStrLn s
+    getOutputHandler [o] (Right s) = writeFile o s
+    getOutputHandler args (Right _) = error $ "getOutputHandler with args " ++ show args ++ "?"
+    getOutputHandler _ (Left err) = error err
