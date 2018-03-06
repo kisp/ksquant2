@@ -94,14 +94,14 @@ ensureListOfLists :: LispVal -> Err LispVal
 ensureListOfLists (LispList []) = Left "ensureListOfLists: empty list"
 ensureListOfLists (LispList xs@(x:_)) | atom x = Right $ LispList [LispList xs]
                                       | otherwise = Right $ LispList xs
-ensureListOfLists _ = Left "ensureListOfLists"
+ensureListOfLists x = Left $ "ensureListOfLists: not a list: " ++ (show x)
 
 ensureListOfIntegers :: Num a => LispVal -> Err [a]
 ensureListOfIntegers (LispList xs) =
     mapM ensureInt xs
     where ensureInt (LispInteger x) = Right $ fromInteger x
           ensureInt v = Left $ "ensureInt: " ++ (show v)
-ensureListOfIntegers _ = Left "ensureListOfIntegers"
+ensureListOfIntegers x = Left $ "ensureListOfIntegers: " ++ (show x)
 
 ensureList :: LispVal -> LispVal
 ensureList x@(LispList _) = x

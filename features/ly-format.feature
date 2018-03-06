@@ -1,4 +1,5 @@
 Feature: ly format
+
   As a user of ksquant2
   I want to be able to output scores in ly format
   So that I can process them with LilyPond
