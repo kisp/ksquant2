@@ -1,0 +1,34 @@
+diff --git a/Main.hs b/Main.hs
+index 65599cc..c13e14a 100644
+--- a/Main.hs
++++ b/Main.hs
+@@ -15,7 +15,7 @@
+ -- You should have received a copy of the GNU General Public License
+ -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+-module Main (main)
++module Main
+ where
+ 
+ import Types (Time, Err, DivChoicesSeq, WInt)
+diff --git a/ksquant2.cabal b/ksquant2.cabal
+index 4ac7cba..434aff1 100644
+--- a/ksquant2.cabal
++++ b/ksquant2.cabal
+@@ -28,14 +28,14 @@ Cabal-Version:       >=1.2
+ Executable ksquant2
+   Main-is:           Main.hs
+   Build-Depends:     base, filepath, directory, process, parsec, either-unwrap
+-  ghc-options:       -Wall
++  ghc-options:       -Wall -fhpc
+ 
+ test-suite tests
+   type:           exitcode-stdio-1.0
+   main-is:        Test.hs
+ 
+   ghc-options:
+-    -Wall -main-is Test
++    -Wall -fhpc -main-is Test
+ 
+   Build-Depends:  HUnit, QuickCheck, test-framework, test-framework-hunit,
+                   test-framework-quickcheck2
