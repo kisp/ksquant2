@@ -179,12 +179,16 @@ main :: IO ()
 main = do
   args <- getArgs
   putOutput args . processInput =<< getInput args
-  where getInput [] = getContents
-        getInput [i] = readFile i
-        getInput [i,_] = readFile i
-        getInput args = error $ "getInput with args " ++ show args ++ "?"
-        putOutput [] (Right s) = putStrLn s
-        putOutput [_] (Right s) = putStrLn s
-        putOutput [_,o] (Right s) = writeFile o s
-        putOutput args (Right _) = error $ "putOutput with args " ++ show args ++ "?"
-        putOutput _ (Left err) = error err
+  where
+    getInput :: [FilePath] -> IO String
+    getInput [] = getContents
+    getInput [i] = readFile i
+    getInput [i,_] = readFile i
+    getInput args = error $ "getInput with args " ++ show args ++ "?"
+
+    putOutput :: [FilePath] -> Either String String -> IO ()
+    putOutput [] (Right s) = putStrLn s
+    putOutput [_] (Right s) = putStrLn s
+    putOutput [_,o] (Right s) = writeFile o s
+    putOutput args (Right _) = error $ "putOutput with args " ++ show args ++ "?"
+    putOutput _ (Left err) = error err
