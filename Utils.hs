@@ -19,8 +19,12 @@
 module Utils (neighbours
              ,isForAllNeighbours
              ,stickToLast
-             ,repeatList)
+             ,repeatList
+             ,rationalPairToTimePair
+             ,appendNewline)
 where
+
+import Types (Time)
 
 -- | Return adjacent elements as pairs.
 --
@@ -56,3 +60,12 @@ repeatList (x:xs) (1:rs) = x:(repeatList xs rs)
 repeatList (x:xs) (r:rs) | r > 1 = x:(repeatList (x:xs) (r-1:rs))
                      | r < 1 = repeatList xs rs
                      | otherwise = undefined
+
+rationalToTime :: Rational -> Time
+rationalToTime = fromRational
+
+rationalPairToTimePair :: (Rational, Rational) -> (Time, Time)
+rationalPairToTimePair (x,y) = (rationalToTime x, rationalToTime y)
+
+appendNewline :: String -> String
+appendNewline s = s ++ "\n"
