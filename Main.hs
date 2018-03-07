@@ -72,19 +72,20 @@ import AdjoinTies (adjoinTies)
 import Data.List ((\\))
 
 type Parser = String -> Err ParseResult
+type Processor = ParseResult -> Err M.Score
 type Filter = M.Score -> Err M.Score
 type Formatter = M.Score -> Err String
 
 data ParseResult = SFInput LispVal
                  | DursInput LispVal
 
-process :: Options -> ParseResult -> Err M.Score
-process opts (SFInput parseResult) = do
+getProcessor :: Options -> Processor
+getProcessor opts (SFInput parseResult) = do
      simple <- getSimple parseResult :: Err LispVal
      let sf_score = simple2sf_score simple :: SF.Score
      opts' <- addInlineOptions opts parseResult
      process_sf_score opts' sf_score
-process opts (DursInput parseResult) = do
+getProcessor opts (DursInput parseResult) = do
      let simple = parseResult
      let sf_score = simple2sf_score simple
      process_sf_score opts sf_score
@@ -206,11 +207,12 @@ process_sf_score opts sf_score =
 processInput :: PureMain
 processInput opts input = do
   parse <- getParser opts
+  let process = getProcessor opts
   filt <- getFilter opts
   format <- getFormatter opts
 
   parseResult <- parse input
-  processResult <- process opts parseResult
+  processResult <- process parseResult
   filterResult <- filt processResult
   format filterResult
 
