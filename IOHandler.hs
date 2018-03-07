@@ -13,13 +13,10 @@ import System.Console.GetOpt (OptDescr(Option)
                              , getOpt
                              , ArgOrder(RequireOrder))
 
-import Types (PureMain
-             , PureMultiMain
-             , Err
-             , Options(..)
-             )
-
+import Types (Err)
+import Options (PureMain, PureMultiMain)
 import Lisp (readLisp')
+import Options (Options(..))
 
 handleIO :: PureMain -> IO ()
 handleIO = handleIO' . toMulti

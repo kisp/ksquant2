@@ -26,7 +26,6 @@ module SimpleFormat2 (voiceToSimpleFormat2
                      ,Events
                      ,QEvent
                      ,QEvents
-                     ,sampleVoice
                      ,voiceEnd
                      ,scoreEnd
                      ,qeventFromEvent
@@ -38,7 +37,7 @@ where
 import Types (Time, WRat)
 import Utils (neighbours)
 import qualified SimpleFormat as SF1 (Events, eventStart, Event(Chord))
-import qualified AbstractScore as A (Score, Part, Voice(Voice), scoreParts, partVoices, voiceItems)
+import qualified AbstractScore as A (Score, Part, Voice, scoreParts, partVoices, voiceItems)
 import Interval (Interval, start, end)
 import qualified Lisp as L (LispVal)
 
@@ -103,6 +102,3 @@ withoutEndMarker = init -- butlast
 
 scoreEnd :: Score -> End
 scoreEnd s = maximum (map voiceEnd (concatMap A.partVoices (A.scoreParts s)))
-
-sampleVoice :: Voice
-sampleVoice = A.Voice []

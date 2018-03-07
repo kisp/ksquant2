@@ -21,7 +21,8 @@ module Utils (neighbours
              ,stickToLast
              ,repeatList
              ,rationalPairToTimePair
-             ,appendNewline)
+             ,appendNewline
+             ,dxsToXs)
 where
 
 import Types (Time)
@@ -69,3 +70,6 @@ rationalPairToTimePair (x,y) = (rationalToTime x, rationalToTime y)
 
 appendNewline :: String -> String
 appendNewline s = s ++ "\n"
+
+dxsToXs :: [Rational] -> [Rational]
+dxsToXs = scanl (+) 0

@@ -18,7 +18,8 @@
 module AbstractScore
     (Score(scoreParts)
     ,Part(partVoices)
-    ,Voice(Voice, voiceItems))
+    ,Voice(voiceItems)
+    ,singleVoice2Score)
 
 where
 
@@ -28,7 +29,8 @@ import Lisp (Sexp
             , LispVal(LispList)
             , mapcar'
             , mapcarUpToPlist
-            , fromLispList)
+            , fromLispList
+            , nil)
 
 data Score a = Score { scoreParts :: [Part a] }
 data Part a = Part { partVoices :: [Voice a], partAttributes :: LispVal }
@@ -56,3 +58,9 @@ instance (Sexp a) => Sexp (Part a) where
 instance (Sexp a) => Sexp (Voice a) where
     toSexp = toSexp . voiceItems
     fromSexp = Voice . fromSexp
+
+singleVoice2Score :: a -> Score a
+singleVoice2Score a = Score { scoreParts = [p] }
+  where v = Voice a
+        p = Part { partVoices = [v]
+                 , partAttributes = nil }

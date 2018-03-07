@@ -7,11 +7,12 @@ module MainUtils (unwrapLeft
                  , scoreToEnp)
 where
 
-import Types (Err, WInt, Time, Options(..) )
+import Types (Err, WInt, Time)
+import Options (Options(..))
 import Utils (stickToLast)
 import Lisp (LispVal(..), getf, fromSexp, printSexp)
 import qualified Measure as M (measuresWithBeats, M(), Ms, measuresUntilTime, Score)
-import qualified AbstractScore as A
+import qualified AbstractScore as A (Score)
 import qualified Lily as L (showLily)
 import qualified Enp as E (voice2sexp)
 import MeasureToEnp (vToEnp)

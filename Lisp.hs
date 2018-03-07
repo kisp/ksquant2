@@ -20,8 +20,10 @@
 
 module Lisp (Sexp, toSexp, fromSexp, printSexp, LispVal(..), mapcar', mapcarUpToPlist, readLisp, readLisp', cons,
              clNull, car, cdr, getf, getf', atom, fromLispList, parseLisp, printLisp, propertyListP,
-             lispEscapeString, nil, n60)
+             lispEscapeString, nil, n60
+            ,lispToRational)
 where
+import Types (WRat)
 import Text.ParserCombinators.Parsec
 import Data.Char (toUpper)
 import Data.List (elemIndex)
@@ -289,3 +291,10 @@ n60 :: LispVal
 n60 = readLisp' "(60)"
 nil :: LispVal
 nil = readLisp' "()"
+
+lispToRational :: LispVal -> WRat
+lispToRational (LispInteger x) = fromInteger x
+lispToRational (LispRatio x) = x
+lispToRational (LispFloat x) = x
+lispToRational x = error $ "cannot convert to rational " ++ (show x)
+

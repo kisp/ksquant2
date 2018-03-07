@@ -29,13 +29,8 @@ module Types(
   , Tempo
   , WRat
   , QuantGrid
-  , Options(..)
-  , PureMain
-  , PureMultiMain
   )
 where
-
-import Lisp (LispVal)
 
 type WRat = Rational
 
@@ -58,17 +53,3 @@ type QuantGrid = [(WRat, WRat)]
 
 -- | Computation result of type 'a' or error as a String.
 type Err a = Either String a
-
-data Options = Options  { optVerbose        :: Bool
-                        , optInputFormat    :: String
-                        , optOutputFormat   :: String
-                        , optMaxDiv         :: [WInt]
-                        , optForbiddenDivs  :: [[WInt]]
-                        , optTimeSignatures :: LispVal
-                        , optMetronomes     :: LispVal
-                        }
-
-
-type PureMain = Options -> String -> Err String
-
-type PureMultiMain = Options -> [String] -> Err [String]

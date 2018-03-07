@@ -24,9 +24,8 @@ import Types (Err
              , DivChoicesSeq
              , BestDivsSeq
              , QuantGrid
-             , Options(..)
-             , PureMain
              )
+import Options(Options(..), PureMain)
 import Utils (stickToLast
              , repeatList
              , rationalPairToTimePair
@@ -56,6 +55,7 @@ import Lisp (LispVal()
             , fromSexp
             , mapcar'
             , parseLisp)
+import DursInput (dursInputToSFScore)
 import qualified SimpleFormat as SF (Score, sexp2event)
 import qualified SimpleFormat2 as SF2 (Events
                                       , qeventFromEvent
@@ -86,8 +86,7 @@ getProcessor opts (SFInput parseResult) = do
      opts' <- addInlineOptions opts parseResult
      process_sf_score opts' sf_score
 getProcessor opts (DursInput parseResult) = do
-     let simple = parseResult
-     let sf_score = simple2sf_score simple
+     let sf_score = dursInputToSFScore parseResult
      process_sf_score opts sf_score
 
 getParser :: Options -> Err Parser

@@ -31,7 +31,7 @@ where
 import Types (WInt, Tempo, Timesig)
 import Data.Either.Unwrap (fromRight)
 import Lisp (LispVal(LispList, LispKeyword, LispInteger, LispFloat), clNull, parseLisp, cons )
-import qualified AbstractScore as A
+import qualified AbstractScore as A (Score, Part, Voice)
 
 type EnpDur = WInt
 

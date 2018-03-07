@@ -33,12 +33,7 @@ where
 import Types (WInt, WRat)
 import Data.Ratio ((%), denominator)
 import Data.List (intercalate)
-import qualified AbstractScore as A (Score
-                                    , Part
-                                    , Voice
-                                    , scoreParts
-                                    , partVoices
-                                    , voiceItems)
+import qualified AbstractScore as A (Score , Part , Voice , scoreParts , partVoices , voiceItems)
 
 data Measure = Measure Int Int [Elt]
                deriving Show

@@ -53,7 +53,7 @@ where
 import Types (Timesig, Tempo, InfInt)
 import Data.Ratio
 import Utils
-import qualified AbstractScore as A
+import qualified AbstractScore as A (Score, Part, Voice)
 import qualified Interval as Iv
 import Data.List
 import qualified Lisp as L
@@ -201,9 +201,6 @@ measureDur (M timesig@(n,_) tempo _) =  (n%1) * tempoToBeatDur timesig tempo
 -- foldl            :: (a -> b -> a) -> a -> [b] -> a
 -- foldl f acc []     =  acc
 -- foldl f acc (x:xs) =  foldl f (f acc x) xs
-
-dxsToXs :: [Rational] -> [Rational]
-dxsToXs = scanl (+) 0
 
 measuresStartTimes :: Ms -> [Rational]
 measuresStartTimes ms = dxsToXs (map measureDur ms)
