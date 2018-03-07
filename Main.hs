@@ -21,12 +21,12 @@ module Main (main)
 where
 
 import Types (Err, DivChoicesSeq, BestDivsSeq, QuantGrid)
+import Options ( Options(..) )
 import Utils (stickToLast
              , repeatList
              , rationalPairToTimePair
              )
-import MainUtils ( Options(..)
-                 , scoreToOutputFormat
+import MainUtils ( scoreToOutputFormat
                  , unwrapLeft
                  , getSimple
                  , getForbDivs

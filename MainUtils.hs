@@ -2,6 +2,7 @@ module MainUtils
 where
 
 import Types (Err, WInt, Time)
+import Options ( Options(..) )
 import Utils (stickToLast, appendNewline)
 import Lisp (LispVal(..), getf, fromSexp, printSexp)
 import qualified Measure as M (measuresWithBeats, M(), Ms, measuresUntilTime, Score)
@@ -81,11 +82,6 @@ scoreToLily = L.showLily . fmap vToLily
 
 scoreToEnp :: M.Score -> String
 scoreToEnp = printSexp . fmap (E.voice2sexp . vToEnp)
-
-data Options = Options  { optVerbose        :: Bool
-                        , optInputFormat    :: String
-                        , optOutputFormat   :: String
-                        }
 
 scoreToOutputFormat :: Options -> Err (M.Score -> String)
 scoreToOutputFormat
