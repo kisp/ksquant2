@@ -27,8 +27,14 @@ module SimpleFormat (
 where
 
 import Types (Time)
-import Lisp
-import qualified AbstractScore as A
+import Lisp (LispVal(LispInteger, LispFloat, LispRatio, LispList, LispSymbol)
+            , n60
+            , readLisp'
+            , car
+            , cdr
+            , getf
+            , getf')
+import qualified AbstractScore as A (Score, Part, Voice)
 
 type Notes = LispVal
 type Expressions = LispVal

@@ -169,4 +169,3 @@ processInput opts input = do
 
 main :: IO ()
 main = handleIO processInput
-

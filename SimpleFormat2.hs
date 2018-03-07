@@ -36,11 +36,11 @@ module SimpleFormat2 (voiceToSimpleFormat2
 where
 
 import Types (Time, WRat)
-import Utils
-import qualified SimpleFormat as SF1
-import qualified AbstractScore as A
-import Interval
-import qualified Lisp as L
+import Utils (neighbours)
+import qualified SimpleFormat as SF1 (Events, eventStart, Event(Chord))
+import qualified AbstractScore as A (Score, Part, Voice(Voice), scoreParts, partVoices, voiceItems)
+import Interval (Interval, start, end)
+import qualified Lisp as L (LispVal)
 
 type Start = Time
 type End = Time
