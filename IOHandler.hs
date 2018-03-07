@@ -1,0 +1,117 @@
+module IOHandler
+
+where
+
+import System.IO (hPutStrLn, hPutStr, stderr)
+import System.Environment (getArgs)
+import System.Exit (exitWith, ExitCode(ExitSuccess, ExitFailure))
+import Control.Monad (liftM, unless)
+
+import System.Console.GetOpt (OptDescr(Option)
+                             , ArgDescr(ReqArg, NoArg)
+                             , usageInfo
+                             , getOpt
+                             , ArgOrder(RequireOrder))
+
+import Types (PureMain
+             , PureMultiMain
+             , Err
+             , Options(..)
+             )
+
+handleIO :: PureMain -> IO ()
+handleIO = handleIO' . toMulti
+
+handleIO' :: PureMultiMain -> IO ()
+handleIO' m = do
+    args <- getArgs
+
+    let (actions, nonOptions, errors) = getOpt RequireOrder options args
+
+    unless (errors == [] && (length nonOptions) <= 2) (handleInvalidOptions errors)
+
+    opts <- foldl (>>=) (return startOptions) actions
+
+    let (nonOptions', inputHandler) = getInputHandler nonOptions
+    let outputHandler = getOutputHandler nonOptions'
+
+    input <- inputHandler
+    let inputs = [input]
+    
+    let outputs = m opts inputs
+    let output = (liftM head) outputs
+    
+    outputHandler output
+
+    where
+      getInputHandler :: [String] -> ([String], IO String)
+      getInputHandler [] = ([], getContents)
+      getInputHandler ("-":r) = (r, getContents)
+      getInputHandler (i:r) = (r, readFile i)
+  
+      getOutputHandler :: [String] -> Err String -> IO ()
+      getOutputHandler [] (Right s) = putStrLn s
+      getOutputHandler [o] (Right s) = writeFile o s
+      getOutputHandler args (Right _) = error $ "getOutputHandler with args " ++ show args ++ "?"
+      getOutputHandler _ (Left err) = do
+        hPutStrLn stderr $ "ERROR: " ++ err
+        exitWith $ ExitFailure 1
+
+collectErrors :: [Err String] -> Err [String]
+collectErrors [] = error "collectErrors on []"
+collectErrors [Right x] = Right [x]
+collectErrors [Left x] = Left x
+collectErrors _ = error "collectErrors on list longer than 1"
+
+toMulti :: PureMain -> PureMultiMain
+toMulti m opts = collectErrors . map (m opts)
+
+
+startOptions :: Options
+startOptions = Options  { optVerbose        = False
+                        , optInputFormat    = "sf"
+                        , optOutputFormat   = "enp"
+                        }
+
+options :: [ OptDescr (Options -> IO Options) ]
+options =
+    [ Option "r" ["read", "from"]
+        (ReqArg
+            (\arg opt -> return opt { optInputFormat = arg })
+            "FORMAT")
+        "Input format"
+
+    , Option "w" ["write", "to"]
+        (ReqArg
+            (\arg opt -> return opt { optOutputFormat = arg })
+            "FORMAT")
+        "Output format"
+
+    , Option "v" ["verbose"]
+        (NoArg
+            (\opt -> return opt { optVerbose = True }))
+        "Enable verbose messages"
+
+    , Option "V" ["version"]
+        (NoArg
+            (\_ -> do
+                hPutStrLn stderr "KSQuant2 0.01"
+                exitWith ExitSuccess))
+        "Print version"
+
+    , Option "h" ["help"]
+        (NoArg
+            (\_ -> do
+                hPutStrLn stderr (usageInfo usageHeader options)
+                exitWith ExitSuccess))
+        "Show help"
+    ]
+
+usageHeader :: String
+usageHeader = "Usage: ksquant2 [OPTIONS]"
+
+handleInvalidOptions :: [String] -> IO ()
+handleInvalidOptions errors = do
+  hPutStrLn stderr $ concat errors
+  hPutStr stderr $ usageInfo usageHeader options
+  exitWith $ ExitFailure 1

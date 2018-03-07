@@ -24,8 +24,8 @@ where
 import qualified Measure as M (Ms, M(M), E(L,R,D))
 import qualified Lily as L (Dur(Dur)
                            , Pitch(Pitch)
-                           , Name(A, B, C, D, E, F, G)
-                           , Accidental(Natural, Sharp, Flat)
+                           , Name(B, C, D, E, F) -- A G
+                           , Accidental(Natural, Sharp) -- Flat
                            , powerToSimpleDur
                            , Elt(Chord, Rest, Times)
                            , Measure(Measure)

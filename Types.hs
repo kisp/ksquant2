@@ -29,6 +29,9 @@ module Types(
   , Tempo
   , WRat
   , QuantGrid
+  , Options(..)
+  , PureMain
+  , PureMultiMain
   )
 where
 
@@ -53,3 +56,13 @@ type QuantGrid = [(WRat, WRat)]
 
 -- | Computation result of type 'a' or error as a String.
 type Err a = Either String a
+
+data Options = Options  { optVerbose        :: Bool
+                        , optInputFormat    :: String
+                        , optOutputFormat   :: String
+                        }
+
+
+type PureMain = Options -> String -> Err String
+
+type PureMultiMain = Options -> [String] -> Err [String]

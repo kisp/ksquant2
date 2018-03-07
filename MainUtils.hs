@@ -1,8 +1,7 @@
 module MainUtils
 where
 
-import Types (Err, WInt, Time)
-import Options ( Options(..) )
+import Types (Err, WInt, Time, Options(..) )
 import Utils (stickToLast, appendNewline)
 import Lisp (LispVal(..), getf, fromSexp, printSexp)
 import qualified Measure as M (measuresWithBeats, M(), Ms, measuresUntilTime, Score)

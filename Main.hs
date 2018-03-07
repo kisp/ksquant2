@@ -20,12 +20,18 @@
 module Main (main)
 where
 
-import Types (Err, DivChoicesSeq, BestDivsSeq, QuantGrid)
-import Options ( Options(..) )
+import Types (Err
+             , DivChoicesSeq
+             , BestDivsSeq
+             , QuantGrid
+             , Options(..)
+             , PureMain
+             )
 import Utils (stickToLast
              , repeatList
              , rationalPairToTimePair
              )
+import IOHandler (handleIO)
 import MainUtils ( scoreToOutputFormat
                  , unwrapLeft
                  , getSimple
@@ -66,15 +72,7 @@ import qualified AbstractScore as A (Score)
 import qualified Quantize as Qu (bestDiv, quantizeIv)
 import AdjoinTies (adjoinTies)
 import Data.List ((\\))
-import Control.Monad (liftM2, unless)
-import System.IO (hPutStrLn, hPutStr, stderr)
-import System.Exit (exitWith, ExitCode(ExitSuccess, ExitFailure))
-import System.Environment (getArgs)
-import System.Console.GetOpt (OptDescr(Option)
-                             , ArgDescr(ReqArg, NoArg)
-                             , usageInfo
-                             , getOpt
-                             , ArgOrder(RequireOrder))
+import Control.Monad (liftM2)
 
 computeBestDivs :: M.Ms -> DivChoicesSeq -> SF2.Events -> BestDivsSeq
 computeBestDivs measures divChoicesSeq input =
@@ -161,7 +159,7 @@ processParsedInput opts input =
 
     unwrapLeft mscore
 
-processInput :: Options -> String -> Err String
+processInput :: PureMain
 processInput opts input = do
   forms <- parseLisp input
   let (first_form:_) = forms
@@ -169,78 +167,6 @@ processInput opts input = do
   scoreFormatter <- scoreToOutputFormat opts
   return $ scoreFormatter mscore
 
-startOptions :: Options
-startOptions = Options  { optVerbose        = False
-                        , optInputFormat    = "sf"
-                        , optOutputFormat   = "enp"
-                        }
-
-options :: [ OptDescr (Options -> IO Options) ]
-options =
-    [ Option "r" ["read", "from"]
-        (ReqArg
-            (\arg opt -> return opt { optInputFormat = arg })
-            "FORMAT")
-        "Input format"
-
-    , Option "w" ["write", "to"]
-        (ReqArg
-            (\arg opt -> return opt { optOutputFormat = arg })
-            "FORMAT")
-        "Output format"
-
-    , Option "v" ["verbose"]
-        (NoArg
-            (\opt -> return opt { optVerbose = True }))
-        "Enable verbose messages"
-
-    , Option "V" ["version"]
-        (NoArg
-            (\_ -> do
-                hPutStrLn stderr "KSQuant2 0.01"
-                exitWith ExitSuccess))
-        "Print version"
-
-    , Option "h" ["help"]
-        (NoArg
-            (\_ -> do
-                hPutStrLn stderr (usageInfo usageHeader options)
-                exitWith ExitSuccess))
-        "Show help"
-    ]
-
-usageHeader :: String
-usageHeader = "Usage: ksquant2 [OPTIONS]"
-
-handleInvalidOptions :: [String] -> IO ()
-handleInvalidOptions errors = do
-  hPutStrLn stderr $ concat errors
-  hPutStr stderr $ usageInfo usageHeader options
-  exitWith $ ExitFailure 1
-
 main :: IO ()
-main = do
-  args <- getArgs
+main = handleIO processInput
 
-  let (actions, nonOptions, errors) = getOpt RequireOrder options args
-
-  unless (errors == [] && (length nonOptions) <= 2) (handleInvalidOptions errors)
-
-  opts <- foldl (>>=) (return startOptions) actions
-
-  let (nonOptions', inputHandler) = getInputHandler nonOptions
-  let outputHandler = getOutputHandler nonOptions'
-
-  outputHandler . processInput opts =<< inputHandler
-
-  where
-    getInputHandler :: [String] -> ([String], IO String)
-    getInputHandler [] = ([], getContents)
-    getInputHandler ("-":r) = (r, getContents)
-    getInputHandler (i:r) = (r, readFile i)
-
-    getOutputHandler :: [String] -> Either String String -> IO ()
-    getOutputHandler [] (Right s) = putStrLn s
-    getOutputHandler [o] (Right s) = writeFile o s
-    getOutputHandler args (Right _) = error $ "getOutputHandler with args " ++ show args ++ "?"
-    getOutputHandler _ (Left err) = error err
