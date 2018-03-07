@@ -19,6 +19,8 @@ import Types (PureMain
              , Options(..)
              )
 
+import Lisp (readLisp')
+
 handleIO :: PureMain -> IO ()
 handleIO = handleIO' . toMulti
 
@@ -71,6 +73,10 @@ startOptions :: Options
 startOptions = Options  { optVerbose        = False
                         , optInputFormat    = "sf"
                         , optOutputFormat   = "enp"
+                        , optMaxDiv         = [8]
+                        , optForbiddenDivs  = [[]]
+                        , optTimeSignatures = readLisp' "(4 4)"
+                        , optMetronomes     = readLisp' "(4 60)"
                         }
 
 options :: [ OptDescr (Options -> IO Options) ]
@@ -85,6 +91,12 @@ options =
         (ReqArg
             (\arg opt -> return opt { optOutputFormat = arg })
             "FORMAT")
+        "Output format"
+
+    , Option "m" ["max-div"]
+        (ReqArg
+            (\arg opt -> return opt { optMaxDiv = [read arg] })
+            "Maximum division")
         "Output format"
 
     , Option "v" ["verbose"]

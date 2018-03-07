@@ -35,6 +35,8 @@ module Types(
   )
 where
 
+import Lisp (LispVal)
+
 type WRat = Rational
 
 type InfInt = Integer
@@ -60,6 +62,10 @@ type Err a = Either String a
 data Options = Options  { optVerbose        :: Bool
                         , optInputFormat    :: String
                         , optOutputFormat   :: String
+                        , optMaxDiv         :: [WInt]
+                        , optForbiddenDivs  :: [[WInt]]
+                        , optTimeSignatures :: LispVal
+                        , optMetronomes     :: LispVal
                         }
 
 

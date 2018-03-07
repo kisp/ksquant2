@@ -35,12 +35,9 @@ import IOHandler (handleIO)
 import MainUtils ( scoreToOutputFormat
                  , unwrapLeft
                  , getSimple
-                 , getForbDivs
-                 , getMaxDiv
-                 , getMetronomes
-                 , getTimeSignatures
                  , measureStream'
                  , measuresUntilTime
+                 , addInlineOptions
                  )
 import qualified Interval as Iv (ascendingIntervals
                                 , ascendingIntervals2points
@@ -72,7 +69,6 @@ import qualified AbstractScore as A (Score)
 import qualified Quantize as Qu (bestDiv, quantizeIv)
 import AdjoinTies (adjoinTies)
 import Data.List ((\\))
-import Control.Monad (liftM2)
 
 computeBestDivs :: M.Ms -> DivChoicesSeq -> SF2.Events -> BestDivsSeq
 computeBestDivs measures divChoicesSeq input =
@@ -124,13 +120,16 @@ quantifyVoiceOrErr :: M.Ms -> DivChoicesSeq -> SF2.Events -> Err M.Ms
 quantifyVoiceOrErr measures divChoicesSeq voice =
   Right (quantifyVoice measures divChoicesSeq voice)
 
-mkTrans :: LispVal -> SF2.Score -> Err (SF2.Score -> A.Score (Err M.Ms))
-mkTrans input sf2 = do
+mkTrans :: Options -> SF2.Score -> Err (SF2.Score -> A.Score (Err M.Ms))
+mkTrans opts sf2 = do
+  let Options { optMaxDiv = maxdiv
+              , optForbiddenDivs = forbid
+              , optTimeSignatures = ts
+              , optMetronomes = ms }
+        = opts
   let sf2end = SF2.scoreEnd sf2
-  tsmetro <- liftM2 (,) (getTimeSignatures input) (getMetronomes input)
+  let tsmetro = (ts, ms)
   measures <- measuresUntilTime sf2end (measureStream' tsmetro)
-  maxdiv <- getMaxDiv input
-  forbid <- getForbDivs input
   let divs = zipWith (\m f -> [1..m] \\ f)
              (stickToLast maxdiv)
              (stickToLast forbid)
@@ -154,7 +153,9 @@ processParsedInput opts input =
     simple <- getSimple input :: Err LispVal
     let sf2_score = simple2sf2_score simple :: SF2.Score
 
-    trans <- mkTrans input sf2_score :: Err (SF2.Score -> A.Score (Err M.Ms))
+    opts' <- addInlineOptions opts input
+
+    trans <- mkTrans opts' sf2_score :: Err (SF2.Score -> A.Score (Err M.Ms))
     let mscore = (trans sf2_score :: A.Score (Err M.Ms))
 
     unwrapLeft mscore

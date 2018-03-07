@@ -1,4 +1,10 @@
-module MainUtils
+module MainUtils (scoreToOutputFormat
+                 , unwrapLeft
+                 , getSimple
+                 , measureStream'
+                 , measuresUntilTime
+                 , addInlineOptions
+                 )
 where
 
 import Types (Err, WInt, Time, Options(..) )
@@ -66,6 +72,17 @@ getForbDivs :: LispVal -> Err [[WInt]]
 getForbDivs s =  case getf s (LispKeyword "FORBIDDEN-DIVS") of
   Just x  -> mapM ensureListOfIntegers (fromSexp (ensureList2 x))
   Nothing -> Left "Could not find :forbidden-divs"
+
+addInlineOptions :: Options -> LispVal -> Err Options
+addInlineOptions opts input = do
+  maxdiv <- getMaxDiv input
+  forbdivs <- getForbDivs input
+  ts <- getTimeSignatures input
+  ms <- getMetronomes input
+  return $ opts { optMaxDiv = maxdiv
+                , optForbiddenDivs = forbdivs
+                , optTimeSignatures = ts
+                , optMetronomes = ms }
 
 measuresUntilTime :: Time -> M.Ms -> Err M.Ms
 measuresUntilTime a b = Right $ M.measuresUntilTime b a
