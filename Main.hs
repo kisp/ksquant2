@@ -205,13 +205,14 @@ process_sf_score opts sf_score =
 
 processInput :: PureMain
 processInput opts input = do
-  parser <- getParser opts
-  parseResult <- parser input
+  parse <- getParser opts
+  filt <- getFilter opts
+  format <- getFormatter opts
+
+  parseResult <- parse input
   processResult <- process opts parseResult
-  f <- getFilter opts
-  filterResult <- f processResult
-  formatter <- getFormatter opts
-  formatter filterResult
+  filterResult <- filt processResult
+  format filterResult
 
 main :: IO ()
 main = handleIO processInput
