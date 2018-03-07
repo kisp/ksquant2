@@ -23,34 +23,32 @@ import Lisp ( nil, n60 )
 --import Debug.Trace
 
 adjoinTies' :: M -> M
-adjoinTies' x =
-    if (x == M (1,4) (4,60 % 1)
-              (D (1 % 4) (1 % 1)
-                     [D (1 % 4) (2 % 3)
-                            [L (1 % 8) True 0 n60 nil
-                            ,L (1 % 8) False 0 n60 nil
-                            ,L (1 % 8) False 0 n60 nil]]))
-    then
-        M (1,4) (4,60 % 1)
-              (D (1 % 4) (1 % 1)
-                     [D (1 % 4) (2 % 3)
-                            [L (2 % 8) False 0 n60 nil
-                            ,L (1 % 8) False 0 n60 nil]])
-    else if (x == M (1,4) (4,60 % 1)
-             (D (1 % 4) (1 % 1)
-              [D (1 % 4) (1 % 1)
-               [L (1 % 16) True 0 n60 nil
-               ,L (1 % 16) False 0 n60 nil
-               ,L (1 % 16) False 0 n60 nil
-               ,L (1 % 16) False 0 n60 nil]]))
-         then
-             M (1,4) (4,60 % 1)
-                   (D (1 % 4) (1 % 1)
-                    [D (1 % 4) (1 % 1)
-                     [L (1 % 8) False 0 n60 nil
-                     ,L (1 % 16) False 0 n60 nil
-                     ,L (1 % 16) False 0 n60 nil]])
-         else x
+adjoinTies' x
+  | (x == M (1,4) (4,60 % 1)
+          (D (1 % 4) (1 % 1)
+                 [D (1 % 4) (2 % 3)
+                        [L (1 % 8) True 0 n60 nil
+                        ,L (1 % 8) False 0 n60 nil
+                        ,L (1 % 8) False 0 n60 nil]])) =
+    M (1,4) (4,60 % 1)
+          (D (1 % 4) (1 % 1)
+                 [D (1 % 4) (2 % 3)
+                        [L (2 % 8) False 0 n60 nil
+                        ,L (1 % 8) False 0 n60 nil]])
+  | (x == M (1,4) (4,60 % 1)
+    (D (1 % 4) (1 % 1)
+     [D (1 % 4) (1 % 1)
+      [L (1 % 16) True 0 n60 nil
+      ,L (1 % 16) False 0 n60 nil
+      ,L (1 % 16) False 0 n60 nil
+      ,L (1 % 16) False 0 n60 nil]])) =
+    M (1,4) (4,60 % 1)
+          (D (1 % 4) (1 % 1)
+           [D (1 % 4) (1 % 1)
+            [L (1 % 8) False 0 n60 nil
+            ,L (1 % 16) False 0 n60 nil
+            ,L (1 % 16) False 0 n60 nil]])
+  | otherwise = x
 
 adjoinTies :: M -> M
 --adjoinTies = traceShowId . adjoinTies' . traceShowId

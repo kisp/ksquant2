@@ -86,7 +86,7 @@ parseSymbol =
       let su = map toUpper s
       return (case su of
                "NIL" -> LispList []
-               _     -> (LispSymbol su))
+               _     -> LispSymbol su)
 
 parseString :: Parser LispVal
 parseString =
@@ -119,7 +119,7 @@ parseFloat =
       let ds2' = read ds2 :: Integer
       let n = fromInteger ds'
       let numerator = fromInteger ds2'
-      let denominator = 10^^((fromIntegral (length ds2)) :: Integer)
+      let denominator = 10^^(fromIntegral (length ds2) :: Integer)
       let r = (n + (numerator / denominator)) :: Rational
       (LispInteger e) <- (oneOf "sfdleSFDLE" >> parseInteger) <|>
                          return (LispInteger 0)
@@ -135,7 +135,7 @@ parseRatio =
       denominator <- many1 digit
       let numerator' = read numerator :: Integer
       let denominator' = read denominator :: Integer
-      return $ (LispRatio . (*sign)) ((fromIntegral numerator') / (fromIntegral denominator'))
+      return $ (LispRatio . (*sign)) (fromIntegral numerator' / fromIntegral denominator')
 
 parseList :: Parser LispVal
 parseList =
@@ -296,5 +296,5 @@ lispToRational :: LispVal -> WRat
 lispToRational (LispInteger x) = fromInteger x
 lispToRational (LispRatio x) = x
 lispToRational (LispFloat x) = x
-lispToRational x = error $ "cannot convert to rational " ++ (show x)
+lispToRational x = error $ "cannot convert to rational " ++ show x
 

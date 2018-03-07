@@ -52,7 +52,7 @@ buildM hs = M (1,4) (4,60) (D q 1 [buildD hs])
 
 
 adjt :: [H] -> [H] -> Assertion
-adjt ee ii = (buildM ee) @=? adjoinTies (buildM ii)
+adjt ee ii = buildM ee @=? adjoinTies (buildM ii)
 
 adjoin1 :: Assertion
 adjoin1 =

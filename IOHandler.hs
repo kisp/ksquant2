@@ -4,7 +4,7 @@ where
 
 import System.IO (hPutStrLn, hPutStr, stderr)
 import System.Environment (getArgs)
-import System.Exit (exitWith, ExitCode(ExitSuccess, ExitFailure))
+import System.Exit (exitWith, ExitCode(ExitFailure), exitSuccess)
 import Control.Monad (liftM, unless)
 
 import System.Console.GetOpt (OptDescr(Option)
@@ -14,9 +14,8 @@ import System.Console.GetOpt (OptDescr(Option)
                              , ArgOrder(RequireOrder))
 
 import Types (Err)
-import Options (PureMain, PureMultiMain)
+import Options (PureMain, PureMultiMain, Options(..))
 import Lisp (readLisp')
-import Options (Options(..))
 
 handleIO :: PureMain -> IO ()
 handleIO = handleIO' . toMulti
@@ -27,7 +26,7 @@ handleIO' m = do
 
     let (actions, nonOptions, errors) = getOpt RequireOrder options args
 
-    unless (errors == [] && (length nonOptions) <= 2) (handleInvalidOptions errors)
+    unless (null errors && length nonOptions <= 2) (handleInvalidOptions errors)
 
     opts <- foldl (>>=) (return startOptions) actions
 
@@ -38,7 +37,7 @@ handleIO' m = do
     let inputs = [input]
 
     let outputs = m opts inputs
-    let output = (liftM head) outputs
+    let output = liftM head outputs
 
     outputHandler output
 
@@ -105,14 +104,14 @@ options =
         (NoArg
             (\_ -> do
                 hPutStrLn stderr "KSQuant2 0.2.1"
-                exitWith ExitSuccess))
+                exitSuccess))
         "Print version"
 
     , Option "h" ["help"]
         (NoArg
             (\_ -> do
                 hPutStrLn stderr (usageInfo usageHeader options)
-                exitWith ExitSuccess))
+                exitSuccess))
         "Show help"
     ]
 

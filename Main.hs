@@ -95,7 +95,7 @@ getParser Options { optInputFormat = "durs" } = Right parseAsDursInput
 getParser Options { optInputFormat = f } = Left $ "unknown input format " ++ f
 
 getFilter :: Options -> Err Filter
-getFilter _ = Right (Right . id)
+getFilter _ = Right (Right)
 
 getFormatter :: Options -> Err Formatter
 getFormatter Options { optOutputFormat = "enp" } = Right (Right . appendNewline . scoreToEnp)
@@ -121,7 +121,7 @@ computeBestDivs measures divChoicesSeq input =
     beats_intervals = Iv.ascendingIntervals
                       (map rationalPairToTimePair
                         (M.measuresLeafIntervals measures))
-    beats_intervals' = (Iv.getAscendingIntervals beats_intervals)
+    beats_intervals' = Iv.getAscendingIntervals beats_intervals
     points = Iv.ascendingIntervals2points input'
     groups = Iv.groupPointsByIntervalls beats_intervals points
   in zipWith3 Qu.bestDiv
@@ -133,7 +133,7 @@ computeQEvents :: QuantGrid -> SF2.Events -> SF2.QEvents
 computeQEvents quant_grid input =
   let
     quant_grid' = Iv.ascendingIntervals (map rationalPairToTimePair quant_grid)
-    quant_grid_asc = (Iv.ascendingIntervals quant_grid)
+    quant_grid_asc = Iv.ascendingIntervals quant_grid
   in
     map (Qu.quantizeIv SF2.qeventFromEvent quant_grid_asc quant_grid') input
 
@@ -141,9 +141,9 @@ quantifyVoice :: M.Ms -> DivChoicesSeq -> SF2.Events -> M.Ms
 quantifyVoice measures divChoicesSeq voice =
   let
     getNotes (M.L dur tie label _ _) qevent =
-      (M.L dur tie label (SF2.qeventNotes qevent) (SF2.qeventExpressions qevent))
+      M.L dur tie label (SF2.qeventNotes qevent) (SF2.qeventExpressions qevent)
     getNotes (M.R _ _) _ = error "getNotes: R"
-    getNotes (M.D _  _ _) _ = error "getNotes: D"
+    getNotes (M.D{}) _ = error "getNotes: D"
 
     measuresTieOrRest' a b m = M.measuresTieOrRest m a b
 
@@ -199,7 +199,7 @@ process_sf_score opts sf_score =
     let sf2_score = sf_score2sf2_score sf_score :: SF2.Score
 
     trans <- mkTrans opts sf2_score :: Err (SF2.Score -> A.Score (Err M.Ms))
-    let mscore = (trans sf2_score :: A.Score (Err M.Ms))
+    let mscore = trans sf2_score :: A.Score (Err M.Ms)
 
     unwrapLeft mscore
 

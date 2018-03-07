@@ -28,12 +28,12 @@ import Data.Ratio ( numerator, denominator, (%) )
 -- | Compute @2^n@ for any integer @n@.
 exp2 :: Integer -> Rational
 exp2 n | n >= 0    = 2^n
-       | otherwise = 1 / (2^(abs n))
+       | otherwise = 1 / (2^abs n)
 
 isExp2 :: Rational -> Bool
 isExp2 r | r == 1 = True
-         | r > 1 && (denominator r) == 1 = isPowerOfTwo (numerator r)
-         | r < 1 && (numerator r) == 1   = isPowerOfTwo (denominator r)
+         | r > 1 && denominator r == 1 = isPowerOfTwo (numerator r)
+         | r < 1 && numerator r == 1   = isPowerOfTwo (denominator r)
          | otherwise = False
 
 isPowerOfTwo :: Integer -> Bool

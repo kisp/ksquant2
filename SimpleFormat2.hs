@@ -88,7 +88,7 @@ instance Interval QEvent Rational where
 voiceToSimpleFormat2 :: SF1.Events -> Events
 voiceToSimpleFormat2 v =
     let events = v
-        startEndPairs = (neighbours (map SF1.eventStart events))
+        startEndPairs = neighbours (map SF1.eventStart events)
         trans (SF1.Chord _ notes expressions,(start,end)) = [Chord start end notes expressions]
         trans _ = []
     in (concatMap trans (zip events startEndPairs) ++
