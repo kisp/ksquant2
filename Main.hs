@@ -47,7 +47,7 @@ import qualified Measure as M (Ms
                               , E(L,R,D)                              
                               , measuresTransformLeafs
                               , measureNumLeaf
-                              )
+                              , Score)
 import Lisp (LispVal()            
             , fromSexp
             , mapcar'
@@ -150,7 +150,7 @@ simple2sf2_score simple =
     sf2_score = fmap SF2.voiceToSimpleFormat2 sf_score :: SF2.Score
   in sf2_score
 
-processParsedInput ::  Options -> LispVal -> Err String
+processParsedInput ::  Options -> LispVal -> Err M.Score
 processParsedInput opts input =
   do
     simple <- getSimple input :: Err LispVal
@@ -159,15 +159,15 @@ processParsedInput opts input =
     trans <- mkTrans input sf2_score :: Err (SF2.Score -> A.Score (Err M.Ms))
     let mscore = (trans sf2_score :: A.Score (Err M.Ms))
 
-    mscore' <- unwrapLeft mscore
-    scoreFormatter <- scoreToOutputFormat opts
-    return $ scoreFormatter mscore'
+    unwrapLeft mscore
 
 processInput :: Options -> String -> Err String
 processInput opts input = do
   forms <- parseLisp input
   let (first_form:_) = forms
-  processParsedInput opts first_form
+  mscore <- processParsedInput opts first_form
+  scoreFormatter <- scoreToOutputFormat opts
+  return $ scoreFormatter mscore
 
 startOptions :: Options
 startOptions = Options  { optVerbose        = False
