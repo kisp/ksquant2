@@ -37,16 +37,16 @@ tiedOverFromLast assoc id =
       Just x -> has_forward_tie x
     where has_forward_tie (M.R _ _) = False
           has_forward_tie (M.L _ tie _ _ _) = tie
-          has_forward_tie (M.D _ _ _) = error "tiedOverFromLast (M.D _ _ _)"
+          has_forward_tie (M.D{}) = error "tiedOverFromLast (M.D _ _ _)"
 
 expressionsForChord :: Bool -> L.LispVal -> L.LispVal
-expressionsForChord True _            = (L.readLisp' "()")
+expressionsForChord True _            = L.readLisp' "()"
 expressionsForChord False expressions = expressions
 
 eToEnp :: [(M.Label, M.E)] -> Rational -> M.E -> E.Elt
 eToEnp assoc f (M.L d _ id notes expressions) =
   E.Chord (ratio2integer (d * f)) tofl notes (expressionsForChord tofl expressions)
-  where tofl = (tiedOverFromLast assoc id)
+  where tofl = tiedOverFromLast assoc id
 eToEnp _ f (M.R d _) = E.Rest (ratio2integer (d * f))
 eToEnp assoc f (M.D d _ es) =
     let f' = durs2factor (map M.dur es)
@@ -68,10 +68,10 @@ adaptForTimesig (n,_) es = let f = n `div` sum (map E.dur es)
 mToEnp :: [(M.Label, M.E)] -> M.M -> E.Measure
 mToEnp assoc (M.M ts t e) =
     let f = denominator (M.dur e) % 1
-        list = (unwrap (wrapIfNeeded (eToEnp assoc f e)))
+        list = unwrap (wrapIfNeeded (eToEnp assoc f e))
         list' = map wrapIfNeeded list
         list'' = adaptForTimesig ts list'
-    in (E.makeMeasure ts t list'')
+    in E.makeMeasure ts t list''
 
 vToEnp :: M.Ms -> E.Measures
 vToEnp v = let v' = M.labelVoice v
