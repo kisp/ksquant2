@@ -104,7 +104,7 @@ options =
     , Option "V" ["version"]
         (NoArg
             (\_ -> do
-                hPutStrLn stderr "KSQuant2 0.01"
+                hPutStrLn stderr "KSQuant2 0.2.1"
                 exitWith ExitSuccess))
         "Print version"
 

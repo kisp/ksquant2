@@ -7,7 +7,7 @@ Feature: informational
     When I run `ksquant2 --version`
     Then the exit status should be 0
     And the output should contain "KSQuant2"
-    And the output should contain "0.01"
+    And the output should contain "0.2.1"
 
   Scenario: xxx
     When I run `ksquant2 -x`

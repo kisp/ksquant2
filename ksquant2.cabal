@@ -16,7 +16,7 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Name:                ksquant2
-Version:             0.1.10
+Version:             0.2.1
 Description:         Haskell implementation of simple2score from ksquant.
 License:             GPL
 License-file:        COPYING
