@@ -1,14 +1,14 @@
-module MainUtils (scoreToOutputFormat
-                 , unwrapLeft
+module MainUtils (unwrapLeft
                  , getSimple
                  , measureStream'
                  , measuresUntilTime
                  , addInlineOptions
-                 )
+                 , scoreToLily
+                 , scoreToEnp)
 where
 
 import Types (Err, WInt, Time, Options(..) )
-import Utils (stickToLast, appendNewline)
+import Utils (stickToLast)
 import Lisp (LispVal(..), getf, fromSexp, printSexp)
 import qualified Measure as M (measuresWithBeats, M(), Ms, measuresUntilTime, Score)
 import qualified AbstractScore as A
@@ -25,7 +25,7 @@ buildMeasureFromLisp :: LispVal -> LispVal -> M.M
 buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])
                          (LispList [LispInteger tu,LispInteger t]) =
                          head (M.measuresWithBeats [(n,d)] [(tu,fromInteger t)])
-buildMeasureFromLisp _ _ = error "buildMeasureFromLisp"
+buildMeasureFromLisp a b = error $ "buildMeasureFromLisp " ++ (show a) ++ " " ++ (show b)
 
 ensureListOfLists :: LispVal -> Err LispVal
 ensureListOfLists (LispList []) = Left "ensureListOfLists: empty list"
@@ -98,11 +98,3 @@ scoreToLily = L.showLily . fmap vToLily
 
 scoreToEnp :: M.Score -> String
 scoreToEnp = printSexp . fmap (E.voice2sexp . vToEnp)
-
-scoreToOutputFormat :: Options -> Err (M.Score -> String)
-scoreToOutputFormat
-  Options { optOutputFormat = "ly" } = Right (appendNewline . scoreToLily)
-scoreToOutputFormat
-  Options { optOutputFormat = "enp" } = Right (appendNewline . scoreToEnp)
-scoreToOutputFormat
-  Options { optOutputFormat = x } = Left $ "unknown output format: " ++ x

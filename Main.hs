@@ -30,15 +30,16 @@ import Types (Err
 import Utils (stickToLast
              , repeatList
              , rationalPairToTimePair
+             , appendNewline
              )
 import IOHandler (handleIO)
-import MainUtils ( scoreToOutputFormat
-                 , unwrapLeft
+import MainUtils ( unwrapLeft
                  , getSimple
                  , measureStream'
                  , measuresUntilTime
                  , addInlineOptions
-                 )
+                 , scoreToLily
+                 , scoreToEnp)
 import qualified Interval as Iv (ascendingIntervals
                                 , ascendingIntervals2points
                                 , groupPointsByIntervalls
@@ -47,11 +48,11 @@ import qualified Measure as M (Ms
                               , measuresLeafIntervals
                               , measuresDivideLeafs
                               , measuresTieOrRest
-                              , E(L,R,D)                              
+                              , E(L,R,D)
                               , measuresTransformLeafs
                               , measureNumLeaf
                               , Score)
-import Lisp (LispVal()            
+import Lisp (LispVal()
             , fromSexp
             , mapcar'
             , parseLisp)
@@ -69,6 +70,49 @@ import qualified AbstractScore as A (Score)
 import qualified Quantize as Qu (bestDiv, quantizeIv)
 import AdjoinTies (adjoinTies)
 import Data.List ((\\))
+
+type Parser = String -> Err ParseResult
+type Filter = M.Score -> Err M.Score
+type Formatter = M.Score -> Err String
+
+data ParseResult = SFInput LispVal
+                 | DursInput LispVal
+
+process :: Options -> ParseResult -> Err M.Score
+process opts (SFInput parseResult) = do
+     simple <- getSimple parseResult :: Err LispVal
+     let sf_score = simple2sf_score simple :: SF.Score
+     opts' <- addInlineOptions opts parseResult
+     process_sf_score opts' sf_score
+process opts (DursInput parseResult) = do
+     let simple = parseResult
+     let sf_score = simple2sf_score simple
+     process_sf_score opts sf_score
+
+getParser :: Options -> Err Parser
+getParser Options { optInputFormat = "sf" } = Right parseAsSFInput
+getParser Options { optInputFormat = "durs" } = Right parseAsDursInput
+getParser Options { optInputFormat = f } = Left $ "unknown input format " ++ f
+
+getFilter :: Options -> Err Filter
+getFilter _ = Right (Right . id)
+
+getFormatter :: Options -> Err Formatter
+getFormatter Options { optOutputFormat = "enp" } = Right (Right . appendNewline . scoreToEnp)
+getFormatter Options { optOutputFormat = "ly" } = Right (Right . appendNewline . scoreToLily)
+getFormatter Options { optOutputFormat = f } = Left $ "unknown output format " ++ f
+
+parseAsSFInput :: Parser
+parseAsSFInput input = do
+  forms <- parseLisp input
+  let (first_form:_) = forms
+  return $ SFInput first_form
+
+parseAsDursInput :: Parser
+parseAsDursInput input = do
+  forms <- parseLisp input
+  let (first_form:_) = forms
+  return $ DursInput first_form
 
 computeBestDivs :: M.Ms -> DivChoicesSeq -> SF2.Events -> BestDivsSeq
 computeBestDivs measures divChoicesSeq input =
@@ -137,36 +181,37 @@ mkTrans opts sf2 = do
   let trans = quantifyVoiceOrErr measures beatDivs
   return $ fmap trans
 
-simple2sf2_score ::  LispVal -> SF2.Score
-simple2sf2_score simple =
+simple2sf_score ::  LispVal -> SF.Score
+simple2sf_score simple =
   let
     lispVal2Score :: LispVal -> A.Score LispVal
     lispVal2Score = fromSexp
     score = lispVal2Score simple :: A.Score LispVal
     sf_score = fmap (mapcar' SF.sexp2event) score :: SF.Score
-    sf2_score = fmap SF2.voiceToSimpleFormat2 sf_score :: SF2.Score
-  in sf2_score
+  in sf_score
 
-processParsedInput ::  Options -> LispVal -> Err M.Score
-processParsedInput opts input =
+sf_score2sf2_score :: SF.Score -> SF2.Score
+sf_score2sf2_score = fmap SF2.voiceToSimpleFormat2
+
+process_sf_score ::  Options -> SF.Score -> Err M.Score
+process_sf_score opts sf_score =
   do
-    simple <- getSimple input :: Err LispVal
-    let sf2_score = simple2sf2_score simple :: SF2.Score
+    let sf2_score = sf_score2sf2_score sf_score :: SF2.Score
 
-    opts' <- addInlineOptions opts input
-
-    trans <- mkTrans opts' sf2_score :: Err (SF2.Score -> A.Score (Err M.Ms))
+    trans <- mkTrans opts sf2_score :: Err (SF2.Score -> A.Score (Err M.Ms))
     let mscore = (trans sf2_score :: A.Score (Err M.Ms))
 
     unwrapLeft mscore
 
 processInput :: PureMain
 processInput opts input = do
-  forms <- parseLisp input
-  let (first_form:_) = forms
-  mscore <- processParsedInput opts first_form
-  scoreFormatter <- scoreToOutputFormat opts
-  return $ scoreFormatter mscore
+  parser <- getParser opts
+  parseResult <- parser input
+  processResult <- process opts parseResult
+  f <- getFilter opts
+  filterResult <- f processResult
+  formatter <- getFormatter opts
+  formatter filterResult
 
 main :: IO ()
 main = handleIO processInput

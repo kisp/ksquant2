@@ -39,10 +39,10 @@ handleIO' m = do
 
     input <- inputHandler
     let inputs = [input]
-    
+
     let outputs = m opts inputs
     let output = (liftM head) outputs
-    
+
     outputHandler output
 
     where
@@ -50,7 +50,7 @@ handleIO' m = do
       getInputHandler [] = ([], getContents)
       getInputHandler ("-":r) = (r, getContents)
       getInputHandler (i:r) = (r, readFile i)
-  
+
       getOutputHandler :: [String] -> Err String -> IO ()
       getOutputHandler [] (Right s) = putStrLn s
       getOutputHandler [o] (Right s) = writeFile o s
@@ -75,8 +75,8 @@ startOptions = Options  { optVerbose        = False
                         , optOutputFormat   = "enp"
                         , optMaxDiv         = [8]
                         , optForbiddenDivs  = [[]]
-                        , optTimeSignatures = readLisp' "(4 4)"
-                        , optMetronomes     = readLisp' "(4 60)"
+                        , optTimeSignatures = readLisp' "((4 4))"
+                        , optMetronomes     = readLisp' "((4 60))"
                         }
 
 options :: [ OptDescr (Options -> IO Options) ]
