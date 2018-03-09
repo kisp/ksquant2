@@ -73,6 +73,7 @@ startOptions = Options  { optVerbose        = False
                         , optForbiddenDivs  = [[]]
                         , optTimeSignatures = readLisp' "((4 4))"
                         , optMetronomes     = readLisp' "((4 60))"
+                        , optMeasureSiblingMerge = False
                         }
 
 options :: [ OptDescr (Options -> IO Options) ]
@@ -94,6 +95,11 @@ options =
             (\arg opt -> return opt { optMaxDiv = [read arg] })
             "Maximum division")
         "Output format"
+
+    , Option "" ["measure-sibling-merge"]
+        (NoArg
+            (\opt -> return opt { optMeasureSiblingMerge = True }))
+        "Enable measureSiblingMerge"
 
     , Option "v" ["verbose"]
         (NoArg

@@ -69,6 +69,7 @@ import qualified SimpleFormat2 as SF2 (Events
 import qualified AbstractScore as A (Score)
 import qualified Quantize as Qu (bestDiv, quantizeIv)
 import AdjoinTies (adjoinTies)
+import MeasureSiblingMerge (measureSiblingMerge)
 import Data.List ((\\))
 
 type Parser = String -> Err ParseResult
@@ -95,7 +96,8 @@ getParser Options { optInputFormat = "durs" } = Right parseAsDursInput
 getParser Options { optInputFormat = f } = Left $ "unknown input format " ++ f
 
 getFilter :: Options -> Err Filter
-getFilter _ = Right (Right)
+getFilter Options { optMeasureSiblingMerge = True } = Right (Right . (fmap (map measureSiblingMerge)))
+getFilter _ = Right (Right . id)
 
 getFormatter :: Options -> Err Formatter
 getFormatter Options { optOutputFormat = "enp" } = Right (Right . appendNewline . scoreToEnp)

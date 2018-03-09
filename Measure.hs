@@ -109,7 +109,7 @@ l d tie notes expressions =
 
 r :: Rational -> E
 r d = if not check then
-          error "r d not valid"
+          error $ "r d not valid: " ++ (show d)
       else R d 0
     where check = notableDurL 1 d
 

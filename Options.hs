@@ -11,6 +11,7 @@ data Options = Options  { optVerbose        :: Bool
                         , optForbiddenDivs  :: [[WInt]]
                         , optTimeSignatures :: LispVal
                         , optMetronomes     :: LispVal
+                        , optMeasureSiblingMerge :: Bool
                         }
 
 type PureMain = Options -> String -> Err String
