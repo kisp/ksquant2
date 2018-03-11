@@ -57,8 +57,8 @@ stickToLast list = list ++ repeat (last list)
 repeatList :: (Num b, Ord b) => [a] -> [b] -> [a]
 repeatList [] _ = []
 repeatList _ [] = []
-repeatList (x:xs) (1:rs) = x:(repeatList xs rs)
-repeatList (x:xs) (r:rs) | r > 1 = x:(repeatList (x:xs) (r-1:rs))
+repeatList (x:xs) (1:rs) = x:repeatList xs rs
+repeatList (x:xs) (r:rs) | r > 1 = x:repeatList (x:xs) (r-1:rs)
                      | r < 1 = repeatList xs rs
                      | otherwise = undefined
 

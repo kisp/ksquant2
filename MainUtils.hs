@@ -10,14 +10,13 @@ where
 import Types (Err, WInt, Time)
 import Options (Options(..))
 import Utils (stickToLast)
-import Lisp (LispVal(..), getf, fromSexp, printSexp)
+import Lisp (LispVal(..), getf, fromSexp, printSexp, atom, fromLispList)
 import qualified Measure as M (measuresWithBeats, M(), Ms, measuresUntilTime, Score)
 import qualified AbstractScore as A (Score)
 import qualified Lily as L (showLily)
 import qualified Enp as E (voice2sexp)
 import MeasureToEnp (vToEnp)
 import MeasureToLily (vToLily)
-import Lisp (atom, fromLispList)
 import Data.Maybe (fromMaybe)
 import Data.Either.Unwrap (fromRight)
 import Control.Monad (liftM)
@@ -26,20 +25,20 @@ buildMeasureFromLisp :: LispVal -> LispVal -> M.M
 buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])
                          (LispList [LispInteger tu,LispInteger t]) =
                          head (M.measuresWithBeats [(n,d)] [(tu,fromInteger t)])
-buildMeasureFromLisp a b = error $ "buildMeasureFromLisp " ++ (show a) ++ " " ++ (show b)
+buildMeasureFromLisp a b = error $ "buildMeasureFromLisp " ++ show a ++ " " ++ show b
 
 ensureListOfLists :: LispVal -> Err LispVal
 ensureListOfLists (LispList []) = Left "ensureListOfLists: empty list"
 ensureListOfLists (LispList xs@(x:_)) | atom x = Right $ LispList [LispList xs]
                                       | otherwise = Right $ LispList xs
-ensureListOfLists x = Left $ "ensureListOfLists: not a list: " ++ (show x)
+ensureListOfLists x = Left $ "ensureListOfLists: not a list: " ++ show x
 
 ensureListOfIntegers :: Num a => LispVal -> Err [a]
 ensureListOfIntegers (LispList xs) =
     mapM ensureInt xs
     where ensureInt (LispInteger x) = Right $ fromInteger x
-          ensureInt v = Left $ "ensureInt: " ++ (show v)
-ensureListOfIntegers x = Left $ "ensureListOfIntegers: " ++ (show x)
+          ensureInt v = Left $ "ensureInt: " ++ show v
+ensureListOfIntegers x = Left $ "ensureListOfIntegers: " ++ show x
 
 ensureList :: LispVal -> LispVal
 ensureList x@(LispList _) = x
@@ -89,7 +88,7 @@ measuresUntilTime :: Time -> M.Ms -> Err M.Ms
 measuresUntilTime a b = Right $ M.measuresUntilTime b a
 
 getSimple :: LispVal -> Err LispVal
-getSimple x = fromMaybe (Left "Could not find :simple") (liftM Right (getf x (LispKeyword "SIMPLE")))
+getSimple x = fromMaybe (Left "Could not find :simple") (fmap Right (getf x (LispKeyword "SIMPLE")))
 
 unwrapLeft :: A.Score (Err M.Ms) -> Err M.Score
 unwrapLeft = Right . fmap fromRight
