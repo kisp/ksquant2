@@ -21,8 +21,8 @@
   :maintainer "Kilian Sprotte <kilian.sprotte@gmail.com>"
   :author "Kilian Sprotte <kilian.sprotte@gmail.com>"
   :depends-on (ompw ksquant) ;temp dep on ksquant
-  :serial t
   :components ((:module "lisp"
+                        :serial t
                         :components ((:file "package")
                                      (:file "boxes")))))
 
@@ -30,7 +30,7 @@
   :maintainer "Kilian Sprotte <kilian.sprotte@gmail.com>"
   :author "Kilian Sprotte <kilian.sprotte@gmail.com>"
   :depends-on (ksquant2)
-  :serial t
   :components ((:module "lisp"
+                        :serial t
                         :components ((:file "rt")
                                      (:file "boxes-test")))))
