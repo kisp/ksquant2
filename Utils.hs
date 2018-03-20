@@ -22,7 +22,8 @@ module Utils (neighbours
              ,repeatList
              ,rationalPairToTimePair
              ,appendNewline
-             ,dxsToXs)
+             ,dxsToXs
+             ,oneOfEq)
 where
 
 import Types (Time)
@@ -73,3 +74,7 @@ appendNewline s = s ++ "\n"
 
 dxsToXs :: [Rational] -> [Rational]
 dxsToXs = scanl (+) 0
+
+oneOfEq :: (Show a, Eq a) => a -> a -> a
+oneOfEq a b | a == b = a
+            | otherwise = error $ "expected to be Eq: " ++ (show a) ++ " " ++ (show b)

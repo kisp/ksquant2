@@ -42,6 +42,7 @@ module Lisp (Sexp
             ,nil
             ,n60
             ,lispToRational
+            ,rationalToLisp
             ,ensureList)
 where
 
@@ -336,6 +337,9 @@ lispToRational (LispInteger x) = fromInteger x
 lispToRational (LispRatio x) = x
 lispToRational (LispFloat x) = x
 lispToRational x = error $ "cannot convert to rational " ++ show x
+
+rationalToLisp :: WRat -> LispVal
+rationalToLisp = LispRatio
 
 ensureList :: LispVal -> LispVal
 ensureList l@(LispList _) = l
