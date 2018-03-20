@@ -30,8 +30,8 @@ import qualified Lily as L (Dur(Dur)
                            , Elt(Chord, Rest, Times)
                            , Measure(Measure)
                            , Measures)
-import Data.Ratio
-import Lisp
+import Data.Ratio (numerator, denominator)
+import Lisp ( LispVal(LispList,LispInteger) )
 
 log2 :: (Num a, Integral a1) => a1 -> a
 log2 1 = 0
@@ -69,9 +69,9 @@ eToLily (M.L d tie _ notes _) = [L.Chord (durToLily d) midis tie]
   where midis = map midiToLily (ensureListOfIntegers notes)
 eToLily (M.R d _) = [L.Rest (durToLily d)]
 eToLily (M.D _ r es) | r == 1 = concatMap eToLily es
-                       | otherwise = let n' = fromInteger (numerator r)
-                                         d' = fromInteger (denominator r)
-                                     in [L.Times n' d' (concatMap eToLily es)]
+                     | otherwise = let n' = fromInteger (numerator r)
+                                       d' = fromInteger (denominator r)
+                                   in [L.Times n' d' (concatMap eToLily es)]
 
 mToLily :: M.M -> L.Measure
 mToLily (M.M (n,d) _ e) = L.Measure (fromInteger n) (fromInteger d) (eToLily e)
