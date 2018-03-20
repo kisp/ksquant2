@@ -19,9 +19,8 @@ eltSiblingMerge :: E -> E
 eltSiblingMerge l@L{} = l
 eltSiblingMerge r@R{} = r
 eltSiblingMerge (D dur factor children) =
-  d dur factor $ foldr t [] merged_children
+  d dur factor $ foldr mcons [] merged_children
   where merged_children = map eltSiblingMerge children
-        t a b = mcons a b
 
 mcons :: E -> [E] -> [E]
 

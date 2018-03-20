@@ -15,21 +15,20 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 
 module DurCalcTest where
 
 import Types (WRat)
 import qualified Test.Framework.Providers.API as TF
-import Test.Framework.Providers.API(testGroup)
-import Test.Framework.Providers.HUnit(testCase)
-import Test.Framework.Providers.QuickCheck2(testProperty)
+import Test.Framework.Providers.API (testGroup)
+import Test.Framework.Providers.HUnit (testCase)
+import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.HUnit
 import Test.QuickCheck
 
-import Data.Ratio
-import DurCalc
-import Control.Monad
+import Data.Ratio ( (%) )
+import DurCalc (notableDur, dotFactor, exp2, isExp2)
 
 newtype Dur = Dur WRat
     deriving (Show, Eq)
@@ -41,7 +40,7 @@ newtype Dur = Dur WRat
 --       return (n % d)
 
 instance Arbitrary Dur where
-    arbitrary = liftM Dur ratio
+    arbitrary = fmap Dur ratio
         where ratio = (do
                 n <- choose (-32,32)
                 d <- choose (1,32)

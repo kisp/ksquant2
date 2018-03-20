@@ -87,7 +87,7 @@ dur (L d _ _ _ _)   = d
 dur (R d _)     = d
 
 eid :: E -> Label
-eid (D _ _ _) = error "id not for D"
+eid D{} = error "id not for D"
 eid (R _ x) = x
 eid (L _ _ x _ _) = x
 
@@ -109,7 +109,7 @@ l d tie notes expressions =
 
 r :: Rational -> E
 r d = if not check then
-          error $ "r d not valid: " ++ (show d)
+          error $ "r d not valid: " ++ show d
       else R d 0
     where check = notableDurL 1 d
 
@@ -127,14 +127,14 @@ class Transformable a b where
 smap :: (t -> a -> (b,t)) -> [a] -> t -> ([b],t)
 smap _ [] d   = ([],d)
 smap f (x:xs) d = let (r,newd) = f d x
-                  in let (rest,lastd) = (smap f xs newd)
+                  in let (rest,lastd) = smap f xs newd
                      in (r : rest,lastd)
 
 instance Transformable M E where
     transform_leafs fn (M timesig tempo e) =
         m timesig tempo (transform_leafs fn e)
     transform_leafs' fn z (M timesig tempo e) =
-        let (r,z') = (transform_leafs' fn z e)
+        let (r,z') = transform_leafs' fn z e
         in (m timesig tempo r,z')
 
 instance Transformable E E where
@@ -142,7 +142,7 @@ instance Transformable E E where
         d dur r (map (transform_leafs fn) es)
     transform_leafs fn x = fn x
     transform_leafs' fn z (D dur r es) =
-        let (res,z') = (smap (transform_leafs' fn) es z)
+        let (res,z') = smap (transform_leafs' fn) es z
         in (d dur r res,z')
     transform_leafs' fn z x = fn x z
 
@@ -160,8 +160,8 @@ measuresDivideLeafs ms divs =
                   in (d dur r (replicate (fromInteger n) (l (dur / (n % 1) / r) False n60 nil)),
                         ds)
               trans r@(R _ _) ds = (r,ds)
-              trans (D _ _ _) _ = error "measuresDivideLeafs: did not expect (D _ _ _)"
-              trans (L _ _ _ _ _) [] = error "measuresDivideLeafs: divs have run out"
+              trans D{} _ = error "measuresDivideLeafs: did not expect (D _ _ _)"
+              trans L{} [] = error "measuresDivideLeafs: divs have run out"
 
 measuresWithBeats :: [(Integer, Integer)] -> [Tempo] -> Ms
 measuresWithBeats timesigs tempos =
@@ -172,7 +172,7 @@ measuresWithBeats timesigs tempos =
               m timesig tempo (L (timesigDur timesig) False 0 n60 nil)
 
 eleaves :: E -> [E]
-eleaves e@(L _ _ _ _ _) = [e]
+eleaves e@L{} = [e]
 eleaves e@(R _ _) = [e]
 eleaves (D _ _ es) = concatMap eleaves es
 
@@ -225,7 +225,7 @@ measureLeafIntervals (M (_,d) tempo div) start =
     neighbours (map (+start) (dxsToXs (map trans (leafEffectiveDurs div))))
     where trans dur = tempoToBeatDur tempo * dur_to_beat dur * (4%d)
           dur_to_beat dur = dur * (d%1)
-          tempoToBeatDur (d,tempo) = (60 / tempo / (d%4))
+          tempoToBeatDur (d,tempo) = 60 / tempo / (d%4)
 
 measuresLeafIntervals :: Ms -> [(Rational, Rational)]
 measuresLeafIntervals ms = concatMap (uncurry measureLeafIntervals)
@@ -248,16 +248,16 @@ measuresTieOrRest ms ivs leaf_times =
                     Just iv -> let tie = e < Iv.end iv
                                in (l dur tie notes expressions,leaf_times)
                   where ivContainsStart = flip Iv.isPointInInterval s
-              trans (L _ _ _ _ _) [] = error "measuresTieOrRest: leaf_times have run out"
+              trans L{} [] = error "measuresTieOrRest: leaf_times have run out"
               trans (R _ _) _    = error "measuresTieOrRest: did not expect a rest here"
-              trans (D _ _ _) _ = error "measuresTieOrRest: did not expect a D"
+              trans D{} _ = error "measuresTieOrRest: did not expect a D"
 
 measuresTransformLeafs :: (Transformable a1 E, Iv.Interval a b, Ord b) =>
                         (E -> a -> E) -> [a1] -> [a] -> [(b, b)] -> [a1]
 measuresTransformLeafs f ms ivs leaf_times =
     fst (smap (transform_leafs' trans) ms leaf_times)
         where
-              trans (D _ _ _) _ = error "measuresTieOrRest: did not expect a D"
+              trans D{} _ = error "measuresTieOrRest: did not expect a D"
               trans _ [] = error "measuresTransformLeafs: leaf_times have run out"
               trans elt ((s,_):leaf_times) =
                   case find ivContainsStart ivs of
@@ -271,7 +271,7 @@ labelVoice voice =
         where
               trans (L dur tie _ notes expressions) (id:ids) = (L dur tie id notes expressions,ids)
               trans (R dur _) (id:ids) = (R dur id,ids)
-              trans (D _ _ _) _ = error "labelVoice: did not expect a D"
+              trans D{} _ = error "labelVoice: did not expect a D"
               trans _ [] = error "labelVoice: ids have run out? (should never happen)"
 
 wrapWithD :: E -> E

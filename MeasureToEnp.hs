@@ -37,7 +37,7 @@ tiedOverFromLast assoc id =
       Just x -> has_forward_tie x
     where has_forward_tie (M.R _ _) = False
           has_forward_tie (M.L _ tie _ _ _) = tie
-          has_forward_tie (M.D{}) = error "tiedOverFromLast (M.D _ _ _)"
+          has_forward_tie M.D{} = error "tiedOverFromLast (M.D _ _ _)"
 
 expressionsForChord :: Bool -> L.LispVal -> L.LispVal
 expressionsForChord True _            = L.readLisp' "()"

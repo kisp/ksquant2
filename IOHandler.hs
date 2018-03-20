@@ -5,7 +5,7 @@ where
 import System.IO (hPutStrLn, hPutStr, stderr)
 import System.Environment (getArgs)
 import System.Exit (exitWith, ExitCode(ExitFailure), exitSuccess)
-import Control.Monad (liftM, unless)
+import Control.Monad (unless)
 
 import System.Console.GetOpt (OptDescr(Option)
                              , ArgDescr(ReqArg, NoArg)
@@ -37,7 +37,7 @@ handleIO' m = do
     let inputs = [input]
 
     let outputs = m opts inputs
-    let output = liftM head outputs
+    let output = fmap head outputs
 
     outputHandler output
 

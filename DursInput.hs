@@ -27,7 +27,7 @@ notesKW = readLisp' ":NOTES"
 
 removeTies :: [LispVal] -> [LispVal]
 removeTies (a:t:b:r) | t == tieKW = removeTies (joinByTie a b:r)
-removeTies (a:r)                  = a:(removeTies r)
+removeTies (a:r)                  = a:removeTies r
 removeTies []                     = []
 
 joinByTie :: LispVal -> LispVal -> LispVal

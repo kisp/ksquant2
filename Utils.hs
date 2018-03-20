@@ -77,4 +77,4 @@ dxsToXs = scanl (+) 0
 
 oneOfEq :: (Show a, Eq a) => a -> a -> a
 oneOfEq a b | a == b = a
-            | otherwise = error $ "expected to be Eq: " ++ (show a) ++ " " ++ (show b)
+            | otherwise = error $ "expected to be Eq: " ++ show a ++ " " ++ show b

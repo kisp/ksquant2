@@ -27,12 +27,12 @@ mtoenp1 :: Test
 mtoenp1 = TestList
            [
             E.Measure (4,4) (4,60) [E.Div 4 [E.Chord 1 False n60 nil]]
-            ~=? let leaf = (M.L 1 False 0 n60 nil)
+            ~=? let leaf = M.L 1 False 0 n60 nil
                 in mToEnp
                        [(0,leaf)]
                        (M.M (4,4) (4,60 % 1) leaf)
            ,E.Measure (1,4) (4,60) [E.Div 1 [E.Chord 1 False n60 nil]]
-            ~=? let leaf = (M.L (1%4) False 0 n60 nil)
+            ~=? let leaf = M.L (1%4) False 0 n60 nil
                 in mToEnp
                        [(0,leaf)]
                        (M.M (1,4) (4,60 % 1) leaf)

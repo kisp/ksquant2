@@ -96,8 +96,8 @@ getParser Options { optInputFormat = "durs" } = Right parseAsDursInput
 getParser Options { optInputFormat = f } = Left $ "unknown input format " ++ f
 
 getFilter :: Options -> Err Filter
-getFilter Options { optMeasureSiblingMerge = True } = Right (Right . (fmap (map measureSiblingMerge)))
-getFilter _ = Right (Right . id)
+getFilter Options { optMeasureSiblingMerge = True } = Right (Right . fmap (map measureSiblingMerge))
+getFilter _ = Right Right
 
 getFormatter :: Options -> Err Formatter
 getFormatter Options { optOutputFormat = "enp" } = Right (Right . appendNewline . scoreToEnp)
@@ -145,7 +145,7 @@ quantifyVoice measures divChoicesSeq voice =
     getNotes (M.L dur tie label _ _) qevent =
       M.L dur tie label (SF2.qeventNotes qevent) (SF2.qeventExpressions qevent)
     getNotes (M.R _ _) _ = error "getNotes: R"
-    getNotes (M.D{}) _ = error "getNotes: D"
+    getNotes M.D{} _ = error "getNotes: D"
 
     measuresTieOrRest' a b m = M.measuresTieOrRest m a b
 
