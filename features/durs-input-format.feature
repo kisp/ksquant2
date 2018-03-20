@@ -30,3 +30,12 @@ Feature: durs input format
     When I run `ksquant2 -r durs -w ly foo.durs`
     Then the exit status should be 0
     And the stdout should contain "ime 4/4 <c'>8 <d'>8 r4 r4 r4"
+
+  Scenario: can specify 2 notes for dur
+    Given a file named "foo.durs" with:
+      """
+      (0.5 (0.5 :notes (60 62)))
+      """
+    When I run `ksquant2 -r durs -w ly foo.durs`
+    Then the exit status should be 0
+    And the stdout should contain "ime 4/4 <c'>8 <c' d'>8 r4 r4 r4"
