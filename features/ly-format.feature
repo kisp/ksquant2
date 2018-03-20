@@ -31,7 +31,7 @@ Feature: ly format
        :max-div 8 :forbidden-divs nil)
       """
     When I run `ksquant2 -w ly foo.simple`
-    Then the stdout should contain "<c'>4~ <c'>4~ <c'>4~ <c'>4"
+    Then the stdout should contain "<c'>4 ~ <c'>4 ~ <c'>4 ~ <c'>4"
     Then the exit status should be 0
 
   Scenario Outline: one duration 1//4

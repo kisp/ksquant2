@@ -98,7 +98,7 @@ durToLily :: Dur -> String
 durToLily (Dur x d) = (show . denominator . simpleDurToRatio) x ++ replicate d '.'
 
 eltToLily :: Elt -> String
-eltToLily (Chord d ps tie) = "<" ++ ps' ++ ">" ++ durToLily d ++ if tie then "~" else ""
+eltToLily (Chord d ps tie) = "<" ++ ps' ++ ">" ++ durToLily d ++ if tie then " ~" else ""
   where ps' = unwords (map pitchToLily ps)
 eltToLily (Rest d) = 'r' : durToLily d
 eltToLily (Times n d xs) = "\\times " ++ show n ++ "/" ++ show d ++ " { " ++
