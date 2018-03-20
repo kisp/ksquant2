@@ -19,7 +19,6 @@ import MeasureToEnp (vToEnp)
 import MeasureToLily (vToLily)
 import Data.Maybe (fromMaybe)
 import Data.Either.Unwrap (fromRight)
-import Control.Monad (liftM)
 
 buildMeasureFromLisp :: LispVal -> LispVal -> M.M
 buildMeasureFromLisp (LispList [LispInteger n,LispInteger d])
