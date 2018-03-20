@@ -32,9 +32,9 @@ import Lisp (Sexp
             , fromLispList
             , nil)
 
-data Score a = Score { scoreParts :: [Part a] }
-data Part a = Part { partVoices :: [Voice a], partAttributes :: LispVal }
-data Voice a = Voice { voiceItems :: a }
+data Score a = Score { scoreParts :: [Part a] } deriving (Eq,Show)
+data Part a = Part { partVoices :: [Voice a], partAttributes :: LispVal } deriving (Eq,Show)
+data Voice a = Voice { voiceItems :: a } deriving (Eq,Show)
 
 -- Functor
 instance Functor Score where
