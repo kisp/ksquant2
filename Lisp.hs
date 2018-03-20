@@ -18,16 +18,54 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
-module Lisp (Sexp, toSexp, fromSexp, printSexp, LispVal(..), mapcar', mapcarUpToPlist, readLisp, readLisp', cons,
-             clNull, car, cdr, getf, getf', atom, fromLispList, parseLisp, printLisp, propertyListP,
-             lispEscapeString, nil, n60
+module Lisp (Sexp
+            ,toSexp
+            ,fromSexp
+            ,printSexp
+            ,LispVal(..)
+            ,mapcar'
+            ,mapcarUpToPlist
+            ,readLisp
+            ,readLisp'
+            ,cons
+            ,clNull
+            ,car
+            ,cdr
+            ,getf
+            ,getf'
+            ,atom
+            ,fromLispList
+            ,parseLisp
+            ,printLisp
+            ,propertyListP
+            ,lispEscapeString
+            ,nil
+            ,n60
             ,lispToRational)
 where
+
 import Types (WRat)
-import Text.ParserCombinators.Parsec
+import Text.ParserCombinators.Parsec (Parser
+                                     ,parse
+                                     ,anyToken
+                                     ,char
+                                     ,space
+                                     ,letter
+                                     ,digit
+                                     ,oneOf
+                                     ,noneOf
+                                     ,many
+                                     ,many1
+                                     ,skipMany
+                                     ,skipMany1
+                                     ,endBy
+                                     ,endBy1
+                                     ,eof
+                                     ,(<|>)
+                                     ,try)
 import Data.Char (toUpper)
 import Data.List (elemIndex)
-import Data.Maybe
+import Data.Maybe (fromMaybe)
 import Data.Ratio (numerator, denominator)
 
 data LispVal = LispInteger Integer
@@ -297,4 +335,3 @@ lispToRational (LispInteger x) = fromInteger x
 lispToRational (LispRatio x) = x
 lispToRational (LispFloat x) = x
 lispToRational x = error $ "cannot convert to rational " ++ show x
-
