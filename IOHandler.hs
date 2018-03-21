@@ -15,7 +15,7 @@ import System.Console.GetOpt (OptDescr(Option)
 
 import qualified Types as T (Err)
 import qualified Options as O (PureMain, PureMultiMain, Options(..))
-import qualified Lisp as L (readLisp')
+import qualified Lisp as L (readLisp', fromSexp, mapcar')
 
 handleIO :: O.PureMain -> IO ()
 handleIO = handleIO' . toMulti
@@ -93,8 +93,14 @@ options =
     , Option "m" ["max-div"]
         (ReqArg
             (\arg opt -> return opt { O.optMaxDiv = [read arg] })
-            "Maximum division")
-        "Output format"
+            "DIV")
+        "Maximum division"
+
+    , Option "" ["forbidden-divs"]
+        (ReqArg
+            (\arg opt -> return opt { O.optForbiddenDivs = [L.mapcar' L.fromSexp (L.readLisp' arg)] })
+            "DIVS")
+        "Forbidden divisions"
 
     , Option "" ["measure-sibling-merge"]
         (NoArg

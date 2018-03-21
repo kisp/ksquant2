@@ -47,7 +47,7 @@ module Lisp (Sexp
 
 where
 
-import qualified Types as T (WRat)
+import qualified Types as T (WRat, WInt)
 import Text.ParserCombinators.Parsec (Parser
                                      ,parse
                                      ,anyToken
@@ -318,7 +318,7 @@ instance Sexp LispVal where
   toSexp = id
   fromSexp = id
 
-instance Sexp Integer where
+instance Sexp T.WInt where
   toSexp = LispInteger
   fromSexp (LispInteger x) = x
   fromSexp _ = error "fromSexp: not (LispInteger x)"
