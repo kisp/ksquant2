@@ -76,3 +76,12 @@ Feature: durs output format
     (1 1 -1 -1)
     """
     And the exit status should be 0
+
+  Scenario: 1 triplet
+    Given a file named "foo.durs" with:
+      """
+      (1/3 1/3 1/3 -1 -1 -1)
+      """
+    When I run `ksquant2 -r durs -w durs foo.durs`
+    Then the stdout should contain "(1/3 1/3 1/3 -1 -1 -1)"
+    Then the exit status should be 0
