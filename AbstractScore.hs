@@ -18,7 +18,7 @@
 module AbstractScore (Score(scoreParts)
                      , Part(partVoices)
                      , Voice(voiceItems)
-                     , singleVoice2Score)
+                     , singleVoices2Score)
 
 where
 
@@ -58,8 +58,7 @@ instance (L.Sexp a) => L.Sexp (Voice a) where
     toSexp = L.toSexp . voiceItems
     fromSexp = Voice . L.fromSexp
 
-singleVoice2Score :: a -> Score a
-singleVoice2Score a = Score { scoreParts = [p] }
-  where v = Voice a
-        p = Part { partVoices = [v]
-                 , partAttributes = L.nil }
+singleVoices2Score :: [a] -> Score a
+singleVoices2Score a = Score { scoreParts = map p a }
+  where p v = Part { partVoices = [Voice v]
+                   , partAttributes = L.nil }

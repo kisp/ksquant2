@@ -65,3 +65,27 @@ Feature: durs input format
       """
     When I run `ksquant2 -r durs -w ly foo.durs`
     Then the exit status should be 1
+
+  Scenario: 2 parts
+    Given a file named "foo.durs" with:
+      """
+      (0.5 0.5)
+      (1 1)
+      """
+    When I run `ksquant2 -r durs -w ly foo.durs`
+    Then the stdout should contain "ime 4/4 <c'>8 <c'>8 r4 r4 r4"
+    And the stdout should contain "ime 4/4 <c'>4 <c'>4 r4 r4"
+    And the exit status should be 0
+
+  Scenario: 3 parts
+    Given a file named "foo.durs" with:
+      """
+      (0.5 0.5)
+      (1 1)
+      ((1 :notes (62)) (1 :notes (62)))
+      """
+    When I run `ksquant2 -r durs -w ly foo.durs`
+    Then the stdout should contain "ime 4/4 <c'>8 <c'>8 r4 r4 r4"
+    And the stdout should contain "ime 4/4 <c'>4 <c'>4 r4 r4"
+    And the stdout should contain "ime 4/4 <d'>4 <d'>4 r4 r4"
+    And the exit status should be 0

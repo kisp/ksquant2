@@ -15,8 +15,9 @@ import qualified Lisp as L (LispVal
                            , getf'
                            , readLisp'
                            , fromLispList
-                           , toSexp)
-import qualified AbstractScore as A ( singleVoice2Score )
+                           , toSexp
+                           , fromSexp)
+import qualified AbstractScore as A ( singleVoices2Score )
 import qualified SimpleFormat as SF ( Score, Event(..) )
 
 tieKW :: L.LispVal
@@ -39,7 +40,10 @@ joinByTie a b = L.toSexp [L.rationalToLisp newDur, notesKW, U.oneOfEq notesA not
         notesB = L.getf' (L.cdr (L.ensureList b)) notesKW L.n60
 
 dursInputToSFScore :: L.LispVal -> SF.Score
-dursInputToSFScore input = A.singleVoice2Score events
+dursInputToSFScore input = A.singleVoices2Score $ map dursInputToEvents (L.fromSexp input)
+
+dursInputToEvents :: L.LispVal -> [SF.Event]
+dursInputToEvents input = events
   where inputNoTies = removeTies . L.fromLispList $ input
         durs = map (L.lispToRational . L.car . L.ensureList) inputNoTies
         points = U.dxsToXs (map abs durs)

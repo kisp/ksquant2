@@ -54,6 +54,7 @@ import qualified Measure as M (Ms
                               , Score)
 import qualified Lisp as L (LispVal()
                            , fromSexp
+                           , toSexp
                            , mapcar'
                            , parseLisp)
 import DursInput (dursInputToSFScore)
@@ -115,8 +116,7 @@ parseAsSFInput input = do
 parseAsDursInput :: Parser
 parseAsDursInput input = do
   forms <- L.parseLisp input
-  let (first_form:_) = forms
-  return $ DursInput first_form
+  return $ DursInput (L.toSexp forms)
 
 computeBestDivs :: M.Ms -> T.DivChoicesSeq -> SF2.Events -> T.BestDivsSeq
 computeBestDivs measures divChoicesSeq input =
