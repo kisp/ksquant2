@@ -15,8 +15,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module AdjoinTies(adjoinTies)
+module AdjoinTies (adjoinTies)
+
 where
+
 import Measure ( M(M), E(L,D) )
 import Data.Ratio ((%))
 import Lisp ( nil, n60 )

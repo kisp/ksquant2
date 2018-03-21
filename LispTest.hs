@@ -15,12 +15,24 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module LispTest where
-import Lisp
-import Test.HUnit
-import Data.Maybe
-import Data.Either.Unwrap
-import Data.Ratio
+module LispTest
+
+where
+
+import Lisp ( LispVal(..)
+            , readLisp
+            , mapcar'
+            , toSexp
+            , printLisp
+            , parseLisp
+            , lispEscapeString
+            , propertyListP
+            , getf)
+
+import Test.HUnit ( Assertion, Test(TestList), (@=?), (~=?) )
+import Data.Maybe (fromMaybe)
+import Data.Either.Unwrap (fromLeft, fromRight)
+import Data.Ratio ( (%) )
 
 rightOrError :: Either t t1 -> t1
 rightOrError x = case x of

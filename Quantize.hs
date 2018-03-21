@@ -19,6 +19,7 @@
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Quantize (bestDiv, quantizeIv)
+
 where
 
 import Types (DivChoices, Div, WRat, Time, TimeInterval)

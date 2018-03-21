@@ -1,4 +1,5 @@
 module Options ( Options(..), PureMain, PureMultiMain )
+
 where
 
 import Types (WInt, Err)

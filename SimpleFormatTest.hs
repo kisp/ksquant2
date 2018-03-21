@@ -15,10 +15,13 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module SimpleFormatTest where
-import SimpleFormat
-import Lisp (readLisp')
-import Test.HUnit
+module SimpleFormatTest
+
+where
+
+import SimpleFormat ( Event(Chord, Rest), sexp2event )
+import Lisp ( readLisp' )
+import Test.HUnit ( Test(TestList), (~=?) )
 
 sexp2event1 :: Test
 sexp2event1 = TestList

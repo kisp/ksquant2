@@ -1,4 +1,4 @@
-module IOHandler
+module IOHandler (handleIO)
 
 where
 

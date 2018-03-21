@@ -18,6 +18,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 module Main (main)
+
 where
 
 import Types (Err

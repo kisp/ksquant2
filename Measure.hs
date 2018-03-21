@@ -19,45 +19,45 @@
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Measure (m
-               ,l
-               ,d
-               ,r
-               ,dur
-               ,E(L,D,R)
-               ,M(M)
-               ,Ms
-               ,transform_leafs
-               ,transform_leafs'
-               ,measuresDivideLeafs
-               ,measuresWithBeats
-               ,leafDurs
-               ,leafEffectiveDurs
-               ,measuresLeafIntervals
-               ,measureNumLeaf
-               ,measuresTransformLeafs
-               ,wrapWithD
-               ,Score
-               ,Part
-               ,Voice
-               ,Label
-               ,measuresTieOrRest
-               ,measuresUntilTime
-               ,measureDur
-               ,labelVoice
-               ,mleaves
-               ,vleaves
-               ,eid
-               )
+               , l
+               , d
+               , r
+               , dur
+               , E(L,D,R)
+               , M(M)
+               , Ms
+               , transform_leafs
+               , transform_leafs'
+               , measuresDivideLeafs
+               , measuresWithBeats
+               , leafDurs
+               , leafEffectiveDurs
+               , measuresLeafIntervals
+               , measureNumLeaf
+               , measuresTransformLeafs
+               , wrapWithD
+               , Score
+               , Part
+               , Voice
+               , Label
+               , measuresTieOrRest
+               , measuresUntilTime
+               , measureDur
+               , labelVoice
+               , mleaves
+               , vleaves
+               , eid)
+
 where
 
-import Types (Timesig, Tempo, InfInt)
-import Data.Ratio
-import Utils
+import Types (Timesig, Tempo, InfInt, WRat, WInt)
+import Data.Ratio ( (%) )
+import Utils (dxsToXs, neighbours)
 import qualified AbstractScore as A (Score, Part, Voice)
-import qualified Interval as Iv
-import Data.List
-import qualified Lisp as L
-import DurCalc
+import qualified Interval as Iv (Interval, end, isPointInInterval)
+import Data.List (find)
+import qualified Lisp as L (LispVal, readLisp')
+import DurCalc (notableDurL, divToRatio)
 
 type Score = A.Score Ms
 type Part = A.Part Ms
@@ -91,7 +91,7 @@ eid D{} = error "id not for D"
 eid (R _ x) = x
 eid (L _ _ x _ _) = x
 
-timesigDur :: Integral a => (a, a) -> Ratio a
+timesigDur :: (WInt, WInt) -> WRat
 timesigDur (n,d) = n%d
 
 m :: (Integer, Integer) -> Tempo -> E -> M

@@ -18,10 +18,27 @@
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing -fno-warn-orphans #-}
 
-module IntervalTest where
-import Interval
-import Test.QuickCheck
-import Data.List (delete,sort,nub)
+module IntervalTest
+
+where
+
+import Interval ( Interval
+                , start
+                , end
+                , AscendingIntervals
+                , AscendingPoints
+                , isPointInInterval
+                , intersect
+                , isStrictlyAfter
+                , ascendingIntervals
+                , ascendingPoints
+                , groupPointsByIntervalls
+                , getAscendingIntervals
+                , getAscendingPoints
+                , ascendingIntervals2points)
+
+import Test.QuickCheck (Arbitrary, arbitrary, Gen, choose)
+import Data.List (delete, sort, nub)
 
 ivmax :: Int
 ivmax = 30::Int

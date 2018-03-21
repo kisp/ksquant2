@@ -17,18 +17,20 @@
 
 
 
-module DurCalcTest where
+module DurCalcTest
 
-import Types (WRat)
-import qualified Test.Framework.Providers.API as TF
-import Test.Framework.Providers.API (testGroup)
-import Test.Framework.Providers.HUnit (testCase)
-import Test.Framework.Providers.QuickCheck2 (testProperty)
-import Test.HUnit
-import Test.QuickCheck
+where
+
+import Types ( WRat )
+import qualified Test.Framework.Providers.API as TF ( Test )
+import Test.Framework.Providers.API ( testGroup )
+import Test.Framework.Providers.HUnit ( testCase )
+import Test.Framework.Providers.QuickCheck2 ( testProperty )
+import Test.HUnit ( Assertion, (@=?) )
+import Test.QuickCheck ( Arbitrary, arbitrary, Gen, Property, choose, (==>) )
 
 import Data.Ratio ( (%) )
-import DurCalc (notableDur, dotFactor, exp2, isExp2)
+import DurCalc ( notableDur, dotFactor, exp2, isExp2 )
 
 newtype Dur = Dur WRat
     deriving (Show, Eq)

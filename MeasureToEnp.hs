@@ -15,13 +15,16 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module MeasureToEnp(vToEnp,mToEnp)
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
+
+module MeasureToEnp (vToEnp, mToEnp)
+
 where
-import qualified Measure as M
+
+import qualified Measure as M ( M(M), E(D,R,L), Label, dur, Ms, labelVoice, vleaves, eid )
 import qualified Enp as E ( Elt(..), EnpDur, Measure, dur, scaleElt, makeMeasure, Measures )
-import qualified Lisp as L
-import Data.Ratio
-import Prelude hiding (id)
+import qualified Lisp as L ( LispVal, readLisp' )
+import Data.Ratio ( Ratio, denominator, (%), numerator )
 
 durs2factor :: Integral a => [Ratio a] -> Ratio a
 durs2factor xs = foldl1 lcm (map denominator xs) % 1

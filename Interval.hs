@@ -36,8 +36,8 @@ module Interval (Point
                 ,groupPointsByIntervalls
                 ,ascendingIntervals2points
                 ,divideInterval
-                ,locatePoint
-                )
+                ,locatePoint)
+
 where
 
 import Types (Time)

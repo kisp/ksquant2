@@ -15,13 +15,16 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module MeasureToEnpTest where
+module MeasureToEnpTest
+
+where
+
 import qualified Measure as M ( M(M), E(L) )
-import MeasureToEnp
+import MeasureToEnp (mToEnp)
 import qualified Enp as E ( Elt (..), Measure(..) )
-import Test.HUnit
-import Data.Ratio
-import Lisp
+import Test.HUnit (Test(TestList), (~=?) )
+import Data.Ratio ( (%) )
+import Lisp (n60, nil)
 
 mtoenp1 :: Test
 mtoenp1 = TestList

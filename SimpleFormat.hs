@@ -15,14 +15,13 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module SimpleFormat (
-  Score
-  ,Part
-  ,Voice
-  ,Event(..)
-  ,Events
-  ,eventStart
-  ,sexp2event)
+module SimpleFormat (Score
+                    , Part
+                    , Voice
+                    , Event(..)
+                    , Events
+                    , eventStart
+                    , sexp2event)
 
 where
 

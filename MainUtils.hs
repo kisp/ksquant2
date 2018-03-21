@@ -5,6 +5,7 @@ module MainUtils (unwrapLeft
                  , addInlineOptions
                  , scoreToLily
                  , scoreToEnp)
+
 where
 
 import Types (Err, WInt, Time)

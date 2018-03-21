@@ -15,21 +15,20 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Types(
-  InfInt
-  , WInt
-  , Time
-  , TimeInterval
-  , Div
-  , DivChoices
-  , DivChoicesSeq
-  , BestDivsSeq
-  , Err
-  , Timesig
-  , Tempo
-  , WRat
-  , QuantGrid
-  )
+module Types(InfInt
+            , WInt
+            , Time
+            , TimeInterval
+            , Div
+            , DivChoices
+            , DivChoicesSeq
+            , BestDivsSeq
+            , Err
+            , Timesig
+            , Tempo
+            , WRat
+            , QuantGrid)
+
 where
 
 type WRat = Rational

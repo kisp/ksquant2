@@ -18,12 +18,12 @@
 module AdjoinTiesTest
 where
 
-import Types (WRat)
-import Measure
-import Test.HUnit
-import Data.Ratio
-import Lisp
-import AdjoinTies
+import Types ( WRat )
+import Measure ( M(M), E(D), l, dur)
+import Test.HUnit ( Assertion, (@=?) )
+import Data.Ratio ( (%) )
+import Lisp ( n60, nil )
+import AdjoinTies ( adjoinTies )
 
 type Dur = WRat
 

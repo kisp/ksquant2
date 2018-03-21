@@ -15,11 +15,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module AbstractScore
-    (Score(scoreParts)
-    ,Part(partVoices)
-    ,Voice(voiceItems)
-    ,singleVoice2Score)
+module AbstractScore (Score(scoreParts)
+                     , Part(partVoices)
+                     , Voice(voiceItems)
+                     , singleVoice2Score)
 
 where
 

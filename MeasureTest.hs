@@ -15,11 +15,14 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module MeasureTest where
-import Measure
-import Test.HUnit
-import Data.Ratio
-import Lisp
+module MeasureTest
+
+where
+
+import Measure ( M(M), E(D), l, measuresWithBeats, measureDur )
+import Test.HUnit (Test(TestList), (~=?))
+import Data.Ratio ( (%) )
+import Lisp (n60, nil)
 
 measure1 :: Test
 measure1 = TestList

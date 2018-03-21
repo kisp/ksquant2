@@ -17,13 +17,13 @@
 
 -- | Some utilities.
 module Utils (neighbours
-             ,isForAllNeighbours
-             ,stickToLast
-             ,repeatList
-             ,rationalPairToTimePair
-             ,appendNewline
-             ,dxsToXs
-             ,oneOfEq)
+             , isForAllNeighbours
+             , stickToLast
+             , repeatList
+             , rationalPairToTimePair
+             , appendNewline
+             , dxsToXs
+             , oneOfEq)
 where
 
 import Types (Time)

@@ -1,8 +1,9 @@
 module DursInput (dursInputToSFScore)
+
 where
 
-import Types (Time, WRat)
-import Utils (dxsToXs, oneOfEq)
+import Types ( Time, WRat )
+import Utils ( dxsToXs, oneOfEq )
 import Lisp (LispVal
             , nil
             , n60
@@ -15,9 +16,8 @@ import Lisp (LispVal
             , readLisp'
             , fromLispList
             , toSexp)
-import qualified AbstractScore as A (singleVoice2Score)
-import qualified SimpleFormat as SF (Score
-                                    ,Event(..))
+import qualified AbstractScore as A ( singleVoice2Score )
+import qualified SimpleFormat as SF ( Score, Event(..) )
 
 tieKW :: LispVal
 tieKW = readLisp' ":tie"

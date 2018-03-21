@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module MeasureSiblingMerge (measureSiblingMerge)
+
 where
 
 import Measure ( M(..), E(..), m, d, r, l)

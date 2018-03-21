@@ -19,19 +19,19 @@
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module SimpleFormat2 (voiceToSimpleFormat2
-                     ,Score
-                     ,Part
-                     ,Voice
-                     ,Event
-                     ,Events
-                     ,QEvent
-                     ,QEvents
-                     ,voiceEnd
-                     ,scoreEnd
-                     ,qeventFromEvent
-                     ,qeventNotes
-                     ,qeventExpressions
-                     ,withoutEndMarker)
+                     , Score
+                     , Part
+                     , Voice
+                     , Event
+                     , Events
+                     , QEvent
+                     , QEvents
+                     , voiceEnd
+                     , scoreEnd
+                     , qeventFromEvent
+                     , qeventNotes
+                     , qeventExpressions
+                     , withoutEndMarker)
 where
 
 import Types (Time, WRat)

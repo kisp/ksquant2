@@ -26,12 +26,13 @@ module Enp (voice2sexp
            ,scaleElt
            ,dur
            ,EnpDur)
+
 where
 
 import Types (WInt, Tempo, Timesig)
 import Data.Either.Unwrap (fromRight)
-import Lisp (LispVal(LispList, LispKeyword, LispInteger, LispFloat), clNull, parseLisp, cons )
-import qualified AbstractScore as A (Score, Part, Voice)
+import Lisp ( LispVal(LispList, LispKeyword, LispInteger, LispFloat), clNull, parseLisp, cons )
+import qualified AbstractScore as A ( Score, Part, Voice )
 
 type EnpDur = WInt
 

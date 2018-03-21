@@ -15,20 +15,37 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module Test where
+module Test
 
-import System.Environment
-import Test.Framework
-import Test.Framework.Providers.HUnit
-import Test.Framework.Providers.QuickCheck2
+where
 
-import IntervalTest
-import LispTest
-import MeasureTest
-import MeasureToEnpTest
-import SimpleFormatTest
-import AdjoinTiesTest
-import DurCalcTest
+import System.Environment (getArgs)
+import Test.Framework ( Test, testGroup, defaultMainWithArgs )
+import Test.Framework.Providers.HUnit ( testCase, hUnitTestToTests )
+import Test.Framework.Providers.QuickCheck2 ( testProperty )
+
+import IntervalTest ( prop_good_iv
+                    , prop_isPointInInterval
+                    , prop_intersect
+                    , prop_isStrictlyAfter
+                    , prop_groupPointsByIntervalls
+                    , prop_ascendingIntervals2points )
+
+import LispTest (readLisp1
+                , readLisp2
+                , readLisp3
+                , prop_mapcar'
+                , prop_string_roundTrip
+                , lisp1
+                , lisp2
+                , lisp3
+                , parseComment1)
+
+import MeasureTest ( measure1 )
+import MeasureToEnpTest ( mtoenp1 )
+import SimpleFormatTest ( sexp2event1 )
+import AdjoinTiesTest ( adjoin1, adjoin2, adjoin3 )
+import DurCalcTest ( durCalcTests )
 
 intervalTests :: Test
 intervalTests = testGroup "intervalTests"
