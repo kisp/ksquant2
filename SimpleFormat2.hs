@@ -34,15 +34,15 @@ module SimpleFormat2 (voiceToSimpleFormat2
                      , withoutEndMarker)
 where
 
-import Types (Time, WRat)
-import Utils (neighbours)
+import qualified Types as T (Time, WRat)
+import qualified Utils as U (neighbours)
 import qualified SimpleFormat as SF1 (Events, eventStart, Event(Chord))
 import qualified AbstractScore as A (Score, Part, Voice, scoreParts, partVoices, voiceItems)
-import Interval (Interval, start, end)
+import qualified Interval as Iv (Interval, start, end)
 import qualified Lisp as L (LispVal)
 
-type Start = Time
-type End = Time
+type Start = T.Time
+type End = T.Time
 
 type Score = A.Score Events
 type Part = A.Part Events
@@ -57,17 +57,17 @@ data Event = Chord Start End Notes Expressions
            | EndMarker Start
            deriving Show
 
-type QStart = WRat
-type QEnd = WRat
+type QStart = T.WRat
+type QEnd = T.WRat
 
 data QEvent = QChord QStart QEnd Notes Expressions
            deriving Show
 
 type QEvents = [QEvent]
 
-qeventFromEvent :: (Interval a QStart) => a -> Event -> QEvent
+qeventFromEvent :: (Iv.Interval a QStart) => a -> Event -> QEvent
 qeventFromEvent quantized_iv (Chord _ _ n e) =
-    QChord (start quantized_iv) (end quantized_iv) n e
+    QChord (Iv.start quantized_iv) (Iv.end quantized_iv) n e
 qeventFromEvent _ (EndMarker _) = error "qeventFromEvent _ (EndMarker _)"
 
 qeventNotes :: QEvent -> Notes
@@ -75,27 +75,27 @@ qeventNotes (QChord _ _ notes _) = notes
 qeventExpressions :: QEvent -> Expressions
 qeventExpressions (QChord _ _ _ expressions) = expressions
 
-instance Interval Event Time where
+instance Iv.Interval Event T.Time where
     start (Chord s _ _ _) = s
     start (EndMarker s) = s
     end (Chord _ e _ _) = e
     end (EndMarker s) = s
 
-instance Interval QEvent Rational where
+instance Iv.Interval QEvent Rational where
     start (QChord s _ _ _) = s
     end (QChord _ e _ _) = e
 
 voiceToSimpleFormat2 :: SF1.Events -> Events
 voiceToSimpleFormat2 v =
     let events = v
-        startEndPairs = neighbours (map SF1.eventStart events)
+        startEndPairs = U.neighbours (map SF1.eventStart events)
         trans (SF1.Chord _ notes expressions,(start,end)) = [Chord start end notes expressions]
         trans _ = []
     in (concatMap trans (zip events startEndPairs) ++
         [EndMarker $ SF1.eventStart (last events)])
 
 voiceEnd :: Voice -> End
-voiceEnd v = (start . last) $ A.voiceItems v
+voiceEnd v = (Iv.start . last) $ A.voiceItems v
 
 withoutEndMarker :: [a] -> [a]
 withoutEndMarker = init -- butlast

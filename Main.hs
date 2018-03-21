@@ -21,17 +21,16 @@ module Main (main)
 
 where
 
-import Types (Err
-             , DivChoicesSeq
-             , BestDivsSeq
-             , QuantGrid
-             )
-import Options(Options(..), PureMain)
-import Utils (stickToLast
-             , repeatList
-             , rationalPairToTimePair
-             , appendNewline
-             )
+import qualified Types as T (Err
+                            , DivChoicesSeq
+                            , BestDivsSeq
+                            , QuantGrid
+                            )
+import qualified Options as O (Options(..), PureMain)
+import qualified Utils as U (stickToLast
+                            , repeatList
+                            , rationalPairToTimePair
+                            , appendNewline)
 import IOHandler (handleIO)
 import MainUtils ( unwrapLeft
                  , getSimple
@@ -52,10 +51,10 @@ import qualified Measure as M (Ms
                               , measuresTransformLeafs
                               , measureNumLeaf
                               , Score)
-import Lisp (LispVal()
-            , fromSexp
-            , mapcar'
-            , parseLisp)
+import qualified Lisp as L (LispVal()
+                           , fromSexp
+                           , mapcar'
+                           , parseLisp)
 import DursInput (dursInputToSFScore)
 import qualified SimpleFormat as SF (Score, sexp2event)
 import qualified SimpleFormat2 as SF2 (Events
@@ -73,17 +72,17 @@ import AdjoinTies (adjoinTies)
 import MeasureSiblingMerge (measureSiblingMerge)
 import Data.List ((\\))
 
-type Parser = String -> Err ParseResult
-type Processor = ParseResult -> Err M.Score
-type Filter = M.Score -> Err M.Score
-type Formatter = M.Score -> Err String
+type Parser = String -> T.Err ParseResult
+type Processor = ParseResult -> T.Err M.Score
+type Filter = M.Score -> T.Err M.Score
+type Formatter = M.Score -> T.Err String
 
-data ParseResult = SFInput LispVal
-                 | DursInput LispVal
+data ParseResult = SFInput L.LispVal
+                 | DursInput L.LispVal
 
-getProcessor :: Options -> Processor
+getProcessor :: O.Options -> Processor
 getProcessor opts (SFInput parseResult) = do
-     simple <- getSimple parseResult :: Err LispVal
+     simple <- getSimple parseResult :: T.Err L.LispVal
      let sf_score = simple2sf_score simple :: SF.Score
      opts' <- addInlineOptions opts parseResult
      process_sf_score opts' sf_score
@@ -91,38 +90,38 @@ getProcessor opts (DursInput parseResult) = do
      let sf_score = dursInputToSFScore parseResult
      process_sf_score opts sf_score
 
-getParser :: Options -> Err Parser
-getParser Options { optInputFormat = "sf" } = Right parseAsSFInput
-getParser Options { optInputFormat = "durs" } = Right parseAsDursInput
-getParser Options { optInputFormat = f } = Left $ "unknown input format " ++ f
+getParser :: O.Options -> T.Err Parser
+getParser O.Options { O.optInputFormat = "sf" } = Right parseAsSFInput
+getParser O.Options { O.optInputFormat = "durs" } = Right parseAsDursInput
+getParser O.Options { O.optInputFormat = f } = Left $ "unknown input format " ++ f
 
-getFilter :: Options -> Err Filter
-getFilter Options { optMeasureSiblingMerge = True } = Right (Right . fmap (map measureSiblingMerge))
+getFilter :: O.Options -> T.Err Filter
+getFilter O.Options { O.optMeasureSiblingMerge = True } = Right (Right . fmap (map measureSiblingMerge))
 getFilter _ = Right Right
 
-getFormatter :: Options -> Err Formatter
-getFormatter Options { optOutputFormat = "enp" } = Right (Right . appendNewline . scoreToEnp)
-getFormatter Options { optOutputFormat = "ly" } = Right (Right . appendNewline . scoreToLily)
-getFormatter Options { optOutputFormat = f } = Left $ "unknown output format " ++ f
+getFormatter :: O.Options -> T.Err Formatter
+getFormatter O.Options { O.optOutputFormat = "enp" } = Right (Right . U.appendNewline . scoreToEnp)
+getFormatter O.Options { O.optOutputFormat = "ly" } = Right (Right . U.appendNewline . scoreToLily)
+getFormatter O.Options { O.optOutputFormat = f } = Left $ "unknown output format " ++ f
 
 parseAsSFInput :: Parser
 parseAsSFInput input = do
-  forms <- parseLisp input
+  forms <- L.parseLisp input
   let (first_form:_) = forms
   return $ SFInput first_form
 
 parseAsDursInput :: Parser
 parseAsDursInput input = do
-  forms <- parseLisp input
+  forms <- L.parseLisp input
   let (first_form:_) = forms
   return $ DursInput first_form
 
-computeBestDivs :: M.Ms -> DivChoicesSeq -> SF2.Events -> BestDivsSeq
+computeBestDivs :: M.Ms -> T.DivChoicesSeq -> SF2.Events -> T.BestDivsSeq
 computeBestDivs measures divChoicesSeq input =
   let
     input' = Iv.ascendingIntervals input
     beats_intervals = Iv.ascendingIntervals
-                      (map rationalPairToTimePair
+                      (map U.rationalPairToTimePair
                         (M.measuresLeafIntervals measures))
     beats_intervals' = Iv.getAscendingIntervals beats_intervals
     points = Iv.ascendingIntervals2points input'
@@ -132,15 +131,15 @@ computeBestDivs measures divChoicesSeq input =
      beats_intervals'
      groups
 
-computeQEvents :: QuantGrid -> SF2.Events -> SF2.QEvents
+computeQEvents :: T.QuantGrid -> SF2.Events -> SF2.QEvents
 computeQEvents quant_grid input =
   let
-    quant_grid' = Iv.ascendingIntervals (map rationalPairToTimePair quant_grid)
+    quant_grid' = Iv.ascendingIntervals (map U.rationalPairToTimePair quant_grid)
     quant_grid_asc = Iv.ascendingIntervals quant_grid
   in
     map (Qu.quantizeIv SF2.qeventFromEvent quant_grid_asc quant_grid') input
 
-quantifyVoice :: M.Ms -> DivChoicesSeq -> SF2.Events -> M.Ms
+quantifyVoice :: M.Ms -> T.DivChoicesSeq -> SF2.Events -> M.Ms
 quantifyVoice measures divChoicesSeq voice =
   let
     getNotes (M.L dur tie label _ _) qevent =
@@ -163,50 +162,50 @@ quantifyVoice measures divChoicesSeq voice =
            measuresTieOrRest' qevents quant_grid)
     in transformMeasures measures'
 
-quantifyVoiceOrErr :: M.Ms -> DivChoicesSeq -> SF2.Events -> Err M.Ms
+quantifyVoiceOrErr :: M.Ms -> T.DivChoicesSeq -> SF2.Events -> T.Err M.Ms
 quantifyVoiceOrErr measures divChoicesSeq voice =
   Right (quantifyVoice measures divChoicesSeq voice)
 
-mkTrans :: Options -> SF2.Score -> Err (SF2.Score -> A.Score (Err M.Ms))
+mkTrans :: O.Options -> SF2.Score -> T.Err (SF2.Score -> A.Score (T.Err M.Ms))
 mkTrans opts sf2 = do
-  let Options { optMaxDiv = maxdiv
-              , optForbiddenDivs = forbid
-              , optTimeSignatures = ts
-              , optMetronomes = ms }
+  let O.Options { O.optMaxDiv = maxdiv
+              , O.optForbiddenDivs = forbid
+              , O.optTimeSignatures = ts
+              , O.optMetronomes = ms }
         = opts
   let sf2end = SF2.scoreEnd sf2
   let tsmetro = (ts, ms)
   measures <- measuresUntilTime sf2end (measureStream' tsmetro)
   let divs = zipWith (\m f -> [1..m] \\ f)
-             (stickToLast maxdiv)
-             (stickToLast forbid)
-  let beatDivs = repeatList divs (map M.measureNumLeaf measures)
+             (U.stickToLast maxdiv)
+             (U.stickToLast forbid)
+  let beatDivs = U.repeatList divs (map M.measureNumLeaf measures)
   let trans = quantifyVoiceOrErr measures beatDivs
   return $ fmap trans
 
-simple2sf_score ::  LispVal -> SF.Score
+simple2sf_score ::  L.LispVal -> SF.Score
 simple2sf_score simple =
   let
-    lispVal2Score :: LispVal -> A.Score LispVal
-    lispVal2Score = fromSexp
-    score = lispVal2Score simple :: A.Score LispVal
-    sf_score = fmap (mapcar' SF.sexp2event) score :: SF.Score
+    lispVal2Score :: L.LispVal -> A.Score L.LispVal
+    lispVal2Score = L.fromSexp
+    score = lispVal2Score simple :: A.Score L.LispVal
+    sf_score = fmap (L.mapcar' SF.sexp2event) score :: SF.Score
   in sf_score
 
 sf_score2sf2_score :: SF.Score -> SF2.Score
 sf_score2sf2_score = fmap SF2.voiceToSimpleFormat2
 
-process_sf_score ::  Options -> SF.Score -> Err M.Score
+process_sf_score ::  O.Options -> SF.Score -> T.Err M.Score
 process_sf_score opts sf_score =
   do
     let sf2_score = sf_score2sf2_score sf_score :: SF2.Score
 
-    trans <- mkTrans opts sf2_score :: Err (SF2.Score -> A.Score (Err M.Ms))
-    let mscore = trans sf2_score :: A.Score (Err M.Ms)
+    trans <- mkTrans opts sf2_score :: T.Err (SF2.Score -> A.Score (T.Err M.Ms))
+    let mscore = trans sf2_score :: A.Score (T.Err M.Ms)
 
     unwrapLeft mscore
 
-processInput :: PureMain
+processInput :: O.PureMain
 processInput opts input = do
   parse <- getParser opts
   let process = getProcessor opts

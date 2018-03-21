@@ -47,7 +47,7 @@ module Lisp (Sexp
 
 where
 
-import Types (WRat)
+import qualified Types as T (WRat)
 import Text.ParserCombinators.Parsec (Parser
                                      ,parse
                                      ,anyToken
@@ -333,13 +333,13 @@ n60 = readLisp' "(60)"
 nil :: LispVal
 nil = readLisp' "()"
 
-lispToRational :: LispVal -> WRat
+lispToRational :: LispVal -> T.WRat
 lispToRational (LispInteger x) = fromInteger x
 lispToRational (LispRatio x) = x
 lispToRational (LispFloat x) = x
 lispToRational x = error $ "cannot convert to rational " ++ show x
 
-rationalToLisp :: WRat -> LispVal
+rationalToLisp :: T.WRat -> LispVal
 rationalToLisp = LispRatio
 
 ensureList :: LispVal -> LispVal

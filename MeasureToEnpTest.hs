@@ -24,18 +24,18 @@ import MeasureToEnp (mToEnp)
 import qualified Enp as E ( Elt (..), Measure(..) )
 import Test.HUnit (Test(TestList), (~=?) )
 import Data.Ratio ( (%) )
-import Lisp (n60, nil)
+import qualified Lisp as L (n60, nil)
 
 mtoenp1 :: Test
 mtoenp1 = TestList
            [
-            E.Measure (4,4) (4,60) [E.Div 4 [E.Chord 1 False n60 nil]]
-            ~=? let leaf = M.L 1 False 0 n60 nil
+            E.Measure (4,4) (4,60) [E.Div 4 [E.Chord 1 False L.n60 L.nil]]
+            ~=? let leaf = M.L 1 False 0 L.n60 L.nil
                 in mToEnp
                        [(0,leaf)]
                        (M.M (4,4) (4,60 % 1) leaf)
-           ,E.Measure (1,4) (4,60) [E.Div 1 [E.Chord 1 False n60 nil]]
-            ~=? let leaf = M.L (1%4) False 0 n60 nil
+           ,E.Measure (1,4) (4,60) [E.Div 1 [E.Chord 1 False L.n60 L.nil]]
+            ~=? let leaf = M.L (1%4) False 0 L.n60 L.nil
                 in mToEnp
                        [(0,leaf)]
                        (M.M (1,4) (4,60 % 1) leaf)

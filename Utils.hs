@@ -26,7 +26,7 @@ module Utils (neighbours
              , oneOfEq)
 where
 
-import Types (Time)
+import qualified Types as T (Time)
 
 -- | Return adjacent elements as pairs.
 --
@@ -63,10 +63,10 @@ repeatList (x:xs) (r:rs) | r > 1 = x:repeatList (x:xs) (r-1:rs)
                      | r < 1 = repeatList xs rs
                      | otherwise = undefined
 
-rationalToTime :: Rational -> Time
+rationalToTime :: Rational -> T.Time
 rationalToTime = fromRational
 
-rationalPairToTimePair :: (Rational, Rational) -> (Time, Time)
+rationalPairToTimePair :: (Rational, Rational) -> (T.Time, T.Time)
 rationalPairToTimePair (x,y) = (rationalToTime x, rationalToTime y)
 
 appendNewline :: String -> String

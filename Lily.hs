@@ -30,7 +30,7 @@ module Lily (showLily
 
 where
 
-import Types (WInt, WRat)
+import qualified Types as T (WInt, WRat)
 import Data.Ratio ((%), denominator)
 import Data.List (intercalate)
 import qualified AbstractScore as A (Score
@@ -62,7 +62,7 @@ data Dur = Dur SimpleDur Int
 
 type Tied = Bool
 
-type Octave = WInt
+type Octave = T.WInt
 
 data Name = A | B | C | D | E | F | G
           deriving Show
@@ -78,7 +78,7 @@ data Elt = Chord Dur [Pitch] Tied
          | Times Int Int [Elt]
            deriving Show
 
-simpleDurToRatio :: SimpleDur -> WRat
+simpleDurToRatio :: SimpleDur -> T.WRat
 simpleDurToRatio x =
     case x of
       D1 -> 1 % 1

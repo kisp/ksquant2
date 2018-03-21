@@ -40,9 +40,9 @@ module Interval (Point
 
 where
 
-import Types (Time)
+import qualified Types as T (Time)
 
-import Utils (isForAllNeighbours, neighbours)
+import qualified Utils as U (isForAllNeighbours, neighbours)
 
 -- http://www.haskell.org/haskellwiki/Functional_dependencies
 -- This tells Haskell that b is uniquely determined from a.
@@ -61,7 +61,7 @@ class Point a b | a -> b where
 --    start (x,_) = x
 --    end (_,x) = x
 
-instance Interval (Time, Time) Time where
+instance Interval (T.Time, T.Time) T.Time where
   start (x,_) = x
   end (_,x) = x
 
@@ -101,7 +101,7 @@ data AscendingIntervals a = AscendingIntervals [a]
 
 {-# ANN isAscendingIntervals "HLint: ignore Eta reduce" #-}
 isAscendingIntervals :: (Interval b a, Ord a) => [b] -> Bool
-isAscendingIntervals xs = isForAllNeighbours isStrictlyAfter xs
+isAscendingIntervals xs = U.isForAllNeighbours isStrictlyAfter xs
 
 ascendingIntervals :: (Interval a1 a, Ord a) => [a1] -> AscendingIntervals a1
 ascendingIntervals ivs =
@@ -117,7 +117,7 @@ data AscendingPoints a = AscendingPoints [a]
                        deriving (Show, Eq)
 ascendingPoints :: Ord a => [a] -> AscendingPoints a
 ascendingPoints xs =
-    if not (isForAllNeighbours (<) xs) then
+    if not (U.isForAllNeighbours (<) xs) then
         error "not (isForAllNeighbours (<) xs)"
     else
         AscendingPoints xs
@@ -156,7 +156,7 @@ divideInterval iv n =
     let n' = fromInteger n
         new_dur = dur iv / n'
         points = map ((+ start iv) . (*new_dur)) [0..n']
-    in ascendingIntervals (neighbours points)
+    in ascendingIntervals (U.neighbours points)
 
 -- TODO implement this as a binary search
 locatePoint :: (Interval t a1, Show t, Ord a1, Num a, Eq t, Show a, Show a1) =>

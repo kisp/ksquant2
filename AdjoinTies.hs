@@ -19,39 +19,39 @@ module AdjoinTies (adjoinTies)
 
 where
 
-import Measure ( M(M), E(L,D) )
+import qualified Measure as M ( M(M), E(L,D) )
 import Data.Ratio ((%))
-import Lisp ( nil, n60 )
+import qualified Lisp as L ( nil, n60 )
 --import Debug.Trace
 
-adjoinTies' :: M -> M
+adjoinTies' :: M.M -> M.M
 adjoinTies' x
-  | x == M (1,4) (4,60 % 1)
-          (D (1 % 4) (1 % 1)
-                 [D (1 % 4) (2 % 3)
-                        [L (1 % 8) True 0 n60 nil
-                        ,L (1 % 8) False 0 n60 nil
-                        ,L (1 % 8) False 0 n60 nil]]) =
-    M (1,4) (4,60 % 1)
-          (D (1 % 4) (1 % 1)
-                 [D (1 % 4) (2 % 3)
-                        [L (2 % 8) False 0 n60 nil
-                        ,L (1 % 8) False 0 n60 nil]])
-  | x == M (1,4) (4,60 % 1)
-    (D (1 % 4) (1 % 1)
-     [D (1 % 4) (1 % 1)
-      [L (1 % 16) True 0 n60 nil
-      ,L (1 % 16) False 0 n60 nil
-      ,L (1 % 16) False 0 n60 nil
-      ,L (1 % 16) False 0 n60 nil]]) =
-    M (1,4) (4,60 % 1)
-          (D (1 % 4) (1 % 1)
-           [D (1 % 4) (1 % 1)
-            [L (1 % 8) False 0 n60 nil
-            ,L (1 % 16) False 0 n60 nil
-            ,L (1 % 16) False 0 n60 nil]])
+  | x == M.M (1,4) (4,60 % 1)
+               (M.D (1 % 4) (1 % 1)
+                [M.D (1 % 4) (2 % 3)
+                 [M.L (1 % 8) True 0 L.n60 L.nil
+                 ,M.L (1 % 8) False 0 L.n60 L.nil
+                 ,M.L (1 % 8) False 0 L.n60 L.nil]]) =
+    M.M (1,4) (4,60 % 1)
+          (M.D (1 % 4) (1 % 1)
+                 [M.D (1 % 4) (2 % 3)
+                        [M.L (2 % 8) False 0 L.n60 L.nil
+                        ,M.L (1 % 8) False 0 L.n60 L.nil]])
+  | x == M.M (1,4) (4,60 % 1)
+    (M.D (1 % 4) (1 % 1)
+     [M.D (1 % 4) (1 % 1)
+      [M.L (1 % 16) True 0 L.n60 L.nil
+      ,M.L (1 % 16) False 0 L.n60 L.nil
+      ,M.L (1 % 16) False 0 L.n60 L.nil
+      ,M.L (1 % 16) False 0 L.n60 L.nil]]) =
+    M.M (1,4) (4,60 % 1)
+          (M.D (1 % 4) (1 % 1)
+           [M.D (1 % 4) (1 % 1)
+            [M.L (1 % 8) False 0 L.n60 L.nil
+            ,M.L (1 % 16) False 0 L.n60 L.nil
+            ,M.L (1 % 16) False 0 L.n60 L.nil]])
   | otherwise = x
 
-adjoinTies :: M -> M
+adjoinTies :: M.M -> M.M
 --adjoinTies = traceShowId . adjoinTies' . traceShowId
 adjoinTies = adjoinTies'

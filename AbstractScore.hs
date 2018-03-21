@@ -22,17 +22,17 @@ module AbstractScore (Score(scoreParts)
 
 where
 
-import Lisp (Sexp
-            , toSexp
-            , fromSexp
-            , LispVal(LispList)
-            , mapcar'
-            , mapcarUpToPlist
-            , fromLispList
-            , nil)
+import qualified Lisp as L (Sexp
+                           , toSexp
+                           , fromSexp
+                           , LispVal(LispList)
+                           , mapcar'
+                           , mapcarUpToPlist
+                           , fromLispList
+                           , nil)
 
 data Score a = Score { scoreParts :: [Part a] } deriving (Eq,Show)
-data Part a = Part { partVoices :: [Voice a], partAttributes :: LispVal } deriving (Eq,Show)
+data Part a = Part { partVoices :: [Voice a], partAttributes :: L.LispVal } deriving (Eq,Show)
 data Voice a = Voice { voiceItems :: a } deriving (Eq,Show)
 
 -- Functor
@@ -46,20 +46,20 @@ instance Functor Voice where
     fmap f x = x { voiceItems = f . voiceItems $ x }
 
 -- Sexp
-instance (Sexp a) => Sexp (Score a) where
-    toSexp s = LispList $ map toSexp (scoreParts s)
-    fromSexp = Score . mapcar' fromSexp
+instance (L.Sexp a) => L.Sexp (Score a) where
+    toSexp s = L.LispList $ map L.toSexp (scoreParts s)
+    fromSexp = Score . L.mapcar' L.fromSexp
 
-instance (Sexp a) => Sexp (Part a) where
-    toSexp s = LispList $ map toSexp (partVoices s) ++ fromLispList (partAttributes s)
-    fromSexp = uncurry Part . mapcarUpToPlist fromSexp
+instance (L.Sexp a) => L.Sexp (Part a) where
+    toSexp s = L.LispList $ map L.toSexp (partVoices s) ++ L.fromLispList (partAttributes s)
+    fromSexp = uncurry Part . L.mapcarUpToPlist L.fromSexp
 
-instance (Sexp a) => Sexp (Voice a) where
-    toSexp = toSexp . voiceItems
-    fromSexp = Voice . fromSexp
+instance (L.Sexp a) => L.Sexp (Voice a) where
+    toSexp = L.toSexp . voiceItems
+    fromSexp = Voice . L.fromSexp
 
 singleVoice2Score :: a -> Score a
 singleVoice2Score a = Score { scoreParts = [p] }
   where v = Voice a
         p = Part { partVoices = [v]
-                 , partAttributes = nil }
+                 , partAttributes = L.nil }

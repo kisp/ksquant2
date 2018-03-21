@@ -21,7 +21,7 @@ module DurCalcTest
 
 where
 
-import Types ( WRat )
+import qualified Types as T ( WRat )
 import qualified Test.Framework.Providers.API as TF ( Test )
 import Test.Framework.Providers.API ( testGroup )
 import Test.Framework.Providers.HUnit ( testCase )
@@ -30,9 +30,9 @@ import Test.HUnit ( Assertion, (@=?) )
 import Test.QuickCheck ( Arbitrary, arbitrary, Gen, Property, choose, (==>) )
 
 import Data.Ratio ( (%) )
-import DurCalc ( notableDur, dotFactor, exp2, isExp2 )
+import qualified DurCalc as DC ( notableDur, dotFactor, exp2, isExp2 )
 
-newtype Dur = Dur WRat
+newtype Dur = Dur T.WRat
     deriving (Show, Eq)
 
 -- instance Arbitrary Dur where
@@ -49,92 +49,92 @@ instance Arbitrary Dur where
                 return (n%d)) :: Gen Rational
 
 notableDur01 :: Assertion
-notableDur01 = True @=? notableDur 0 (1%4)
+notableDur01 = True @=? DC.notableDur 0 (1%4)
 
 notableDur02 :: Assertion
-notableDur02 = False @=? notableDur 3 (5%4)
+notableDur02 = False @=? DC.notableDur 3 (5%4)
 
 prop_notableDur_abs :: Integer -> Dur -> Property
-prop_notableDur_abs m (Dur r) = m >= 0 ==> notableDur m r == notableDur m (abs r)
+prop_notableDur_abs m (Dur r) = m >= 0 ==> DC.notableDur m r == DC.notableDur m (abs r)
 
 prop_notableDur_half :: Integer -> Dur -> Property
-prop_notableDur_half m (Dur r) = m >= 0 ==> notableDur m r == notableDur m (r / 2)
+prop_notableDur_half m (Dur r) = m >= 0 ==> DC.notableDur m r == DC.notableDur m (r / 2)
 
 prop_notableDur_dot1 :: Integer -> Bool
-prop_notableDur_dot1 n = notableDur 1 (r * dotFactor 1)
-    where r = exp2 n
+prop_notableDur_dot1 n = DC.notableDur 1 (r * DC.dotFactor 1)
+    where r = DC.exp2 n
 
 prop_notableDur_dot2 :: Integer -> Bool
-prop_notableDur_dot2 n = notableDur 2 (r * dotFactor 2)
-    where r = exp2 n
+prop_notableDur_dot2 n = DC.notableDur 2 (r * DC.dotFactor 2)
+    where r = DC.exp2 n
 
 prop_notableDur_dot3 :: Integer -> Bool
-prop_notableDur_dot3 n = notableDur 3 (r * dotFactor 3)
-    where r = exp2 n
+prop_notableDur_dot3 n = DC.notableDur 3 (r * DC.dotFactor 3)
+    where r = DC.exp2 n
 
 prop_notableDur_dot4 :: Integer -> Bool
-prop_notableDur_dot4 n = notableDur 4 (r * dotFactor 4)
-    where r = exp2 n
+prop_notableDur_dot4 n = DC.notableDur 4 (r * DC.dotFactor 4)
+    where r = DC.exp2 n
 
 dotFactor0 :: Assertion
-dotFactor0 = 1 @=? dotFactor 0
+dotFactor0 = 1 @=? DC.dotFactor 0
 
 dotFactor1 :: Assertion
-dotFactor1 = (3%2) @=? dotFactor 1
+dotFactor1 = (3%2) @=? DC.dotFactor 1
 
 dotFactor2 :: Assertion
-dotFactor2 = (7%4) @=? dotFactor 2
+dotFactor2 = (7%4) @=? DC.dotFactor 2
 
 prop_dotFactor_geq_one :: Integer -> Property
-prop_dotFactor_geq_one n = n >= 0 ==> dotFactor n >= 1
+prop_dotFactor_geq_one n = n >= 0 ==> DC.dotFactor n >= 1
 
 prop_dotFactor_lt_two :: Integer -> Property
-prop_dotFactor_lt_two n = n >= 0 ==> dotFactor n < 2
+prop_dotFactor_lt_two n = n >= 0 ==> DC.dotFactor n < 2
 
 prop_dotFactor_monotone :: Integer -> Property
-prop_dotFactor_monotone n = n >= 0 ==> dotFactor n < dotFactor (n+1)
+prop_dotFactor_monotone n = n >= 0 ==> DC.dotFactor n < DC.dotFactor (n+1)
 
 exp2_0 :: Assertion
-exp2_0 = 1 @=? exp2 0
+exp2_0 = 1 @=? DC.exp2 0
 
 exp2_1 :: Assertion
-exp2_1 = 2 @=? exp2 1
+exp2_1 = 2 @=? DC.exp2 1
 
 exp2_2 :: Assertion
-exp2_2 = (1%2) @=? exp2 (-1)
+exp2_2 = (1%2) @=? DC.exp2 (-1)
 
 prop_exp2_double :: Integer -> Bool
-prop_exp2_double n = 2 * exp2 n == exp2 (n+1)
+prop_exp2_double n = 2 * DC.exp2 n == DC.exp2 (n+1)
 
 isExp2_0 :: Assertion
-isExp2_0 = True @=? isExp2 1
+isExp2_0 = True @=? DC.isExp2 1
 
 isExp2_1 :: Assertion
-isExp2_1 = True @=? isExp2 8
+isExp2_1 = True @=? DC.isExp2 8
 
 isExp2_2 :: Assertion
-isExp2_2 = True @=? isExp2 (1%2)
+isExp2_2 = True @=? DC.isExp2 (1%2)
 
 isExp2_3 :: Assertion
-isExp2_3 = False @=? isExp2 3
+isExp2_3 = False @=? DC.isExp2 3
 
 isExp2_4 :: Assertion
-isExp2_4 = False @=? isExp2 7
+isExp2_4 = False @=? DC.isExp2 7
 
 isExp2_5 :: Assertion
-isExp2_5 = False @=? isExp2 (1%3)
+isExp2_5 = False @=? DC.isExp2 (1%3)
 
 isExp2_6 :: Assertion
-isExp2_6 = False @=? isExp2 (4%3)
+isExp2_6 = False @=? DC.isExp2 (4%3)
 
 isExp2_7 :: Assertion
-isExp2_7 = False @=? isExp2 (3%4)
+isExp2_7 = False @=? DC.isExp2 (3%4)
 
 isExp2_8 :: Assertion
-isExp2_8 = False @=? isExp2 0
+isExp2_8 = False @=? DC.isExp2 0
 
 prop_isExp2_complete :: Integer -> Bool
-prop_isExp2_complete n = isExp2 (exp2 n)
+prop_isExp2_complete n = DC.isExp2 (DC.exp2 n)
 
 durCalcTests :: TF.Test
 durCalcTests = testGroup "durCalcTests"

@@ -50,14 +50,14 @@ module Measure (m
 
 where
 
-import Types (Timesig, Tempo, InfInt, WRat, WInt)
+import qualified Types as T (Timesig, Tempo, InfInt, WRat, WInt)
 import Data.Ratio ( (%) )
-import Utils (dxsToXs, neighbours)
+import qualified Utils as U (dxsToXs, neighbours)
 import qualified AbstractScore as A (Score, Part, Voice)
 import qualified Interval as Iv (Interval, end, isPointInInterval)
 import Data.List (find)
 import qualified Lisp as L (LispVal, readLisp')
-import DurCalc (notableDurL, divToRatio)
+import qualified DurCalc as DC (notableDurL, divToRatio)
 
 type Score = A.Score Ms
 type Part = A.Part Ms
@@ -65,10 +65,10 @@ type Voice = A.Voice Ms
 
 type Ms = [M]
 
-data M = M Timesig Tempo E
+data M = M T.Timesig T.Tempo E
        deriving (Show, Eq)
 
-type Label = InfInt
+type Label = T.InfInt
 type Notes = L.LispVal
 type Expressions = L.LispVal
 
@@ -91,10 +91,10 @@ eid D{} = error "id not for D"
 eid (R _ x) = x
 eid (L _ _ x _ _) = x
 
-timesigDur :: (WInt, WInt) -> WRat
+timesigDur :: (T.WInt, T.WInt) -> T.WRat
 timesigDur (n,d) = n%d
 
-m :: (Integer, Integer) -> Tempo -> E -> M
+m :: (Integer, Integer) -> T.Tempo -> E -> M
 m timesig tempo d = if not(check timesig tempo d) then
                         error "m timesig tempo d not valid"
                     else M timesig tempo d
@@ -105,13 +105,13 @@ l d tie notes expressions =
     if not check then
         error $ "cannot construct L from " ++ show d ++ " " ++ show tie
     else L d tie 0 notes expressions
-    where check = notableDurL 1 d
+    where check = DC.notableDurL 1 d
 
 r :: Rational -> E
 r d = if not check then
           error $ "r d not valid: " ++ show d
       else R d 0
-    where check = notableDurL 1 d
+    where check = DC.notableDurL 1 d
 
 d :: Rational -> Rational -> [E] -> E
 d d r es = if not(check d r es) then
@@ -156,14 +156,14 @@ measuresDivideLeafs ms divs =
     fst (smap (transform_leafs' trans) ms divs)
         where
               trans (L dur _ _ _ _) (n:ds) =
-                  let r = if notableDurL 1 (dur / (n%1)) then 1 else divToRatio n
+                  let r = if DC.notableDurL 1 (dur / (n%1)) then 1 else DC.divToRatio n
                   in (d dur r (replicate (fromInteger n) (l (dur / (n % 1) / r) False n60 nil)),
                         ds)
               trans r@(R _ _) ds = (r,ds)
               trans D{} _ = error "measuresDivideLeafs: did not expect (D _ _ _)"
               trans L{} [] = error "measuresDivideLeafs: divs have run out"
 
-measuresWithBeats :: [(Integer, Integer)] -> [Tempo] -> Ms
+measuresWithBeats :: [(Integer, Integer)] -> [T.Tempo] -> Ms
 measuresWithBeats timesigs tempos =
     let divs = map fst timesigs
     in measuresDivideLeafs (zipWith (curry mes) timesigs tempos) divs
@@ -203,7 +203,7 @@ measureDur (M timesig@(n,_) tempo _) =  (n%1) * tempoToBeatDur timesig tempo
 -- foldl f acc (x:xs) =  foldl f (f acc x) xs
 
 measuresStartTimes :: Ms -> [Rational]
-measuresStartTimes ms = dxsToXs (map measureDur ms)
+measuresStartTimes ms = U.dxsToXs (map measureDur ms)
 
 measuresUntilTime :: (RealFrac t) => Ms -> t -> Ms
 measuresUntilTime ms time = map fst (takeWhile p (zip ms (measuresStartTimes ms)))
@@ -222,7 +222,7 @@ measuresUntilTime ms time = map fst (takeWhile p (zip ms (measuresStartTimes ms)
 
 measureLeafIntervals :: M -> Rational -> [(Rational, Rational)]
 measureLeafIntervals (M (_,d) tempo div) start =
-    neighbours (map (+start) (dxsToXs (map trans (leafEffectiveDurs div))))
+    U.neighbours (map (+start) (U.dxsToXs (map trans (leafEffectiveDurs div))))
     where trans dur = tempoToBeatDur tempo * dur_to_beat dur * (4%d)
           dur_to_beat dur = dur * (d%1)
           tempoToBeatDur (d,tempo) = 60 / tempo / (d%4)

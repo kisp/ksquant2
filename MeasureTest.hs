@@ -19,44 +19,44 @@ module MeasureTest
 
 where
 
-import Measure ( M(M), E(D), l, measuresWithBeats, measureDur )
+import qualified Measure as M ( M(M), E(D), l, measuresWithBeats, measureDur )
 import Test.HUnit (Test(TestList), (~=?))
 import Data.Ratio ( (%) )
-import Lisp (n60, nil)
+import qualified Lisp as L (n60, nil)
 
 measure1 :: Test
 measure1 = TestList
-           [[M (4,4) (4,60 % 1)
-             (D (1 % 1) (1 % 1)
-              [l (1 % 4) False n60 nil,
-               l (1 % 4) False n60 nil,
-               l (1 % 4) False n60 nil,
-               l (1 % 4) False n60 nil])]
-            ~=?  measuresWithBeats [(4,4)] [(4,60)]
-           ,[M (3,4) (4,60 % 1)
-             (D (3 % 4) (1 % 1)
-              [l (1 % 4) False n60 nil,
-               l (1 % 4) False n60 nil,
-               l (1 % 4) False n60 nil])]
-            ~=?  measuresWithBeats [(3,4)] [(4,60)]
-           ,[M (5,8) (4,60 % 1)
-             (D (5 % 8) (1 % 1)
-              (replicate 5 (l (1 % 8) False n60 nil)))]
-            ~=?  measuresWithBeats [(5,8)] [(4,60)]
+           [[M.M (4,4) (4,60 % 1)
+             (M.D (1 % 1) (1 % 1)
+              [M.l (1 % 4) False L.n60 L.nil,
+               M.l (1 % 4) False L.n60 L.nil,
+               M.l (1 % 4) False L.n60 L.nil,
+               M.l (1 % 4) False L.n60 L.nil])]
+            ~=?  M.measuresWithBeats [(4,4)] [(4,60)]
+           ,[M.M (3,4) (4,60 % 1)
+             (M.D (3 % 4) (1 % 1)
+              [M.l (1 % 4) False L.n60 L.nil,
+               M.l (1 % 4) False L.n60 L.nil,
+               M.l (1 % 4) False L.n60 L.nil])]
+            ~=?  M.measuresWithBeats [(3,4)] [(4,60)]
+           ,[M.M (5,8) (4,60 % 1)
+             (M.D (5 % 8) (1 % 1)
+              (replicate 5 (M.l (1 % 8) False L.n60 L.nil)))]
+            ~=?  M.measuresWithBeats [(5,8)] [(4,60)]
            ,[1,2,3,4,5]
-            ~=?  map measureDur (measuresWithBeats [(1,4),(2,4),(3,4),(4,4),(5,4)] [(4,60),(4,60),(4,60),(4,60),(4,60)])
+            ~=?  map M.measureDur (M.measuresWithBeats [(1,4),(2,4),(3,4),(4,4),(5,4)] [(4,60),(4,60),(4,60),(4,60),(4,60)])
            ,[1%2,2%2,3%2,4%2,5%2]
-            ~=?  map measureDur (measuresWithBeats [(1,4),(2,4),(3,4),(4,4),(5,4)] [(4,120),(4,120),(4,120),(4,120),(4,120)])
+            ~=?  map M.measureDur (M.measuresWithBeats [(1,4),(2,4),(3,4),(4,4),(5,4)] [(4,120),(4,120),(4,120),(4,120),(4,120)])
            ,[1%2,2%2,3%2,4%2,5%2]
-            ~=?  map measureDur (measuresWithBeats [(1,4),(2,4),(3,4),(4,4),(5,4)] [(8,60),(8,60),(8,60),(8,60),(8,60)])
+            ~=?  map M.measureDur (M.measuresWithBeats [(1,4),(2,4),(3,4),(4,4),(5,4)] [(8,60),(8,60),(8,60),(8,60),(8,60)])
            ,[1%4,2%4,3%4,4%4,5%4]
-            ~=?  map measureDur (measuresWithBeats [(1,4),(2,4),(3,4),(4,4),(5,4)] [(8,120),(8,120),(8,120),(8,120),(8,120)])
+            ~=?  map M.measureDur (M.measuresWithBeats [(1,4),(2,4),(3,4),(4,4),(5,4)] [(8,120),(8,120),(8,120),(8,120),(8,120)])
            ,[1%2,2%2,3%2,4%2,5%2]
-            ~=?  map measureDur (measuresWithBeats [(1,8),(2,8),(3,8),(4,8),(5,8)] [(4,60),(4,60),(4,60),(4,60),(4,60)])
+            ~=?  map M.measureDur (M.measuresWithBeats [(1,8),(2,8),(3,8),(4,8),(5,8)] [(4,60),(4,60),(4,60),(4,60),(4,60)])
            ,[1%4,2%4,3%4,4%4,5%4]
-            ~=?  map measureDur (measuresWithBeats [(1,8),(2,8),(3,8),(4,8),(5,8)] [(4,120),(4,120),(4,120),(4,120),(4,120)])
+            ~=?  map M.measureDur (M.measuresWithBeats [(1,8),(2,8),(3,8),(4,8),(5,8)] [(4,120),(4,120),(4,120),(4,120),(4,120)])
            ,[1%4,2%4,3%4,4%4,5%4]
-            ~=?  map measureDur (measuresWithBeats [(1,8),(2,8),(3,8),(4,8),(5,8)] [(8,60),(8,60),(8,60),(8,60),(8,60)])
+            ~=?  map M.measureDur (M.measuresWithBeats [(1,8),(2,8),(3,8),(4,8),(5,8)] [(8,60),(8,60),(8,60),(8,60),(8,60)])
            ,[1%8,2%8,3%8,4%8,5%8]
-            ~=?  map measureDur (measuresWithBeats [(1,8),(2,8),(3,8),(4,8),(5,8)] [(8,120),(8,120),(8,120),(8,120),(8,120)])
+            ~=?  map M.measureDur (M.measuresWithBeats [(1,8),(2,8),(3,8),(4,8),(5,8)] [(8,120),(8,120),(8,120),(8,120),(8,120)])
            ]

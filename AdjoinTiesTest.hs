@@ -18,14 +18,14 @@
 module AdjoinTiesTest
 where
 
-import Types ( WRat )
-import Measure ( M(M), E(D), l, dur)
+import qualified Types as T ( WRat )
+import qualified Measure as M ( M(M), E(D), l, dur)
 import Test.HUnit ( Assertion, (@=?) )
 import Data.Ratio ( (%) )
-import Lisp ( n60, nil )
+import qualified Lisp as L ( n60, nil )
 import AdjoinTies ( adjoinTies )
 
-type Dur = WRat
+type Dur = T.WRat
 
 q, e, s :: Dur
 q = 1 % 4
@@ -36,19 +36,19 @@ data H = N Dur
        | T Dur
          deriving Show
 
-buildLeaf :: H -> E
-buildLeaf (N x) = l x False n60 nil
-buildLeaf (T x) = l x True n60 nil
+buildLeaf :: H -> M.E
+buildLeaf (N x) = M.l x False L.n60 L.nil
+buildLeaf (T x) = M.l x True L.n60 L.nil
 
-buildD :: [H] -> E
-buildD hs = D q rr ls
+buildD :: [H] -> M.E
+buildD hs = M.D q rr ls
     where ls = map buildLeaf hs
-          dd = sum (map dur ls)
+          dd = sum (map M.dur ls)
           rr = q / dd
 
 
-buildM :: [H] -> M
-buildM hs = M (1,4) (4,60) (D q 1 [buildD hs])
+buildM :: [H] -> M.M
+buildM hs = M.M (1,4) (4,60) (M.D q 1 [buildD hs])
 
 
 adjt :: [H] -> [H] -> Assertion
@@ -56,20 +56,20 @@ adjt ee ii = buildM ee @=? adjoinTies (buildM ii)
 
 adjoin1 :: Assertion
 adjoin1 =
-    M (4,4) (4,60)
-          (D (1 % 1) (1 % 1)
-           [l q False n60 nil,
-            l q False n60 nil,
-            l q False n60 nil,
-            l q False n60 nil])
+    M.M (4,4) (4,60)
+          (M.D (1 % 1) (1 % 1)
+           [M.l q False L.n60 L.nil,
+            M.l q False L.n60 L.nil,
+            M.l q False L.n60 L.nil,
+            M.l q False L.n60 L.nil])
           @=?
           adjoinTies
-          (M (4,4) (4,60)
-           (D (1 % 1) (1 % 1)
-            [l q False n60 nil,
-             l q False n60 nil,
-             l q False n60 nil,
-             l q False n60 nil]))
+          (M.M (4,4) (4,60)
+           (M.D (1 % 1) (1 % 1)
+            [M.l q False L.n60 L.nil,
+             M.l q False L.n60 L.nil,
+             M.l q False L.n60 L.nil,
+             M.l q False L.n60 L.nil]))
 
 adjoin2 :: Assertion
 adjoin2 = [N q, N e] `adjt` [T e, N e, N e]

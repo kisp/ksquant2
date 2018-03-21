@@ -19,15 +19,15 @@ module LispTest
 
 where
 
-import Lisp ( LispVal(..)
-            , readLisp
-            , mapcar'
-            , toSexp
-            , printLisp
-            , parseLisp
-            , lispEscapeString
-            , propertyListP
-            , getf)
+import qualified Lisp as L ( LispVal(..)
+                           , readLisp
+                           , mapcar'
+                           , toSexp
+                           , printLisp
+                           , parseLisp
+                           , lispEscapeString
+                           , propertyListP
+                           , getf)
 
 import Test.HUnit ( Assertion, Test(TestList), (@=?), (~=?) )
 import Data.Maybe (fromMaybe)
@@ -40,115 +40,115 @@ rightOrError x = case x of
                    Left _ -> error "rightOrError"
 
 readLisp1 :: Assertion
-readLisp1 = Right (LispInteger 1) @=? readLisp "1"
+readLisp1 = Right (L.LispInteger 1) @=? L.readLisp "1"
 
 readLisp2 :: Assertion
-readLisp2 = "readLisp: expecting only a single form" @=? fromLeft (readLisp "1 2")
+readLisp2 = "readLisp: expecting only a single form" @=? fromLeft (L.readLisp "1 2")
 
 readLisp3 :: Assertion
-readLisp3 = "readLisp: cannot parse '('" @=? fromLeft (readLisp "(")
+readLisp3 = "readLisp: cannot parse '('" @=? fromLeft (L.readLisp "(")
 
 prop_mapcar' :: [Integer] -> Bool
-prop_mapcar' xs = mapcar' f (LispList (map toSexp xs)) == map g xs
-  where f (LispInteger x) = LispInteger $ x+1
+prop_mapcar' xs = L.mapcar' f (L.LispList (map L.toSexp xs)) == map g xs
+  where f (L.LispInteger x) = L.LispInteger $ x+1
         f _ = error "prop_mapcar'"
-        g = toSexp . (+1)
+        g = L.toSexp . (+1)
 
 prop_string_roundTrip :: String -> Bool
-prop_string_roundTrip s = (printLisp . (!!0) . fromRight . parseLisp . p) s == p s
-  where p = lispEscapeString
+prop_string_roundTrip s = (L.printLisp . (!!0) . fromRight . L.parseLisp . p) s == p s
+  where p = L.lispEscapeString
 
 lisp1 :: Test
 lisp1 = TestList
-        [LispInteger 1     ~=? LispInteger 1
-        ,"123"               ~=? printLisp (LispInteger 123)
-        ,[LispInteger 123] ~=? rightOrError (parseLisp "123")
-        ,[LispInteger 123] ~=? rightOrError (parseLisp " 123")
-        ,"left"              ~=? case parseLisp "123(" of
+        [L.LispInteger 1     ~=? L.LispInteger 1
+        ,"123"               ~=? L.printLisp (L.LispInteger 123)
+        ,[L.LispInteger 123] ~=? rightOrError (L.parseLisp "123")
+        ,[L.LispInteger 123] ~=? rightOrError (L.parseLisp " 123")
+        ,"left"              ~=? case L.parseLisp "123(" of
                                    Left  _ -> "left"
                                    Right _ -> "right"
-        ,[LispInteger 1,
-          LispInteger 2]   ~=? rightOrError (parseLisp "1 2")
+        ,[L.LispInteger 1,
+          L.LispInteger 2]   ~=? rightOrError (L.parseLisp "1 2")
         ]
 
 lisp2 :: Test
 lisp2 = TestList
         [
-         [LispFloat 123.12] ~=? rightOrError (parseLisp "123.12")
-        ,[LispFloat 123.12] ~=? rightOrError (parseLisp "123.12d0")
-        ,[LispFloat 12.312] ~=? rightOrError (parseLisp "123.12D-1")
-        ,[LispKeyword "FOO"] ~=? rightOrError (parseLisp ":FOO")
-        ,[LispKeyword "BAR"] ~=? rightOrError (parseLisp ":bar")
-        ,[LispKeyword "F/123"] ~=? rightOrError (parseLisp ":f/123")
-        ,[LispList [LispInteger 1]] ~=?
-         rightOrError (parseLisp "(1)")
-        ,[LispList [LispInteger 1]] ~=?
-         rightOrError (parseLisp "( 1)")
-        ,[LispList [LispInteger 1]] ~=?
-         rightOrError (parseLisp "(\n1)")
-        ,[LispList [LispInteger 1]] ~=?
-         rightOrError (parseLisp "( \n1)")
-        ,[LispList [LispInteger 1]] ~=?
-         rightOrError (parseLisp "(1 )")
-        ,[LispList [LispInteger 1, LispInteger 2]] ~=?
-         rightOrError (parseLisp "(1 2)")
-        ,[LispList []] ~=?
-         rightOrError (parseLisp "()")
-        ,[LispList []] ~=?
-         rightOrError (parseLisp "nil")
-        ,[LispList []] ~=?
-         rightOrError (parseLisp "NIL")
-        ,[LispList [LispList [LispInteger 1]]] ~=?
-         rightOrError (parseLisp "((1))")
-        ,[LispInteger (-123)] ~=?
-         rightOrError (parseLisp "-123")
-        ,[LispFloat (-123.12)] ~=?
-         rightOrError (parseLisp "-123.12")
-        ,[LispInteger 1] ~=?
-         rightOrError (parseLisp "1 ")
-        ,[LispInteger 1] ~=?
-         rightOrError (parseLisp "+1 ")
-        ,[LispRatio $ 1 % 2] ~=?
-         rightOrError (parseLisp "1/2")
-        ,[LispRatio $ (-1) % 10] ~=?
-         rightOrError (parseLisp "-1/10")
-        ,[LispSymbol "T"] ~=?
-         rightOrError (parseLisp "t")
+         [L.LispFloat 123.12] ~=? rightOrError (L.parseLisp "123.12")
+        ,[L.LispFloat 123.12] ~=? rightOrError (L.parseLisp "123.12d0")
+        ,[L.LispFloat 12.312] ~=? rightOrError (L.parseLisp "123.12D-1")
+        ,[L.LispKeyword "FOO"] ~=? rightOrError (L.parseLisp ":FOO")
+        ,[L.LispKeyword "BAR"] ~=? rightOrError (L.parseLisp ":bar")
+        ,[L.LispKeyword "F/123"] ~=? rightOrError (L.parseLisp ":f/123")
+        ,[L.LispList [L.LispInteger 1]] ~=?
+         rightOrError (L.parseLisp "(1)")
+        ,[L.LispList [L.LispInteger 1]] ~=?
+         rightOrError (L.parseLisp "( 1)")
+        ,[L.LispList [L.LispInteger 1]] ~=?
+         rightOrError (L.parseLisp "(\n1)")
+        ,[L.LispList [L.LispInteger 1]] ~=?
+         rightOrError (L.parseLisp "( \n1)")
+        ,[L.LispList [L.LispInteger 1]] ~=?
+         rightOrError (L.parseLisp "(1 )")
+        ,[L.LispList [L.LispInteger 1, L.LispInteger 2]] ~=?
+         rightOrError (L.parseLisp "(1 2)")
+        ,[L.LispList []] ~=?
+         rightOrError (L.parseLisp "()")
+        ,[L.LispList []] ~=?
+         rightOrError (L.parseLisp "nil")
+        ,[L.LispList []] ~=?
+         rightOrError (L.parseLisp "NIL")
+        ,[L.LispList [L.LispList [L.LispInteger 1]]] ~=?
+         rightOrError (L.parseLisp "((1))")
+        ,[L.LispInteger (-123)] ~=?
+         rightOrError (L.parseLisp "-123")
+        ,[L.LispFloat (-123.12)] ~=?
+         rightOrError (L.parseLisp "-123.12")
+        ,[L.LispInteger 1] ~=?
+         rightOrError (L.parseLisp "1 ")
+        ,[L.LispInteger 1] ~=?
+         rightOrError (L.parseLisp "+1 ")
+        ,[L.LispRatio $ 1 % 2] ~=?
+         rightOrError (L.parseLisp "1/2")
+        ,[L.LispRatio $ (-1) % 10] ~=?
+         rightOrError (L.parseLisp "-1/10")
+        ,[L.LispSymbol "T"] ~=?
+         rightOrError (L.parseLisp "t")
         ]
 
 parseComment1 :: Test
 parseComment1 = TestList
                 [
-                  [LispInteger 25] ~=? rightOrError (parseLisp "25 ;foo")
-                , [LispInteger 25] ~=? rightOrError (parseLisp "25;foo")
-                , [LispInteger 25] ~=? rightOrError (parseLisp "25\n;foo\n;foo\n")
-                , [LispInteger 25] ~=? rightOrError (parseLisp ";foo\n25")
-                , [LispList [LispInteger 1, LispInteger 2]] ~=?
-                    rightOrError (parseLisp "(1 ;foo\n2)")
-                , [LispInteger 25] ~=? rightOrError (parseLisp "25 ;bar")
-                , [LispInteger 25] ~=? rightOrError (parseLisp "25;;;")
-                , [LispInteger 25] ~=? rightOrError (parseLisp "25;")
+                  [L.LispInteger 25] ~=? rightOrError (L.parseLisp "25 ;foo")
+                , [L.LispInteger 25] ~=? rightOrError (L.parseLisp "25;foo")
+                , [L.LispInteger 25] ~=? rightOrError (L.parseLisp "25\n;foo\n;foo\n")
+                , [L.LispInteger 25] ~=? rightOrError (L.parseLisp ";foo\n25")
+                , [L.LispList [L.LispInteger 1, L.LispInteger 2]] ~=?
+                    rightOrError (L.parseLisp "(1 ;foo\n2)")
+                , [L.LispInteger 25] ~=? rightOrError (L.parseLisp "25 ;bar")
+                , [L.LispInteger 25] ~=? rightOrError (L.parseLisp "25;;;")
+                , [L.LispInteger 25] ~=? rightOrError (L.parseLisp "25;")
                 ]
 
 lisp3 :: Test
 lisp3 = TestList
         [
          "(:FDS 1 2.3)" ~=?
-         printLisp (LispList [LispKeyword "FDS",LispInteger 1,LispFloat 2.3])
+         L.printLisp (L.LispList [L.LispKeyword "FDS",L.LispInteger 1,L.LispFloat 2.3])
         ,"()" ~=?
-         printLisp (LispList [])
+         L.printLisp (L.LispList [])
         ,"T" ~=?
-         printLisp (LispSymbol "T")
+         L.printLisp (L.LispSymbol "T")
         ,True ~=?
-         propertyListP (LispList [LispKeyword "FDS",LispInteger 1])
+         L.propertyListP (L.LispList [L.LispKeyword "FDS",L.LispInteger 1])
         ,False ~=?
-         propertyListP (LispList [LispKeyword "FDS"])
+         L.propertyListP (L.LispList [L.LispKeyword "FDS"])
         ,False ~=?
-         propertyListP (LispList [LispInteger 1, LispInteger 2])
+         L.propertyListP (L.LispList [L.LispInteger 1, L.LispInteger 2])
         ,False ~=?
-         propertyListP (LispInteger 1)
-        ,LispInteger 1 ~=?
-         fromMaybe (error "Nothing") (getf (LispList [LispKeyword "FDS",LispInteger 1]) (LispKeyword "FDS"))
+         L.propertyListP (L.LispInteger 1)
+        ,L.LispInteger 1 ~=?
+         fromMaybe (error "Nothing") (L.getf (L.LispList [L.LispKeyword "FDS",L.LispInteger 1]) (L.LispKeyword "FDS"))
         ,Nothing ~=?
-         getf (LispList [LispKeyword "FDS",LispInteger 1]) (LispKeyword "BAR")
+         L.getf (L.LispList [L.LispKeyword "FDS",L.LispInteger 1]) (L.LispKeyword "BAR")
         ]

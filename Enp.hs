@@ -29,14 +29,14 @@ module Enp (voice2sexp
 
 where
 
-import Types (WInt, Tempo, Timesig)
+import qualified Types as T (WInt, Tempo, Timesig)
 import Data.Either.Unwrap (fromRight)
-import Lisp ( LispVal(LispList, LispKeyword, LispInteger, LispFloat), clNull, parseLisp, cons )
+import qualified Lisp as L ( LispVal(LispList, LispKeyword, LispInteger, LispFloat), clNull, parseLisp, cons )
 import qualified AbstractScore as A ( Score, Part, Voice )
 
-type EnpDur = WInt
+type EnpDur = T.WInt
 
-data Measure = Measure Timesig Tempo [Elt]
+data Measure = Measure T.Timesig T.Tempo [Elt]
            deriving (Show, Eq)
 
 type Score = A.Score Measures
@@ -46,8 +46,8 @@ type Voice = A.Voice Measures
 type Measures = [Measure]
 
 type Tied = Bool
-type Notes = LispVal
-type Expressions = LispVal
+type Notes = L.LispVal
+type Expressions = L.LispVal
 
 -- |Tied here has ENP semantics, which is a tie "going to the left".
 data Elt = Chord EnpDur Tied Notes Expressions
@@ -65,32 +65,32 @@ scaleElt n (Chord d t notes expressions) = Chord (n * d) t notes expressions
 scaleElt n (Rest d) = Rest (n * d)
 scaleElt n (Div d es) = Div (n * d) es
 
-makeMeasure :: Timesig -> Tempo -> [Elt] -> Measure
+makeMeasure :: T.Timesig -> T.Tempo -> [Elt] -> Measure
 makeMeasure (n,d) t es =
     if not check then
         error $ "Enp.makeMeasure " ++ show (n,d) ++ " " ++ show es
     else Measure (n,d) t es
     where check = n == sum (map dur es)
 
-voice2sexp :: Measures -> LispVal
-voice2sexp e = LispList $ map measure2sexp e
+voice2sexp :: Measures -> L.LispVal
+voice2sexp e = L.LispList $ map measure2sexp e
 
-measure2sexp :: Measure -> LispVal
+measure2sexp :: Measure -> L.LispVal
 measure2sexp (Measure (n,d) (tu,t) xs) =
-    LispList $ map elt2sexp xs ++
-                 [LispKeyword "TIME-SIGNATURE",
-                  LispList [LispInteger n,LispInteger d],
-                  LispKeyword "METRONOME",
-                  LispList [LispInteger tu,LispInteger $ round t]]
+    L.LispList $ map elt2sexp xs ++
+                 [L.LispKeyword "TIME-SIGNATURE",
+                  L.LispList [L.LispInteger n,L.LispInteger d],
+                  L.LispKeyword "METRONOME",
+                  L.LispList [L.LispInteger tu,L.LispInteger $ round t]]
 
-elt2sexp :: Elt -> LispVal
+elt2sexp :: Elt -> L.LispVal
 elt2sexp (Chord d False notes expressions) =
-    LispInteger d `cons` LispList ([LispKeyword "NOTES", notes] ++ expressionsOrEmpty expressions)
+    L.LispInteger d `L.cons` L.LispList ([L.LispKeyword "NOTES", notes] ++ expressionsOrEmpty expressions)
 elt2sexp (Chord d True  notes expressions) =
-    LispFloat (fromInteger d) `cons` LispList ([LispKeyword "NOTES", notes] ++ expressionsOrEmpty expressions)
-elt2sexp (Rest d) = LispInteger (-d) `cons` LispList ((fromRight . parseLisp) ":notes (60)")
-elt2sexp (Div d xs) = LispInteger d `cons` LispList [LispList (map elt2sexp xs)]
+    L.LispFloat (fromInteger d) `L.cons` L.LispList ([L.LispKeyword "NOTES", notes] ++ expressionsOrEmpty expressions)
+elt2sexp (Rest d) = L.LispInteger (-d) `L.cons` L.LispList ((fromRight . L.parseLisp) ":notes (60)")
+elt2sexp (Div d xs) = L.LispInteger d `L.cons` L.LispList [L.LispList (map elt2sexp xs)]
 
-expressionsOrEmpty :: LispVal -> [LispVal]
-expressionsOrEmpty expressions = if clNull expressions then []
-                                 else [LispKeyword "EXPRESSIONS", expressions]
+expressionsOrEmpty :: L.LispVal -> [L.LispVal]
+expressionsOrEmpty expressions = if L.clNull expressions then []
+                                 else [L.LispKeyword "EXPRESSIONS", expressions]
