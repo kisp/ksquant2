@@ -51,3 +51,28 @@ Feature: durs output format
     When I run `ksquant2 -r durs -w durs foo.durs`
     Then the stdout should contain "(1 :TIE 1 :TIE 1 :TIE 1 :TIE 1 -1 -1 -1)"
     Then the exit status should be 0
+
+  Scenario: 2 parts
+    Given a file named "foo.durs" with:
+      """
+      (1 1 1 1)
+      (1 1 -1 -1)
+      """
+    When I run `ksquant2 -r durs -w durs foo.durs`
+    Then the stdout should contain "(1 1 1 1)"
+    And the stdout should contain "(1 1 -1 -1)"
+    And the exit status should be 0
+
+  Scenario: output as individual forms
+    Given a file named "foo.durs" with:
+      """
+      (1 1 1 1)
+      (1 1 -1 -1)
+      """
+    When I run `ksquant2 -r durs -w durs foo.durs`
+    Then the stdout should contain:
+    """
+    (1 1 1 1)
+    (1 1 -1 -1)
+    """
+    And the exit status should be 0

@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
+
 module MainUtils (unwrapLeft
                  , getSimple
                  , measureStream'
@@ -14,7 +16,7 @@ import qualified Options as O (Options(..))
 import qualified Utils as U (stickToLast)
 import qualified Lisp as L (LispVal(..), getf, fromSexp, printSexp, atom, fromLispList)
 import qualified Measure as M (measuresWithBeats, M(), Ms, measuresUntilTime, Score)
-import qualified AbstractScore as A (Score)
+import qualified AbstractScore as A (Score, score2singlePartVoices)
 import qualified Lily as L (showLily)
 import qualified Enp as E (voice2sexp)
 import MeasureToEnp (vToEnp)
@@ -22,6 +24,7 @@ import MeasureToLily (vToLily)
 import MeasureToDurs (vToDurs)
 import Data.Maybe (fromMaybe)
 import Data.Either.Unwrap (fromRight)
+import Data.List (intercalate)
 
 buildMeasureFromLisp :: L.LispVal -> L.LispVal -> M.M
 buildMeasureFromLisp (L.LispList [L.LispInteger n,L.LispInteger d])
@@ -102,4 +105,6 @@ scoreToEnp :: M.Score -> String
 scoreToEnp = L.printSexp . fmap (E.voice2sexp . vToEnp)
 
 scoreToDurs :: M.Score -> String
-scoreToDurs = L.printSexp . fmap vToDurs
+scoreToDurs s = intercalate "\n" lines
+  where lines = map L.printSexp parts
+        parts = A.score2singlePartVoices $ fmap vToDurs s

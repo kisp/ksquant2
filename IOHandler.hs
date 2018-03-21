@@ -48,7 +48,7 @@ handleIO' m = do
       getInputHandler (i:r) = (r, readFile i)
 
       getOutputHandler :: [String] -> T.Err String -> IO ()
-      getOutputHandler [] (Right s) = putStrLn s
+      getOutputHandler [] (Right s) = putStr s
       getOutputHandler [o] (Right s) = writeFile o s
       getOutputHandler args (Right _) = error $ "getOutputHandler with args " ++ show args ++ "?"
       getOutputHandler _ (Left err) = do
