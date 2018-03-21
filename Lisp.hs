@@ -323,6 +323,14 @@ instance Sexp Integer where
   fromSexp (LispInteger x) = x
   fromSexp _ = error "fromSexp: not (LispInteger x)"
 
+instance Sexp T.WRat where
+  toSexp r | denominator r == 1 = LispInteger $ numerator r
+           | otherwise = LispRatio r
+  fromSexp (LispRatio x) = x
+  fromSexp (LispFloat x) = x
+  fromSexp (LispInteger x) = fromInteger x
+  fromSexp x = error $ "fromSexp cannot interpret as WRat: " ++ show x
+
 instance Sexp [LispVal] where
   toSexp = LispList
   fromSexp (LispList xs) = xs

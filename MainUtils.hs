@@ -4,7 +4,8 @@ module MainUtils (unwrapLeft
                  , measuresUntilTime
                  , addInlineOptions
                  , scoreToLily
-                 , scoreToEnp)
+                 , scoreToEnp
+                 , scoreToDurs)
 
 where
 
@@ -18,6 +19,7 @@ import qualified Lily as L (showLily)
 import qualified Enp as E (voice2sexp)
 import MeasureToEnp (vToEnp)
 import MeasureToLily (vToLily)
+import MeasureToDurs (vToDurs)
 import Data.Maybe (fromMaybe)
 import Data.Either.Unwrap (fromRight)
 
@@ -98,3 +100,6 @@ scoreToLily = L.showLily . fmap vToLily
 
 scoreToEnp :: M.Score -> String
 scoreToEnp = L.printSexp . fmap (E.voice2sexp . vToEnp)
+
+scoreToDurs :: M.Score -> String
+scoreToDurs = L.printSexp . fmap vToDurs

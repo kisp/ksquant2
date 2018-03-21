@@ -46,7 +46,10 @@ module Measure (m
                , labelVoice
                , mleaves
                , vleaves
-               , eid)
+               , eid
+               , mroot
+               , leafLRAs
+               , tied)
 
 where
 
@@ -93,6 +96,10 @@ eid (L _ _ x _ _) = x
 
 timesigDur :: (T.WInt, T.WInt) -> T.WRat
 timesigDur (n,d) = n%d
+
+tied :: E -> Bool
+tied (L _ t _ _ _) = t
+tied _ = False
 
 m :: (Integer, Integer) -> T.Tempo -> E -> M
 m timesig tempo d = if not(check timesig tempo d) then
@@ -178,6 +185,9 @@ eleaves (D _ _ es) = concatMap eleaves es
 
 mleaves :: M -> [E]
 mleaves (M _ _ e) = eleaves e
+
+mroot :: M -> E
+mroot (M _ _ e) = e
 
 vleaves :: Ms -> [E]
 vleaves = concatMap mleaves
@@ -285,3 +295,8 @@ wrapWithD e = d (dur e) 1 [e]
 
 -- m2 = (measuresDivideLeafs [m1] (repeat 3)) !! 0
 -- m3 = (measuresDivideLeafs [m2] (repeat 3)) !! 0
+
+leafLRAs :: a -> a -> E -> a
+leafLRAs l _ L{} = l
+leafLRAs _ r R{} = r
+leafLRAs _ _ D{} = error "D is not a leaf"

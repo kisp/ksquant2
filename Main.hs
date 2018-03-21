@@ -38,7 +38,8 @@ import MainUtils ( unwrapLeft
                  , measuresUntilTime
                  , addInlineOptions
                  , scoreToLily
-                 , scoreToEnp)
+                 , scoreToEnp
+                 , scoreToDurs)
 import qualified Interval as Iv (ascendingIntervals
                                 , ascendingIntervals2points
                                 , groupPointsByIntervalls
@@ -102,6 +103,7 @@ getFilter _ = Right Right
 getFormatter :: O.Options -> T.Err Formatter
 getFormatter O.Options { O.optOutputFormat = "enp" } = Right (Right . U.appendNewline . scoreToEnp)
 getFormatter O.Options { O.optOutputFormat = "ly" } = Right (Right . U.appendNewline . scoreToLily)
+getFormatter O.Options { O.optOutputFormat = "durs" } = Right (Right . U.appendNewline . scoreToDurs)
 getFormatter O.Options { O.optOutputFormat = f } = Left $ "unknown output format " ++ f
 
 parseAsSFInput :: Parser
