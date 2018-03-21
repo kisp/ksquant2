@@ -336,6 +336,11 @@ instance Sexp [LispVal] where
   fromSexp (LispList xs) = xs
   fromSexp _ = error "fromSexp: not (LispList xs)"
 
+instance Sexp [T.WRat] where
+  toSexp = toSexp . map toSexp
+  fromSexp (LispList xs) = map fromSexp xs
+  fromSexp _ = error "fromSexp: not (LispList xs)"
+
 n60 :: LispVal
 n60 = readLisp' "(60)"
 nil :: LispVal

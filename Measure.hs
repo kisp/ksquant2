@@ -49,7 +49,8 @@ module Measure (m
                , eid
                , mroot
                , leafLRAs
-               , tied)
+               , tied
+               , enotes)
 
 where
 
@@ -300,3 +301,8 @@ leafLRAs :: a -> a -> E -> a
 leafLRAs l _ L{} = l
 leafLRAs _ r R{} = r
 leafLRAs _ _ D{} = error "D is not a leaf"
+
+enotes :: E -> Notes
+enotes (L _ _ _ ns _) = ns
+enotes R{} = nil
+enotes D{} = nil

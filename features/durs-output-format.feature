@@ -85,3 +85,21 @@ Feature: durs output format
     When I run `ksquant2 -r durs -w durs foo.durs`
     Then the stdout should contain "(1/3 1/3 1/3 -1 -1 -1)"
     Then the exit status should be 0
+
+  Scenario: a scale with different pitches
+    Given a file named "foo.durs" with:
+      """
+      (1 (1 :notes (62)) (1 :notes (64)) (1 :notes (65)))
+      """
+    When I run `ksquant2 -r durs -w durs foo.durs`
+    Then the stdout should contain "(1 (1 :NOTES (62)) (1 :NOTES (64)) (1 :NOTES (65)))"
+    And the exit status should be 0
+
+  Scenario: a scale with different pitches and ties
+    Given a file named "foo.durs" with:
+      """
+      (1 (1 :notes (62)) (2 :notes (64)))
+      """
+    When I run `ksquant2 -r durs -w durs foo.durs`
+    Then the stdout should contain "(1 (1 :NOTES (62)) (1 :NOTES (64)) :TIE (1 :NOTES (64)))"
+    And the exit status should be 0
