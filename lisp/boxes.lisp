@@ -46,7 +46,7 @@
 #-win32
 (defun call-kernel (err-path kernel-path sf-path enp-path)
   (sys:call-system
-   (format nil "'~A' ~A >~A 2>~A"
+   (format nil "'~A' --measure-sibling-merge ~A >~A 2>~A"
            kernel-path sf-path enp-path err-path)))
 
 (defun format-time-stamp (&optional (utime (get-universal-time)))
@@ -159,8 +159,8 @@
                            (call-kernel err-path kernel-path sf-path enp-path))))
                (unless (zerop code)
                  (let ((err-message (or (ignore-errors
-                                         (with-open-file (in err-path)
-                                           (read-line in)))
+                                          (with-open-file (in err-path)
+                                            (read-line in)))
                                         "<no message>")))
                    (if (capi:prompt-for-confirmation
                         (format
@@ -186,7 +186,7 @@
                          (abort))))))
              (let ((enp (with-open-file (in enp-path)
                           (read in))))
-               (values (ccl::adjoin-ties (ccl::make-score enp))
+               (values (ccl::make-score enp)
                        enp)))
         (delete-file-if-needed sf-path)
         (delete-file-if-needed enp-path)
